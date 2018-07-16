@@ -9,6 +9,7 @@ import os
 from flask_pymongo import PyMongo
 from app.config import config
 
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 def create_app(config_name):
@@ -17,7 +18,12 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
 
+    from app.http.handler.item_type import item_type_blueprint
+    app.register_blueprint(item_type_blueprint)
+
     from app.http.handler.form_meta import form_meta_blueprint
     app.register_blueprint(form_meta_blueprint)
+
+
 
     return app
