@@ -4,9 +4,6 @@
 # @Author  : suchang
 # @File    : __init__.py.py
 
-from run import mongo
-from flask_pymongo import PyMongo
-
 
 class FormMeta(object):
 
@@ -42,7 +39,6 @@ class FormMeta(object):
                 self.model['items'].append(data.model)
             except:
                 pass
-
 
 
 class Item(object):
@@ -97,5 +93,39 @@ class Item(object):
     @property
     def options(self):
         return self.model['payload']['options']
+
+
+class ItemType(object):
+
+    def __init__(self):
+        self.model = {
+            'item_type_name':None,
+            'item_detail': None,
+            'using': True
+        }
+
+    @property
+    def item_type_name(self):
+        return self.model['item_type_name']
+
+    @item_type_name.setter
+    def item_type_name(self, item_type_name_data):
+        self.model['item_type_name'] = item_type_name_data
+
+    @property
+    def item_detail(self):
+        return self.model['item_detail']
+
+    @item_detail.setter
+    def item_detail(self, item_detail_data):
+        self.model['item_detail'] = item_detail_data
+
+    @property
+    def using(self):
+        return self.model['using']
+
+    @using.setter
+    def using(self, using_data):
+        self.model['using'] = using_data
 
 

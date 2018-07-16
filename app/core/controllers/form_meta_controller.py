@@ -15,11 +15,19 @@ def insert_form_meta(mongo, form_meta):
     form_meta.items_to_dict()
     mongo.db.form_meta.insert(form_meta.model)
 
+#传入一个FormMeta对象，存入数据库
+
 
 def delete_form_meta(mongo, condition= None):
     if condition is None:
         return False
-    mongo.db.form_meta.update(condition, {"$set":{"using":False}})
+    try:
+        mongo.db.form_meta.update(condition, {"$set":{"using":False}})
+    except:
+        return False
+    return True
+
+#传入一个用于匹配的字典，更改匹配到的所有文档的using值
 
 
 def request_to_class(json_request):
@@ -32,10 +40,13 @@ def request_to_class(json_request):
     if item_datas is not None:
         for item_data in item_datas:
             item = Item()
-            item.model = item_data
+            for k, v in item_data.items():
+                if k in item.model:
+                    item.model[k]= v
             form_meta.items.append(item)
     return form_meta
 
+#传入request.json字典,返回一个FormMeta对象
 
 def dict_serializable(dict_unserializalbe):
     r = {}
@@ -45,6 +56,8 @@ def dict_serializable(dict_unserializalbe):
         except:
             r[k] = str(v)
     return r
+
+#将不可序列化的对象可序列化
 
 
 def to_json_list(form_meta):
@@ -57,3 +70,4 @@ def to_json_list(form_meta):
         'using':using
     }
     return json_list
+

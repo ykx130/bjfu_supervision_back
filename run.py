@@ -23,4 +23,4 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 
 
 if __name__ == '__main__':
-    app.run()
+    manager.run()
