@@ -61,14 +61,7 @@ def request_to_change(json_request={}):
 
 
 
-def dict_serializable(dict_unserializalbe):
-    r = {}
-    for k, v in dict_unserializalbe.items():
-        try:
-            r[k] = json.loads(v)
-        except:
-            r[k] = str(v)
-    return r
+
 
 #将不可序列化的对象可序列化
 
