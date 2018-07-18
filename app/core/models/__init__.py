@@ -145,6 +145,40 @@ class ItemType(object):
         self.model['using'] = using_data
 
 
+class BlockType(object):
+
+    def __init__(self):
+        self.model = {
+            'block_type_name':None,
+            'block_detail': None,
+            'using': True
+        }
+
+    @property
+    def block_type_name(self):
+        return self.model['block_type_name']
+
+    @block_type_name.setter
+    def block_type_name(self, block_type_name_data):
+        self.model['block_type_name'] = block_type_name_data
+
+    @property
+    def block_detail(self):
+        return self.model['block_detail']
+
+    @block_detail.setter
+    def block_detail(self, block_detail_data):
+        self.model['block_detail'] = block_detail_data
+
+    @property
+    def using(self):
+        return self.model['using']
+
+    @using.setter
+    def using(self, using_data):
+        self.model['using'] = using_data
+
+
 class Form(object):
     def __init__(self):
         self.model = {

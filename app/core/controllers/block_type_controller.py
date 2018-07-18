@@ -1,43 +1,43 @@
-from app.core.models import ItemType
+from app.core.models import BlockType
 from flask_pymongo import ObjectId
 import json
 
 
-def insert_item_type(mongo, item_type):
+def insert_block_type(mongo, block_type):
     try:
-        mongo.db.item_type.insert(item_type.model)
+        mongo.db.block_type.insert(block_type.model)
     except:
         return False
     return True
-#传入ItemType对象，存入数据库
+#传入BlockType对象，存入数据库
 
 
-def find_item_type(mongo, condition=None):
+def find_block_type(mongo, condition=None):
     if condition is None:
-        return mongo.db.item_type.find()
+        return mongo.db.block_type.find()
     if '_id' in condition:
         condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
-    datas = mongo.db.item_type.find(condition)
+    datas = mongo.db.block_type.find(condition)
     return datas
 
 #传入一个判断的字典，返回查询数据的cursor
 
 
-def delete_item_type(mongo, condition=None):
+def delete_block_type(mongo, condition=None):
     if condition is None:
         return False
     try:
-        mongo.db.item_type.update(condition, {"$set": {"using": False}})
+        mongo.db.block_type.update(condition, {"$set": {"using": False}})
     except:
         return False
     return True
 
 
-def update_item_type(mongo, condition=None, update_dict= None):
+def update_block_type(mongo, condition=None, update_dict= None):
     if condition is None:
         condition = {}
     try:
-        mongo.db.item_type.update(condition, {"$set":update_dict})
+        mongo.db.block_type.update(condition, {"$set":update_dict})
     except:
         return False
     return True
@@ -46,19 +46,19 @@ def update_item_type(mongo, condition=None, update_dict= None):
 
 
 def request_to_class(json_request={}):
-    item_type = ItemType()
+    block_type = BlockType()
     for k, v in json_request.items():
-        if k in item_type.model:
-            item_type.model[k]= v
-    return item_type
+        if k in block_type.model:
+            block_type.model[k]= v
+    return block_type
 
-#传入request.json字典,返回一个ItemType对象
+#传入request.json字典,返回一个BlockType对象
 
 
 def request_to_change(json_request={}):
     change = {}
     for k, v in json_request.items():
-        if k in ItemType().model:
+        if k in BlockType().model:
             change[k] = v
     return change
 

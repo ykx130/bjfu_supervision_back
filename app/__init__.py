@@ -24,6 +24,9 @@ def create_app(config_name):
     from app.http.handler.form_meta import form_meta_blueprint
     app.register_blueprint(form_meta_blueprint)
 
+    from app.http.handler.block_type import block_type_blueprint
+    app.register_blueprint(block_type_blueprint)
+
 
 
     return app
