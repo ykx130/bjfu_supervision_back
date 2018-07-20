@@ -11,7 +11,7 @@ class FormMeta(object):
         self.model = {
             'meta': {},
             "identify": None,
-            'using': None,
+            'using': True,
             'items': []
         }
         self.items = list()
@@ -190,6 +190,7 @@ class Form(object):
             "using":True,
             "values":[]
         }
+        self.values = []
 
     @property
     def meta_table_id(self):
@@ -200,16 +201,71 @@ class Form(object):
         self.model['meta_table_id'] = meta_table_id_data
 
     @property
-    def values(self):
-        return self.model['values']
-
-    @property
     def meta(self):
         return self.model['meta']
+
+    @property
+    def using(self):
+        return self.model['using']
+
+    @using.setter
+    def using(self, using_data):
+        self.model['using'] = using_data
 
     @meta.setter
     def meta(self, meta_data):
         self.model['meta'] = meta_data
+
+
+    def value_to_dict(self):
+        for value in self.values:
+            try:
+                self.model['values'].append(value.model)
+            except:
+                pass
+
+
+class Value(object):
+    def __int__(self):
+        self.model = {
+            'item_id':None,
+            'item_type':None,
+            'item_name':None,
+            'value':None
+        }
+
+    @property
+    def item_id(self):
+        return self.model['item_id']
+
+    @item_id.setter
+    def item_id(self, item_id_data):
+        self.model['item_id'] = item_id_data
+
+    @property
+    def item_type(self):
+        return self.model['item_type']
+
+    @item_type.setter
+    def item_type(self, item_type_data):
+        self.model['item_type'] = item_type_data
+
+    @property
+    def item_name(self):
+        return self.model['item_name']
+
+    @item_name.setter
+    def item_name(self, item_name_data):
+        self.model['item_name'] = item_name_data
+
+    @property
+    def value(self):
+        return self.model['value']
+
+    @value.setter
+    def value(self, value_data):
+        self.model['value'] = value_data
+
 
 
 

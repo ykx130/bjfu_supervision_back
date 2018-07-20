@@ -6,6 +6,7 @@ from flask_pymongo import ObjectId
 from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit
 from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
 
+
 @form_meta_blueprint.route('/form_metas', methods=['POST'])
 def new_form_meta():
     from run import mongo
@@ -23,6 +24,7 @@ def new_form_meta():
         'message':'',
         'data':[dict_json]
     })
+
 
 @form_meta_blueprint.route('/form_metas')
 def get_form_metas():
@@ -89,4 +91,30 @@ def delete_from_meta(_id):
         'code':'200',
         'message':'',
         'data':[]
+    })
+
+
+@form_meta_blueprint.route('/form_metas/<string:_id>', methods=['PUT'])
+def change_form_meta(_id):
+    from run import mongo
+    try:
+        delete_form_meta(mongo, {'_id':ObjectId(_id)})
+    except PyMongoError as e:
+        return jsonify({
+            'code':'500',
+            'message':e
+        })
+    form_meta = request_to_class(request.json)
+    try:
+        insert_form_meta(mongo, form_meta)
+    except ServerSelectionTimeoutError as e:
+        return jsonify({
+            'code': '500',
+            'message': e
+        })
+    dict_json = dict_serializable(form_meta.model)
+    return jsonify({
+        'code': '200',
+        'message': '',
+        'data': [dict_json]
     })
