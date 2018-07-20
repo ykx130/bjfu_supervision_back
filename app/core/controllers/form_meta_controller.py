@@ -1,10 +1,13 @@
 from app.core.models import FormMeta, Item
+from flask_pymongo import ObjectId
 import json
 
 
 def find_form_meta(mongo, condition= None):
     if condition is None:
         return mongo.db.form_meta.find()
+    if '_id' in condition:
+        condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
     datas = mongo.db.form_meta.find(condition)
     return datas
 
@@ -30,11 +33,13 @@ def delete_form_meta(mongo, condition= None):
 #传入一个用于匹配的字典，更改匹配到的所有文档的using值
 
 
+
 def request_to_class(json_request):
     form_meta = FormMeta()
-
+    identify = json_request.get('identify', None)
     meta = json_request.get('meta', {})
     item_datas = json_request.get('items', {})
+    form_meta.identify = identify
     if meta is not None:
         form_meta.meta = meta
     if item_datas is not None:
@@ -46,27 +51,21 @@ def request_to_class(json_request):
             form_meta.items.append(item)
     return form_meta
 
+
+
 #传入request.json字典,返回一个FormMeta对象
 
-def dict_serializable(dict_unserializalbe):
-    r = {}
-    for k, v in dict_unserializalbe.items():
-        try:
-            r[k] = json.loads(v)
-        except:
-            r[k] = str(v)
-    return r
-
-#将不可序列化的对象可序列化
 
 
 def to_json_list(form_meta):
     _id = form_meta.get('_id', None)
     meta = form_meta.get('meta', {})
+    identify = form_meta.get('identify', None)
     using = form_meta.get('using', None)
     json_list = {
         '_id':_id,
         'meta':meta,
+        'identify':identify,
         'using':using
     }
     return json_list

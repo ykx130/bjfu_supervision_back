@@ -1,0 +1,1 @@
+from app.http.handler.form import form_blueprint
