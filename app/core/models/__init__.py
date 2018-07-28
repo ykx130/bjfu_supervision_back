@@ -265,7 +265,3 @@ class Value(object):
     @value.setter
     def value(self, value_data):
         self.model['value'] = value_data
-
-
-
-

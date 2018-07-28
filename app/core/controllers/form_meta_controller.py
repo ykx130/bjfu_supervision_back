@@ -17,6 +17,7 @@ def find_form_meta(mongo, condition=None):
 def insert_form_meta(mongo, form_meta):
     form_meta.items_to_dict()
     mongo.db.form_meta.insert(form_meta.model)
+
 # 传入一个FormMeta对象，存入数据库
 
 
@@ -59,7 +60,6 @@ def to_json_list(form_meta):
         '_id': _id,
         'meta': meta,
         'identify': identify,
-        'using': using
     }
     return json_list
 
