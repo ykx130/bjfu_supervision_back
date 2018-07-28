@@ -24,6 +24,7 @@ def new_form_meta():
         'data':[dict_json]
     })
 
+
 @form_meta_blueprint.route('/form_metas')
 def get_form_metas():
     url_condition = UrlCondition(request.args)
@@ -90,3 +91,29 @@ def delete_from_meta(_id):
         'message':'',
         'data':[]
     })
+
+@form_meta_blueprint.route('/form_metas/<string:_id>', methods=['PUT'])
+def change_form_meta(_id):
+    from run import mongo
+    try:
+        delete_form_meta(mongo, {'_id':ObjectId(_id)})
+    except PyMongoError as e:
+        return jsonify({
+            'code':'500',
+            'message':e
+        })
+    form_meta = request_to_class(request.json)
+    try:
+        insert_form_meta(mongo, form_meta)
+    except ServerSelectionTimeoutError as e:
+        return jsonify({
+            'code': '500',
+            'message': e
+        })
+    dict_json = dict_serializable(form_meta.model)
+    return jsonify({
+        'code': '200',
+        'message': '',
+        'data': [dict_json]
+    })
+
