@@ -59,7 +59,7 @@ def to_json_list(form_meta):
     json_list = {
         '_id': _id,
         'meta': meta,
-        'identify': identify,
+        'identify': identify
     }
     return json_list
 
