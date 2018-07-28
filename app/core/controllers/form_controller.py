@@ -39,10 +39,12 @@ def update_form(mongo, condition=None, change_item = None):
 def to_json_list(form):
     _id = form.get('_id', None)
     meta = form.get('meta', {})
-    using = form.get('form', None)
+    using = form.get('using', None)
+    meta_table_id = form.get('meta_table_id', None)
     json_list = {
         '_id':_id,
         'meta':meta,
+        'meta_table_id':meta_table_id,
         'using':using
     }
     return json_list

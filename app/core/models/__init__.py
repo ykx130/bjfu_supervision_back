@@ -231,7 +231,7 @@ class Value(object):
             'item_id':None,
             'item_type':None,
             'item_name':None,
-            'value':None,
+            'value':None
         }
 
     @property
@@ -369,5 +369,3 @@ class Event(object):
     @using.setter
     def using(self, using_data):
         self.model['using'] = using_data
-
-

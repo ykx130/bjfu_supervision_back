@@ -41,10 +41,10 @@ def get_forms():
     forms_list = [to_json_list(form) for form in paginate.data_page]
     prev = None
     if paginate.has_prev:
-        prev = url_for('form_meta_blueprint.get_forms', _page=paginate.page - 1)
+        prev = url_for('form_meta_blueprint.get_form_metas', _page=paginate.page - 1)
     next = None
     if paginate.has_next:
-        next = url_for('form_meta_blueprint.get_forms', _page=paginate.page + 1)
+        next = url_for('form_meta_blueprint.get_form_metas', _page=paginate.page + 1)
     return jsonify({
         'code': '200',
         'message': '',
@@ -61,7 +61,7 @@ def get_forms():
 
 
 @form_blueprint.route('/forms/<string:_id>')
-def get_form(_id):
+def get_form_meta(_id):
     from run import mongo
     try:
         forms = find_form(mongo, {'_id':ObjectId(_id)})
@@ -77,8 +77,8 @@ def get_form(_id):
     })
 
 
-@form_blueprint.route('/forms/<string:_id>', methods=['DELETE'])
-def delete_from(_id):
+@form_blueprint.route('/form_metas/<string:_id>', methods=['DELETE'])
+def delete_from_meta(_id):
     from run import mongo
     try:
         delete_form(mongo, {'_id':ObjectId(_id)})
@@ -95,7 +95,7 @@ def delete_from(_id):
 
 
 @form_blueprint.route('/forms/<string:_id>', methods=['PUT'])
-def change_form(_id):
+def change_form_meta(_id):
     from run import mongo
     try:
         update_form(mongo, {'_id':ObjectId(_id)}, request.json)
