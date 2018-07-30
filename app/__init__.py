@@ -30,4 +30,10 @@ def create_app(config_name):
     from app.http.handler.form import form_blueprint
     app.register_blueprint(form_blueprint)
 
+    from app.http.handler.user import user_blueprint
+    app.register_blueprint(user_blueprint)
+
+    from app.http.handler.lesson import lesson_blueprint
+    app.register_blueprint(lesson_blueprint)
+
     return app
