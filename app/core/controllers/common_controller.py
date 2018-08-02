@@ -1,6 +1,11 @@
 import json
+from flask_pymongo import ObjectId
 
-
+def object_to_str(dict_unserializalbe):
+    for k, v in dict_unserializalbe.items():
+        if type(v) == ObjectId:
+            dict_unserializalbe[k] = str(v)
+    return dict_unserializalbe
 
 def dict_serializable(dict_unserializalbe):
     r = {}

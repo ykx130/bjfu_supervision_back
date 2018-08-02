@@ -56,8 +56,7 @@ def request_to_class(json_request):
         for item_data in item_datas:
             item = Item()
             for k, v in item_data.items():
-                if k in item.model:
-                    item.model[k]= v
+                item.model[k]= v
             form_meta.items.append(item)
     return form_meta
 # 传入request.json字典,返回一个FormMeta对象

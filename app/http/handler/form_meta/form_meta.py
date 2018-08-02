@@ -3,7 +3,7 @@ from app.http.handler.form_meta import form_meta_blueprint
 from app.core.controllers.form_meta_controller import find_form_meta, delete_form_meta, insert_form_meta, request_to_class,\
      to_json_list, find_form_metas
 from flask_pymongo import ObjectId
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit
+from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit,object_to_str
 from pymongo.errors import ServerSelectionTimeoutError, PyMongoError, OperationFailure
 
 
@@ -50,7 +50,7 @@ def get_form_metas():
     return jsonify({
         'code':200,
         'message':'',
-        'form_metas':[dict_serializable(form_metas_list_node) for form_metas_list_node in form_metas_list],
+        'form_metas':[object_to_str(form_metas_list_node) for form_metas_list_node in form_metas_list],
         'prev': prev,
         'next': next,
         'has_prev': paginate.has_prev,
@@ -81,7 +81,7 @@ def get_form_meta(_id):
     return jsonify({
         'code':200,
         'message':'',
-        'form_meta':dict_serializable(form_meta) if form_meta is not None else None
+        'form_meta':object_to_str(form_meta) if form_meta is not None else None
     }),200
 
 

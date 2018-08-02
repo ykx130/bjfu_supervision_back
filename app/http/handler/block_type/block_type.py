@@ -4,7 +4,7 @@ from flask import jsonify, request
 from flask import url_for
 from app.core.controllers.block_type_controller import insert_block_type, delete_block_type, find_block_type, \
     update_block_type, request_to_class, request_to_change, find_block_types
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, sort_limit, Paginate
+from app.core.controllers.common_controller import dict_serializable, UrlCondition, sort_limit, Paginate, object_to_str
 
 
 @block_type_blueprint.route('/block_types')
@@ -30,7 +30,7 @@ def get_block_types():
     return jsonify({
         'code':200,
         'message':'',
-        'block_types':[dict_serializable(block_type) for block_type in block_types],
+        'block_types':[object_to_str(block_type) for block_type in block_types],
         'prev': prev,
         'next': next,
         'has_prev': paginate.has_prev,
@@ -80,7 +80,7 @@ def get_block_type(_id):
     return jsonify({
         'code':200,
         'message':'',
-        'block_type':dict_serializable(block_type) if block_type is not None else None
+        'block_type':object_to_str(block_type) if block_type is not None else None
     }),200
 
 

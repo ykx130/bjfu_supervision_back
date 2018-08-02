@@ -58,8 +58,7 @@ def update_block_type(mongo, condition=None, update_dict= None):
 def request_to_class(json_request={}):
     block_type = BlockType()
     for k, v in json_request.items():
-        if k in block_type.model:
-            block_type.model[k]= v
+        block_type.model[k]= v
     return block_type
 
 #传入request.json字典,返回一个BlockType对象
@@ -68,7 +67,6 @@ def request_to_class(json_request={}):
 def request_to_change(json_request={}):
     change = {}
     for k, v in json_request.items():
-        if k in BlockType().model:
             change[k] = v
     return change
 
