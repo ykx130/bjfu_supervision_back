@@ -4,7 +4,7 @@ from flask import jsonify, request
 from flask import url_for
 from app.core.controllers.item_type_controller import insert_item_type, delete_item_type, find_item_type, \
     update_item_type, request_to_class, request_to_change, find_item_types
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, sort_limit, Paginate
+from app.core.controllers.common_controller import dict_serializable, UrlCondition, sort_limit, Paginate, object_to_str
 
 
 @item_type_blueprint.route('/item_types')
@@ -30,7 +30,7 @@ def get_item_types():
     return jsonify({
         'code':200,
         'message':'',
-        'item_types':[dict_serializable(item_type) for item_type in item_types],
+        'item_types':[object_to_str(item_type) for item_type in item_types],
         'prev': prev,
         'next': next,
         'has_prev': paginate.has_prev,
@@ -81,7 +81,7 @@ def get_item_type(_id):
     return jsonify({
         'code':200,
         'message':'',
-        'item_type':dict_serializable(item_type) if item_type is not None else None
+        'item_type':object_to_str(item_type) if item_type is not None else None
     }),200
 
 

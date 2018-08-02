@@ -15,7 +15,7 @@ def find_user(mongo, _id):
         condition={'using':True,'_id':ObjectId(_id)}
     except:
         return None
-    datas = mongo.db.user.find(condition)
+    datas = mongo.db.user.find_one(condition)
     return datas
 
 
@@ -130,7 +130,7 @@ def delete_event(mongo,_id,event_id):
         condition_user={'using':True,'_id':ObjectId(_id)}
     except:
         return False
-        user_datas = mongo.db.user.find_one(condition_user)
+    user_datas = mongo.db.user.find_one(condition_user)
     if user_datas is None:
         return None
     for event_data in user_datas["events"]:
