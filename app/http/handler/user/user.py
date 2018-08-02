@@ -83,7 +83,7 @@ def get_user(_id):
     })
 
 @user_blueprint.route('/users/<string:_id>',methods=['DELETE'])
-def delete_users(_id):
+def delete_user(_id):
     from run import mongo
     user=find_user(mongo,_id)
     if user is None:
@@ -146,6 +146,7 @@ def new_event(_id):
         'message': '',
         'event':None
     }),200
+
 
 @user_blueprint.route('/users/<string:_id>/events/<string:event_id>',methods=['GET'])
 def get_event(_id,event_id):

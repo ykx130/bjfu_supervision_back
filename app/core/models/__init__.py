@@ -269,10 +269,10 @@ class Value(object):
 class User(object):
     def __init__(self):
         self.model={
-            'name':None,
-            'information':{
-                'birth':None,
-                'sex':None
+            'name': None,
+            'information': {
+                'birth': None,
+                'sex': None
             },
             'events': [],
             'using': True
@@ -282,6 +282,7 @@ class User(object):
     @property
     def id(self):
         return self.model['id']
+
 
     @id.setter
     def id(self, id_data):
