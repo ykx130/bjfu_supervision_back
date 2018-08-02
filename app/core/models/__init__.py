@@ -283,6 +283,7 @@ class User(object):
     def id(self):
         return self.model['id']
 
+
     @id.setter
     def id(self, id_data):
         self.model['id'] = id_data
@@ -371,3 +372,50 @@ class Event(object):
         self.model['using'] = using_data
 
 
+class Lesson(object):
+    def __init__(self):
+        self.model = {
+            'lesson_attribute':None,
+            'lesson_state':None,
+            'lesson_teacher_id':None,
+            'lesson_name':None,
+            'lesson_teacher_name':None,
+            'lesson_semester':None,
+            'lesson_level':None,
+            'lesson_teacher_unit':None,
+            'lesson_unit':None,
+            'lesson_year':None,
+            'lesson_type':None,
+            'lesson_cases':[]
+        }
+        self.lesson_cases = []
+
+    def lesson_case_to_dict(self):
+        for id, data in enumerate(self.lesson_cases):
+            try:
+                data.id = id
+                self.model['lesson_cases'].append(data.model)
+            except:
+                pass
+
+
+class LessonCase(object):
+    def __init__(self):
+        self.model = {
+            'id':None,
+            'lesson_week':None,
+            'lesson_time':None,
+            'lesson_class': None,
+            'lesson_weekday':None,
+            'lesson_room':None,
+            'assign_group':None,
+            'lesson_attention_reason':None
+        }
+
+    @property
+    def id(self):
+        return self.model['id']
+
+    @id.setter
+    def id(self, id_data):
+        self.model['id'] = id_data

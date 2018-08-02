@@ -37,6 +37,7 @@ def delete_user(mongo, condition=None):
 def request_to_class(json_request):
     user = User()
     name = json_request.get('name', None)
+
     information_datas = json_request.get('information', {})
     events_datas = json_request.get('events',[])
     user.name = name
@@ -46,6 +47,7 @@ def request_to_class(json_request):
                 user.model['information'][k] = v
     if events_datas is not None:
         for events_data in events_datas:
+
             event = Event()
             for k, v in events_data.items():
                 if k in event.model:
