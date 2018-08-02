@@ -1,7 +1,7 @@
 from app.http.handler.user import user_blueprint
 from flask import request,jsonify,url_for,json
 from pymongo.errors import ServerSelectionTimeoutError,PyMongoError
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit
+from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, object_to_str, sort_limit
 from flask_pymongo import ObjectId
 from app.core.controllers.user_controller import to_json_list, find_user,find_users, delete_user, insert_user, request_to_class,update_user,request_to_class_event,insert_event,find_event,delete_event,update_event
 
@@ -48,7 +48,7 @@ def get_users():
     return jsonify({
         'code': '200',
         'message': '',
-        'users': [dict_serializable(users_list_node) for users_list_node in users_list],
+        'users': [object_to_str(users_list_node) for users_list_node in users_list],
         'prev': prev,
         'next': next,
         'has_prev': paginate.has_prev,
@@ -63,14 +63,14 @@ def get_users():
 def get_user(_id):
     from run import mongo
     try:
-        user_datas=find_user(mongo, _id)
+        user_data=find_user(mongo, _id)
     except PyMongoError as e:
         return jsonify({
             'code': '500',
             'message':str(e),
             'users':None
         }),500
-    if user_datas is None:
+    if user_data is None:
         return jsonify({
             'code': '404',
             'message':'Not found',
@@ -79,7 +79,7 @@ def get_user(_id):
     return jsonify({
         'code': '200',
         'message': '',
-        'users': [dict_serializable(user_data) for user_data in user_datas]
+        'users': object_to_str(user_data)
     })
 
 @user_blueprint.route('/users/<string:_id>',methods=['DELETE'])
