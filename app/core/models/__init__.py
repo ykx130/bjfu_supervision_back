@@ -56,6 +56,7 @@ class Item(object):
             'item_name': None,
             'item_type': None,
             'extra': None,
+            'type':None,
             'payload': {
                 'options': []
             }
@@ -226,7 +227,7 @@ class Form(object):
 
 
 class Value(object):
-    def __int__(self):
+    def __init__(self):
         self.model = {
             'item_id':None,
             'item_type':None,

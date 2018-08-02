@@ -2,7 +2,7 @@ from app.http.handler.form import form_blueprint
 from flask import jsonify, request, url_for
 from app.core.controllers.form_controller import to_json_list, find_form, delete_form, insert_form,update_form, request_to_class, find_forms
 from flask_pymongo import ObjectId
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit
+from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit, object_to_str
 from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
 
 
@@ -49,7 +49,7 @@ def get_forms():
     return jsonify({
         'code': 200,
         'message': '',
-        'forms': [dict_serializable(forms_list_node) for forms_list_node in forms_list],
+        'forms': [object_to_str(forms_list_node) for forms_list_node in forms_list],
         'prev': prev,
         'next': next,
         'has_prev': paginate.has_prev,
@@ -81,7 +81,7 @@ def get_form(_id):
     return jsonify({
         'code':200,
         'message':'',
-        'form':dict_serializable(form) if form is not None else None
+        'form':object_to_str(form) if form is not None else None
     }),200
 
 

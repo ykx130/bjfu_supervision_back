@@ -61,7 +61,6 @@ def update_item_type(mongo, condition=None, update_dict= None):
 def request_to_class(json_request={}):
     item_type = ItemType()
     for k, v in json_request.items():
-        if k in item_type.model:
             item_type.model[k]= v
     return item_type
 
@@ -71,7 +70,6 @@ def request_to_class(json_request={}):
 def request_to_change(json_request={}):
     change = {}
     for k, v in json_request.items():
-        if k in ItemType().model:
             change[k] = v
     return change
 

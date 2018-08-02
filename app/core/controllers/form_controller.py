@@ -72,7 +72,6 @@ def request_to_class(json_request):
         for value_item in values:
             value = Value()
             for k, v in value_item.items():
-                if k in value.model:
-                    value.model[k] = v
+                value.model[k] = v
             form.values.append(value)
     return form
