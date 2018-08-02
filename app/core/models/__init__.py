@@ -231,7 +231,7 @@ class Value(object):
             'item_id':None,
             'item_type':None,
             'item_name':None,
-            'value':None
+            'value':None,
         }
 
     @property
@@ -269,20 +269,24 @@ class Value(object):
 class User(object):
     def __init__(self):
         self.model={
-            'name':None,
-            'information':{
-                'birth':None,
-                'sex':None
+            'name': None,
+            'information': {
+                'birth': None,
+                'sex': None
             },
-            'events':[],
-            'using':True
+            'events': [],
+            'using': True
         }
-        self.events = list()
+        self.events= list()
 
     @property
     def id(self):
         return self.model['id']
 
+
+    @id.setter
+    def id(self, id_data):
+        self.model['id'] = id_data
 
     @property
     def name(self):
@@ -308,10 +312,10 @@ class User(object):
     def using(self, using_data):
         self.model['using'] = using_data
 
-    def events_to_dict(self):
+    def items_to_dict(self):
         for id, data in enumerate(self.events):
             try:
-                data.id = id
+                data.event_id = id
                 self.model['events'].append(data.model)
             except:
                 pass
@@ -320,11 +324,11 @@ class User(object):
 class Event(object):
     def __init__(self):
         self.model = {
-            'event_id':None,
-            'time':None,
-            'value':None,
-            'discripe':None,
-            'event_using':True
+            'event_id': None,
+            'time': None,
+            'value': None,
+            'discripe': None,
+            'event_using': True
         }
 
     @property
