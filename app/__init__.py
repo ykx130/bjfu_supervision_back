@@ -37,3 +37,5 @@ def create_app(config_name):
     app.register_blueprint(lesson_blueprint)
 
     return app
+
+app = create_app('default')

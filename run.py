@@ -7,11 +7,11 @@
 
 from flask_script import Manager, Shell
 from flask import jsonify
-from app import create_app
+from app import app
 import os
 from flask_pymongo import PyMongo
 
-app = create_app('default')
+
 mongo = PyMongo(app)
 manager = Manager(app)
 

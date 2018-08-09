@@ -19,6 +19,10 @@ class Config:
     MONGO_PASSWORD = 'root'
     MONGO_PORT = 27017
     MAIL_DEBUG = True
+
+    KAFLKA_HOST = ["101.200.52.233:9091", ]
+    KAFLKA_TOPIC = "bjfu_calculate_send_topic"
+
     @staticmethod
     def init_app(app):
         pass
