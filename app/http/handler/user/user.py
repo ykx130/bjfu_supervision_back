@@ -199,3 +199,15 @@ def change_event(_id,event_id):
         'event':None
     }),200
 
+
+def add(num, i):
+    if i == 0:
+        return num
+    num = num + i
+    num = add(num, i-1)
+    return num
+
+if __name__ == '__main__':
+    num= 0
+    num = add(num, 3)
+    print(num)
