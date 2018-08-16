@@ -39,24 +39,11 @@ def get_lessons():
         }),500
     lessons = sort_limit(lessons, url_condition.sort_limit_dict)
     paginate = Paginate(lessons, url_condition.page_dict)
-    prev = None
-    if paginate.has_prev:
-        prev = url_for('lesson_blueprint.get_lessons', _page=paginate.page - 1)
-    next = None
-    if paginate.has_next:
-        next = url_for('lesson_blueprint.get_lessons', _page=paginate.page + 1)
     return jsonify({
         'code': 200,
         'message': '',
         'lessons': [dict_serializable(lesson) for lesson in lessons],
-        'prev': prev,
-        'next': next,
-        'has_prev': paginate.has_prev,
-        'has_next': paginate.has_next,
         'total': paginate.total,
-        'page_num': paginate.page_num,
-        'page_now': paginate.page,
-        'per_page': paginate.per_page
     }),200
 
 

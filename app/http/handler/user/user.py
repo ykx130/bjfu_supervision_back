@@ -39,24 +39,11 @@ def get_users():
     users=sort_limit(users,url_condition.sort_limit_dict)
     paginate=Paginate(users,url_condition.page_dict)
     users_list=[to_json_list(user) for user in paginate.data_page]
-    prev=None
-    if paginate.has_prev:
-        prev=url_for('user_blueprint.get_users',_page=paginate.page-1)
-    next=None
-    if paginate.has_next:
-        next=url_for('user_blueprint.get_users',_page=paginate.page+1)
     return jsonify({
         'code': '200',
         'message': '',
         'users': [object_to_str(users_list_node) for users_list_node in users_list],
-        'prev': prev,
-        'next': next,
-        'has_prev': paginate.has_prev,
-        'has_next': paginate.has_next,
         'total': paginate.total,
-        'page_num': paginate.page_num,
-        'page_now': paginate.page,
-        'per_page': paginate.per_page
         }),200
 
 @user_blueprint.route('/users/<string:_id>')
@@ -198,16 +185,3 @@ def change_event(_id,event_id):
         'message': '',
         'event':None
     }),200
-
-
-def add(num, i):
-    if i == 0:
-        return num
-    num = num + i
-    num = add(num, i-1)
-    return num
-
-if __name__ == '__main__':
-    num= 0
-    num = add(num, 3)
-    print(num)
