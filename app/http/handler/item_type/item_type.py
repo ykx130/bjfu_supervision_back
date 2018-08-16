@@ -21,24 +21,11 @@ def get_item_types():
         }),500
     item_types = sort_limit(item_types, url_condition.sort_limit_dict)
     paginate = Paginate(item_types, url_condition.page_dict)
-    prev = None
-    if paginate.has_prev:
-        prev = url_for('item_type_blueprint.get_item_types', _page=paginate.page - 1)
-    next = None
-    if paginate.has_next:
-        next = url_for('item_type_blueprint.get_item_types', _page=paginate.page + 1)
     return jsonify({
         'code':200,
         'message':'',
         'item_types':[object_to_str(item_type) for item_type in item_types],
-        'prev': prev,
-        'next': next,
-        'has_prev': paginate.has_prev,
-        'has_next': paginate.has_next,
         'total': paginate.total,
-        'page_num': paginate.page_num,
-        'page_now': paginate.page,
-        'per_page': paginate.per_page
     }),200
 
 
