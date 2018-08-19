@@ -13,7 +13,7 @@ def new_form_meta():
     form_meta = request_to_class(request.json)
     try:
         insert_form_meta(mongo, form_meta)
-    except ServerSelectionTimeoutError as e:
+    except Exception as e:
         return jsonify({
             'code': 500,
             'message': str(e),
@@ -32,7 +32,7 @@ def get_form_metas():
     from run import mongo
     try:
         form_metas = find_form_metas(mongo, url_condition.filter_dict)
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message': str(e),
@@ -53,7 +53,7 @@ def get_form_meta(_id):
     from run import mongo
     try:
         form_meta = find_form_meta(mongo, _id)
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
@@ -84,7 +84,7 @@ def delete_from_meta(_id):
         }),404
     try:
         delete_form_meta(mongo, {'_id':ObjectId(_id)})
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
@@ -109,7 +109,7 @@ def change_form_meta(_id):
         }),404
     try:
         delete_form_meta(mongo, {'_id':ObjectId(_id)})
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
@@ -118,7 +118,7 @@ def change_form_meta(_id):
     form_meta = request_to_class(request.json)
     try:
         insert_form_meta(mongo, form_meta)
-    except ServerSelectionTimeoutError as e:
+    except Exception as e:
         return jsonify({
             'code': 500,
             'message': str(e),

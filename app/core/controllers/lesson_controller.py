@@ -1,6 +1,6 @@
 import pymysql
 from flask_pymongo import ObjectId
-from app.core.models import Lesson, LessonCase
+from app.core.models.lesson import Lesson, LessonCase, Term
 
 def update_database(mongo):
     mongo.db.lessons.drop()
@@ -44,10 +44,7 @@ def update_database(mongo):
     print(i)
 
 def find_lesson(mongo, _id):
-    try:
-        condition = {'_id':ObjectId(_id)}
-    except:
-        return None
+    condition = {'_id': ObjectId(_id)}
     data = mongo.db.lessons.find_one(condition)
     return data
 
@@ -55,10 +52,17 @@ def find_lessons(mongo, condition=None):
     if condition is None:
         return mongo.db.lessons.find()
     if '_id' in condition:
-        try:
-            condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
-        except:
-            return None
+        condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
     datas = mongo.db.lessons.find(condition)
     return datas
 
+
+def find_terms(condition):
+    terms = Term.terms(condition)
+    page = condition['_page'] if '_page' in condition else 1
+    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    pagination = terms.paginate(page=page, per_page=per_page, error_out=False)
+    return pagination
+
+def find_now_term():
+    return Term.query.order_by(Term.id.desc()).first()
