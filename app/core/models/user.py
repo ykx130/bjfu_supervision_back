@@ -1,6 +1,7 @@
 from flask_login import UserMixin, AnonymousUserMixin,current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
+from datetime import datetime
 from flask import jsonify
 from functools import wraps
 import json
@@ -11,21 +12,21 @@ from app.core.controllers.common_controller import UrlCondition
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True ,index=True)
-    username = db.Column(db.String(64), unique=True, index=True)
-    name = db.Column(db.String(64))
-    password_hash = db.Column(db.String(128))
-    start_time = db.Column(db.TIMESTAMP)
-    end_time = db.Column(db.TIMESTAMP)
-    sex = db.Column(db.String(16))
-    email = db.Column(db.String(64), unique=True, index=True)
-    phone = db.Column(db.String(16), unique=True)
-    state = db.Column(db.String(8))
-    unit = db.Column(db.String(8))
-    status = db.Column(db.String(8))
-    work_state = db.Column(db.String(8))
-    prorank = db.Column(db.String(8))
-    skill = db.Column(db.String(16))
-    group = db.Column(db.String(16))
+    username = db.Column(db.String(64), unique=True, index=True, default="")
+    name = db.Column(db.String(64), default="")
+    password_hash = db.Column(db.String(128), default="")
+    start_time = db.Column(db.TIMESTAMP, default=datetime.now())
+    end_time = db.Column(db.TIMESTAMP, default=datetime.now())
+    sex = db.Column(db.String(16), default="男")
+    email = db.Column(db.String(64), index=True,default="")
+    phone = db.Column(db.String(16), default="")
+    state = db.Column(db.String(8), default="")
+    unit = db.Column(db.String(8), default="")
+    status = db.Column(db.String(8), default="")
+    work_state = db.Column(db.String(8), default="")
+    prorank = db.Column(db.String(8), default="")
+    skill = db.Column(db.String(16), default="")
+    group = db.Column(db.String(16), default="")
 
     @staticmethod
     def users(condition):
@@ -38,8 +39,7 @@ class User(db.Model, UserMixin):
                 items = key.split('.')
                 table = name_map[items[0]]
                 users = users.filter(getattr(table, items[1]) == value)
-        return User.query
-
+        return users
     @property
     def roles(self):
         return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.user_id == self.id)
@@ -78,8 +78,8 @@ login_manager.anonymous_user = AnonymousUser
 class Group(db.Model):
     __tablename__ = 'groups'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    name = db.Column(db.String(64), unique=True)
-    leader_name = db.Column(db.String(64))
+    name = db.Column(db.String(64), unique=True, default="")
+    leader_name = db.Column(db.String(64), default="")
 
     @staticmethod
     def groups(condition):
@@ -95,10 +95,10 @@ class Group(db.Model):
 
 class UserRole(db.Model):
     __tablename__ = 'user_roles'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True ,index=True)
-    user_id = db.Column(db.Integer)
-    role_id = db.Column(db.Integer)
-    term = db.Column(db.String(32))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    user_id = db.Column(db.Integer, default=-1)
+    role_id = db.Column(db.Integer, default=-1)
+    term = db.Column(db.String(32), default="")
 
 
     @staticmethod
@@ -107,9 +107,9 @@ class UserRole(db.Model):
 
 class Role(db.Model):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True ,index=True)
-    name = db.Column(db.String(64), unique=True)
-    permissions = db.Column(db.JSON)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    name = db.Column(db.String(64), unique=True, default="")
+    permissions = db.Column(db.JSON, default=[])
 
     @staticmethod
     def roles(condition):

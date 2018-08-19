@@ -1,5 +1,6 @@
 from app.core.controllers.user_controller import find_user, find_users, delete_user, update_user, insert_user, find_roles, find_groups
 from flask import request,jsonify,url_for,json
+from app.utils.misc import convert_datetime_to_string
 from app.http.handler.user import user_blueprint
 from sqlalchemy.exc import IntegrityError
 
@@ -21,8 +22,8 @@ def get_users():
             'id':user.id,
             'username':user.username,
             'name':user.name,
-            'start_time':str(user.start_time),
-            'end_time':str(user.end_time),
+            'start_time':convert_datetime_to_string(user.start_time),
+            'end_time':convert_datetime_to_string(user.end_time),
             'sex':user.sex,
             'email':user.email,
             'phone':user.phone,
@@ -33,7 +34,7 @@ def get_users():
             'prorank':user.prorank,
             'skill':user.skill,
             'group':user.group,
-            'roles':[role.name for role in user.roles]
+            'role_names':[role.name for role in user.roles]
         } for user in users]
     })
 
@@ -54,8 +55,8 @@ def get_user(username):
             'id': user.id,
             'username': user.username,
             'name': user.name,
-            'start_time': user.start_time,
-            'end_time': user.end_time,
+            'start_time': convert_datetime_to_string(user.start_time),
+            'end_time': convert_datetime_to_string(user.end_time),
             'sex': user.sex,
             'email': user.email,
             'phone': user.phone,
@@ -66,7 +67,7 @@ def get_user(username):
             'prorank': user.prorank,
             'skill': user.skill,
             'group': user.group,
-            'roles': [role.name for role in user.roles]
+            'role_names': [role.name for role in user.roles]
         }
     })
 
@@ -159,8 +160,8 @@ def get_groups():
                 'id': group.leader.id,
                 'username': group.leader.username,
                 'name': group.leader.name,
-                'start_time': group.leader.start_time,
-                'end_time': group.leader.end_time,
+                'start_time': convert_datetime_to_string(group.leader.start_time),
+                'end_time': convert_datetime_to_string(group.leader.end_time),
                 'sex': group.leader.sex,
                 'email': group.leader.email,
                 'phone': group.leader.phone,
@@ -171,7 +172,7 @@ def get_groups():
                 'prorank': group.leader.prorank,
                 'skill': group.leader.skill,
                 'group': group.leader.group,
-                'roles': [role.name for role in group.leader.roles]
+                'role_names': [role.name for role in group.leader.roles]
             }
         } for group in groups],
         'total':pagination.total
