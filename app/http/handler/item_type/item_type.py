@@ -13,10 +13,10 @@ def get_item_types():
     from run import mongo
     try:
         item_types = find_item_types(mongo, url_condition.filter_dict)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'item_types':None
         }),500
     item_types = sort_limit(item_types, url_condition.sort_limit_dict)
@@ -35,10 +35,10 @@ def new_item_type():
     item_type = request_to_class(request.json)
     try:
         insert_item_type(mongo, item_type)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'item_type':None
         }),500
     return jsonify({
@@ -53,10 +53,10 @@ def get_item_type(_id):
     from run import mongo
     try:
         item_type = find_item_type(mongo, {'_id':ObjectId(_id)})
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'item_type': None
         }),500
     if item_type is None:
@@ -84,10 +84,10 @@ def del_item_type(_id):
         }),404
     try:
         delete_item_type(mongo, {'_id':ObjectId(_id)})
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'item_type': None
         }),500
     return jsonify({
@@ -110,10 +110,10 @@ def change_item_type(_id):
     change = request_to_change(request.json)
     try:
         update_item_type(mongo, {'_id':ObjectId(_id)}, change)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'item_type': None
         }),500
     return jsonify({

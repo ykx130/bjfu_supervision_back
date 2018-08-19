@@ -1,5 +1,5 @@
 from flask_pymongo import ObjectId
-from app.core.models import Form, Value
+from app.core.models.form import Form, Value
 
 
 def find_forms(mongo, condition=None):
@@ -13,10 +13,7 @@ def find_forms(mongo, condition=None):
 
 
 def find_form(mongo, _id):
-    try:
-        condition = {'using':True, '_id':ObjectId(_id)}
-    except:
-        return None
+    condition = {'using': True, '_id': ObjectId(_id)}
     data = mongo.db.form.find_one(condition)
     return data
 
@@ -29,20 +26,14 @@ def insert_form(mongo, form):
 def delete_form(mongo, condition=None):
     if condition is None:
         return False
-    try:
-        mongo.db.form.update(condition, {"$set":{"using":False}})
-    except:
-        return False
+    mongo.db.form.update(condition, {"$set": {"using": False}})
     return True
 
 
 def update_form(mongo, condition=None, change_item = None):
     if condition is None:
         return False
-    try:
-        mongo.db.form.update(condition, {"$set":change_item})
-    except:
-        return False
+    mongo.db.form.update(condition, {"$set": change_item})
     return True
 
 

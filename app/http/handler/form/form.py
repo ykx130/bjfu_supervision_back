@@ -12,7 +12,7 @@ def new_form():
     form = request_to_class(request.json)
     try:
         insert_form(mongo, form)
-    except ServerSelectionTimeoutError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
@@ -31,7 +31,7 @@ def get_forms():
     from run import mongo
     try:
         forms = find_forms(mongo, url_condition.filter_dict)
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
@@ -53,7 +53,7 @@ def get_form(_id):
     from run import mongo
     try:
         form = find_form(mongo, _id)
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
@@ -84,10 +84,10 @@ def delete_from(_id):
         }),404
     try:
         delete_form(mongo, {'_id':ObjectId(_id)})
-    except PyMongoError as e:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'form':None
         })
     return jsonify({
@@ -109,10 +109,10 @@ def change_form(_id):
         }),404
     try:
         update_form(mongo, {'_id':ObjectId(_id)}, request.json)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'form':None
         }),500
     return jsonify({

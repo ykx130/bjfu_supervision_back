@@ -13,10 +13,10 @@ def get_block_types():
     from run import mongo
     try:
         block_types = find_block_types(mongo, url_condition.filter_dict)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'block_type':None
         }),500
     block_types = sort_limit(block_types, url_condition.sort_limit_dict)
@@ -35,10 +35,10 @@ def new_block_type():
     block_type = request_to_class(request.json)
     try:
         insert_block_type(mongo, block_type)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':''
+            'message':str(e)
         }),500
     return jsonify({
         'code':200,
@@ -52,10 +52,10 @@ def get_block_type(_id):
     from run import mongo
     try:
         block_type = find_block_type(mongo, _id)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'block_type':None
         }),500
     if block_type is None:
@@ -83,10 +83,10 @@ def del_block_type(_id):
         }),404
     try:
         delete_block_type(mongo, {'_id':ObjectId(_id)})
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'block_type':None
         }),500
     return jsonify({
@@ -109,10 +109,10 @@ def change_block_type(_id):
     change = request_to_change(request.json)
     try:
         update_block_type(mongo, {'_id':ObjectId(_id)}, change)
-    except:
+    except Exception as e:
         return jsonify({
             'code':500,
-            'message':'',
+            'message':str(e),
             'block_types':None
         }),500
     return jsonify({
