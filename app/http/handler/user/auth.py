@@ -14,25 +14,24 @@ def login():
             return jsonify({
                 "code":500,
                 "message":"username or password can not be null"
-            })
+            }),200
         try:
             user = User.query.filter(User.username == username).first()
             if user is None or not user.verify_password(password=password):
                 return jsonify({
                     "code":500,
                     "message":"username or password may be wrong"
-                })
-
+                }),200
             login_user(user, remember=False)
         except Exception as e:
             return jsonify({
-                "code":200,
+                "code":500,
                 "message":str(e)
-            })
+            }),500
         return jsonify({
             "code":200,
             "message":"success"
-        })
+        }),200
 
 
 @user_blueprint.route("/logout", methods=["GET"])
@@ -44,13 +43,15 @@ def logout():
         return jsonify({
             "code":500,
             "message":str(e)
-        })
+        }),500
     return jsonify({
         "code":200,
         "message":"success"
-    })
+    }),200
+
 
 @user_blueprint.route("/current_user",methods=["GET"])
+@login_required
 def get_current():
     try:
         user = User.query.filter(User.username == current_user.username).first()
@@ -58,7 +59,7 @@ def get_current():
         return jsonify({
             "code":500,
             "message":str(e)
-        })
+        }),500
     return jsonify({
         "code":200,
         "message":"",
@@ -80,5 +81,5 @@ def get_current():
             'group':user.group,
             'role_names':[role.name for role in user.roles]
         }
-    })
+    }),200
 
