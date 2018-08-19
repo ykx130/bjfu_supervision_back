@@ -17,7 +17,7 @@ def find_user(username):
 
 def insert_user(request_json):
     user = User()
-    for key, value in request_json:
+    for key, value in request_json.items():
         if key == 'password':
             user.password = value
         if hasattr(user, key):
@@ -27,7 +27,7 @@ def insert_user(request_json):
     term = Term.query.order_by(Term.id.desc()).first().name
     for role_name in request_json['role_names']:
         user_role = UserRole()
-        role = Role.query.filter(Role.name == role_name)
+        role = Role.query.filter(Role.name == role_name).first()
         user_role.user_id = user.id
         user_role.role_id = role.id
         user_role.term = term
