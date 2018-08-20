@@ -17,6 +17,7 @@ class Config:
     MONGO_USERNAME = 'supervision'
     MONGO_DBNAME = 'supervision'
     MONGO_PASSWORD = 'root'
+    SQLALCHEMY_ECHO = True
     MONGO_PORT = 27017
     MAIL_DEBUG = True
     SQLALCHEMY_DATABASE_URI = \

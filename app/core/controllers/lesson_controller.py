@@ -1,17 +1,18 @@
 import pymysql
 from flask_pymongo import ObjectId
+from app import db
+import json
 from app.core.models.lesson import Lesson, LessonCase, Term
+from app.core.controllers.common_controller import dict_serializable
 
-def update_database(mongo):
-    mongo.db.lessons.drop()
-    db = pymysql.connect(host="localhost",user="root",passwd="wshwoaini",db="lessons",charset='utf8',
+def update_database():
+    lesson_db = pymysql.connect(host="localhost",user="root",passwd="wshwoaini",db="lessons",charset='utf8',
     cursorclass = pymysql.cursors.DictCursor)
-
-    cursor = db.cursor()
+    cursor = lesson_db.cursor()
 
     cursor.execute("select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name, \
-                   lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type from lessons")
-    i=0
+                   lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class, lesson_attention_reason,\
+                   lesson_model, lesson_grade, assign_group from lessons")
     datas = cursor.fetchall()
     for data in datas:
         teacher_name = data['lesson_teacher_name']
@@ -21,40 +22,83 @@ def update_database(mongo):
         data['lesson_teacher_id'] = teacher_ids
         teacher_units = data['lesson_teacher_unit'].replace(' ','').split(',')
         data['lesson_teacher_unit'] = teacher_units
-        for teacher in range(len(teachers)):
-
+        for index in range(len(teachers)):
             lesson = Lesson()
             for k, v in data.items():
-                if k in lesson.model:
-                    if type(data[k]) is list:
-                        lesson.model[k]= data[k][teacher]
+                try:
+                    v = json.loads(v)
+                except:
+                    v = v
+                if v is None or v is '':
+                    continue
+                if hasattr(lesson, k):
+                    if type(v) is list:
+                        setattr(lesson, k, v[index])
                     else:
-                        lesson.model[k] = v
-            cursor.execute("select lesson_week, lesson_time, lesson_class, lesson_weekday, lesson_room, lesson_attention_reason, assign_group from lessons where lesson_id='{}' and lesson_teacher_name='{}'".format(data['lesson_id'], teacher_name))
+                        setattr(lesson, k, v)
+            db.session.add(lesson)
+            db.session.commit()
+            cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
+                            ='{}' and lesson_teacher_name='{}'".format(data['lesson_id'], teacher_name))
             lesson_case_datas = cursor.fetchall()
             for lesson_case_data in lesson_case_datas:
                 lesson_case = LessonCase()
-                i+=1
                 for k, v in lesson_case_data.items():
-                    if k in lesson_case.model:
-                        lesson_case.model[k] = v
-                lesson.lesson_cases.append(lesson_case)
-            lesson.lesson_case_to_dict()
-            mongo.db.lessons.insert(lesson.model)
-    print(i)
+                    try:
+                        v = json.loads(v)
+                    except:
+                        v = v
+                    if v is None or v is '':
+                        continue
+                    if hasattr(lesson_case, k):
+                        setattr(lesson_case, k, v)
+                lesson_case.lesson_id = lesson.id
+                db.session.add(lesson_case)
+                db.session.commit()
 
-def find_lesson(mongo, _id):
-    condition = {'_id': ObjectId(_id)}
-    data = mongo.db.lessons.find_one(condition)
-    return data
 
-def find_lessons(mongo, condition=None):
-    if condition is None:
-        return mongo.db.lessons.find()
-    if '_id' in condition:
-        condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
-    datas = mongo.db.lessons.find(condition)
-    return datas
+def lesson_to_model(lesson):
+    lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
+                     "lesson_weekday": lesson_case.lesson_weekday, "lesson_room": lesson_case.lesson_weekday} for
+                    lesson_case in lesson.lesson_cases]
+    lesson_model = {"lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
+                    "lesson_state": lesson.lesson_state, "lesson_teacher_id": lesson.lesson_teacher_id,
+                    "lesson_name": lesson.lesson_name, "lesson_teacher_name": lesson.lesson_teacher_name,
+                    "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
+                    "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
+                    "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
+                    "lesson_class": lesson.lesson_class, "lesson_attention_reason": lesson.lesson_attention_reason,
+                    "lesson_model": lesson.lesson_model, "lesson_grade": lesson.lesson_grade,
+                    "assign_group": lesson.assgin_group, "lesson_cases": lesson_cases}
+    return lesson_model
+
+def find_lesson(id):
+    lesson = Lesson.query.filter(Lesson.id == id).first()
+    lesson_model = lesson_to_model(lesson)
+    return lesson_model
+
+def has_lesson(id):
+    lesson = Lesson.query.filter(Lesson.id == id).first()
+    return False if lesson is None else True
+
+def find_lessons(condition):
+    lessons = Lesson.lessons(condition)
+    page = condition['_page'] if '_page' in condition else 1
+    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
+    lesson_page = pagination.items
+    lesson_models = []
+    for lesson in lesson_page:
+        lesson_model = lesson_to_model(lesson)
+        lesson_models.append(lesson_model)
+    return lesson_models, pagination.total
+
+
+def change_lesson(id, request_json):
+    lesson = Lesson.query.filter(Lesson.id == id).first()
+    for k, v in request_json.items():
+        if hasattr(lesson, k):
+            setattr(lesson, k, v)
 
 
 def find_terms(condition):

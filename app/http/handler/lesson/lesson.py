@@ -5,21 +5,13 @@ from sqlalchemy.exc import IntegrityError
 from app.utils.misc import convert_datetime_to_string
 from flask import url_for
 from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
-from app.core.controllers.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, find_terms
+from app.core.controllers.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, find_terms, change_lesson, has_lesson
 from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit
 
 
 @lesson_blueprint.route('/lessons', methods=['POST'])
 def new_lesson():
-    from run import mongo
-    try:
-        update_database(mongo)
-    except Exception as e:
-        return jsonify({
-            'code':500,
-            'message':str(e),
-            'lesson':None
-        }),500
+    update_database()
     return jsonify({
         'code':200,
         'message':'',
@@ -29,31 +21,26 @@ def new_lesson():
 
 @lesson_blueprint.route('/lessons')
 def get_lessons():
-    url_condition = UrlCondition(request.args)
-    from run import mongo
     try:
-        lessons = find_lessons(mongo, url_condition.filter_dict)
+        lessons, num = find_lessons(request.args)
     except Exception as e:
         return jsonify({
             'code':500,
             'message':str(e),
-            'lessons':None
+            'lessons':[]
         }),500
-    lessons = sort_limit(lessons, url_condition.sort_limit_dict)
-    paginate = Paginate(lessons, url_condition.page_dict)
     return jsonify({
         'code': 200,
         'message': '',
         'lessons': [dict_serializable(lesson) for lesson in lessons],
-        'total': paginate.total,
+        'total': num,
     }),200
 
 
-@lesson_blueprint.route('/lessons/<string:_id>')
-def get_lesson(_id):
-    from run import mongo
+@lesson_blueprint.route('/lessons/<int:id>')
+def get_lesson(id):
     try:
-        lesson = find_lesson(mongo, _id)
+        lesson = find_lesson(id)
     except Exception as e:
         return jsonify({
             'code':500,
@@ -72,6 +59,25 @@ def get_lesson(_id):
         'lesson':dict_serializable(lesson) if lesson is not None else None
     }),200
 
+@lesson_blueprint.route('/lessons/<int:id>', methods=["PUT"])
+def update_lesson(id):
+    if not has_lesson(id):
+        return jsonify({
+            'code':404,
+            'message':'Not found'
+        }),404
+    try:
+        change_lesson(id, request.json)
+    except Exception as e:
+        return jsonify({
+            'code':500,
+            'message':str(e)
+        }),500
+    return jsonify({
+        'code':202,
+        'message':''
+    })
+
 @lesson_blueprint.route('/terms')
 def get_terms():
     try:
@@ -82,7 +88,7 @@ def get_terms():
             'code': 500,
             'message': str(e),
             'users': None
-        })
+        }),500
     return jsonify({
         'code': 200,
         'terms': [{
@@ -91,7 +97,7 @@ def get_terms():
             'begin_time': convert_datetime_to_string(term.begin_time),
             'end_time':convert_datetime_to_string(term.end_time)
         } for term in terms]
-    })
+    }),200
 
 @lesson_blueprint.route('/terms/current')
 def get_term_now():
@@ -102,7 +108,12 @@ def get_term_now():
             'code': 500,
             'message': str(e),
             'users': None
-        })
+        }),500
+    if term is None:
+        return jsonify({
+            "code":404,
+            "message": "there is no term"
+        }),404
     return jsonify({
         'code': 200,
         'term': {
@@ -111,4 +122,4 @@ def get_term_now():
             'begin_time': convert_datetime_to_string(term.begin_time),
             'end_time': convert_datetime_to_string(term.end_time)
         }
-    })
+    }),200

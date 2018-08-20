@@ -8,24 +8,20 @@ import json
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    lesson_id = db.Column(db.Integer, default=-1)
+    lesson_id = db.Column(db.String(16), default="")
     lesson_attribute = db.Column(db.String(8), default="")
     lesson_state = db.Column(db.String(8), default="")
     lesson_level = db.Column(db.String(8), default="")
     lesson_name = db.Column(db.String(32), default="")
-    lesson_teacher_id = db.Column(db.String(16), default="")
+    lesson_teacher_id = db.Column(db.String(48), default="")
     lesson_teacher_letter = db.Column(db.String(32), default="")
     lesson_teacher_name = db.Column(db.String(8), default="")
     lesson_teacher_unit = db.Column(db.String(16), default="")
     lesson_unit = db.Column(db.String(16), default="")
     lesson_year = db.Column(db.String(32), default="")
     lesson_semester = db.Column(db.Integer, default="")
-    lesson_week = db.Column(db.String(48), default="")
-    lesson_time = db.Column(db.String(16), default="")
-    lesson_room = db.Column(db.String(16), default="")
-    lesson_class = db.Column(db.String(24), default="")
+    lesson_class = db.Column(db.String(255), default="")
     lesson_type = db.Column(db.String(8), default="")
-    lesson_weekday = db.Column(db.Integer, default=0)
     lesson_grade = db.Column(db.String(64), default="")
     assgin_group = db.Column(db.String(8), default="")
     lesson_attention_reason = db.Column(db.String(255), default="")
@@ -37,6 +33,21 @@ class Lesson(db.Model):
         for key, value in condition.items():
             if hasattr(Lesson, key):
                 lesson_data = lesson_data.filter(getattr(Lesson, key)== value)
+        return lesson_data
+
+    @property
+    def lesson_cases(self):
+        return LessonCase.query.join(Lesson, LessonCase.lesson_id == Lesson.id).filter(LessonCase.lesson_id == self.id)
+
+class LessonCase(db.Model):
+    __tablename__ = "lesson_cases"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_id = db.Column(db.Integer, default=-1)
+    lesson_room = db.Column(db.String(48), default="")
+    lesson_weekday = db.Column(db.Integer, default=0)
+    lesson_week = db.Column(db.String(48), default="")
+    lesson_time = db.Column(db.String(48), default="")
+
 
 
 class Term(db.Model):
@@ -57,25 +68,3 @@ class Term(db.Model):
         return terms_data
 
 
-
-
-class LessonCase(object):
-    def __init__(self):
-        self.model = {
-            'id':None,
-            'lesson_week':None,
-            'lesson_time':None,
-            'lesson_class': None,
-            'lesson_weekday':None,
-            'lesson_room':None,
-            'assign_group':None,
-            'lesson_attention_reason':None
-        }
-
-    @property
-    def id(self):
-        return self.model['id']
-
-    @id.setter
-    def id(self, id_data):
-        self.model['id'] = id_data

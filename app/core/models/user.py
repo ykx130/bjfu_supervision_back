@@ -18,7 +18,7 @@ class User(db.Model, UserMixin):
     start_time = db.Column(db.TIMESTAMP, default=datetime.now())
     end_time = db.Column(db.TIMESTAMP, default=datetime.now())
     sex = db.Column(db.String(16), default="男")
-    email = db.Column(db.String(64), index=True,default="")
+    email = db.Column(db.String(64), default="")
     phone = db.Column(db.String(16), default="")
     state = db.Column(db.String(8), default="")
     unit = db.Column(db.String(8), default="")
