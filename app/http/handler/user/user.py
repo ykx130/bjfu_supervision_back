@@ -111,8 +111,8 @@ def del_user(username):
 @user_blueprint.route('/roles',methods=['GET'])
 def get_roles():
     try:
-        pagination = find_roles(request.args)
-        roles = pagination.items
+        roles, total = find_roles(request.args)
+        roles = roles, total
     except Exception as e:
         return jsonify({
             'code':500,
@@ -126,7 +126,7 @@ def get_roles():
             'name':role.name,
             'permissions':role.permissions
         } for role in roles],
-        'total':pagination.total
+        'total':total
     }),200
 
 
