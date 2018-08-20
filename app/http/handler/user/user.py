@@ -112,7 +112,6 @@ def del_user(username):
 def get_roles():
     try:
         roles, total = find_roles(request.args)
-        roles = roles, total
     except Exception as e:
         return jsonify({
             'code':500,
