@@ -1,9 +1,10 @@
-from flask_login import UserMixin, AnonymousUserMixin,current_user
+from flask_login import UserMixin, AnonymousUserMixin, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
 from flask import jsonify
 from functools import wraps
 import json
+
 
 class Lesson(db.Model):
     __tablename__ = 'lessons'
@@ -32,12 +33,13 @@ class Lesson(db.Model):
         lesson_data = Lesson.query
         for key, value in condition.items():
             if hasattr(Lesson, key):
-                lesson_data = lesson_data.filter(getattr(Lesson, key)== value)
+                lesson_data = lesson_data.filter(getattr(Lesson, key) == value)
         return lesson_data
 
     @property
     def lesson_cases(self):
         return LessonCase.query.join(Lesson, LessonCase.lesson_id == Lesson.id).filter(LessonCase.lesson_id == self.id)
+
 
 class LessonCase(db.Model):
     __tablename__ = "lesson_cases"
@@ -47,7 +49,6 @@ class LessonCase(db.Model):
     lesson_weekday = db.Column(db.Integer, default=0)
     lesson_week = db.Column(db.String(48), default="")
     lesson_time = db.Column(db.String(48), default="")
-
 
 
 class Term(db.Model):
@@ -64,7 +65,6 @@ class Term(db.Model):
             if hasattr(Term, key):
                 terms_data = terms_data.filter(getattr(Term, key) == value)
         if 'time' in condition:
-            terms_data = terms_data.filter(Term.begin_time<condition['time']).filter(Term.end_time>=condition['time'])
+            terms_data = terms_data.filter(Term.begin_time < condition['time']).filter(
+                Term.end_time >= condition['time'])
         return terms_data
-
-

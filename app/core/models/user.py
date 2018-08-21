@@ -1,4 +1,4 @@
-from flask_login import UserMixin, AnonymousUserMixin,current_user
+from flask_login import UserMixin, AnonymousUserMixin, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, login_manager
 from datetime import datetime
@@ -8,10 +8,9 @@ import json
 from app.core.controllers.common_controller import UrlCondition
 
 
-
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True ,index=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True, default="")
     name = db.Column(db.String(64), default="")
     password_hash = db.Column(db.String(128), default="")
@@ -30,7 +29,7 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def users(condition):
-        name_map = {'users':User, 'roles':Role, 'groups':Group, 'user_roles':UserRole}
+        name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole}
         users = User.query.join(UserRole, UserRole.user_id == User.id).join(Role, UserRole.role_id == Role.id)
         for key, value in condition.items():
             if hasattr(User, key):
@@ -40,6 +39,7 @@ class User(db.Model, UserMixin):
                 table = name_map[items[0]]
                 users = users.filter(getattr(table, items[1]) == value)
         return users
+
     @property
     def roles(self):
         return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.user_id == self.id)
@@ -93,6 +93,7 @@ class Group(db.Model):
     def leader(self):
         return User.query.join(Group, User.username == Group.leader_name).first()
 
+
 class UserRole(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
@@ -100,10 +101,10 @@ class UserRole(db.Model):
     role_id = db.Column(db.Integer, default=-1)
     term = db.Column(db.String(32), default="")
 
-
     @staticmethod
     def userroles(condition):
         return UserRole.query
+
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -120,7 +121,6 @@ class Role(db.Model):
         return roles
 
 
-
 def permission_required_d(permission):
     def decorator(f):
         @wraps(f)
@@ -128,7 +128,9 @@ def permission_required_d(permission):
             if not current_user.can(permission):
                 return jsonify(status="fail", data=[], reason="no permission")
             return f(*args, **kwargs)
+
         return decorated_function
+
     return decorator
 
 

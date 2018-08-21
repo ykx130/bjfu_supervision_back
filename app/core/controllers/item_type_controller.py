@@ -8,6 +8,8 @@ def insert_item_type(mongo, item_type):
     except Exception as e:
         return False, e
     return True, None
+
+
 # 传入ItemType对象，存入数据库
 
 
@@ -32,6 +34,7 @@ def find_item_types(mongo, condition=None):
         return None, e
     return datas, None
 
+
 # 传入一个判断的字典，返回查询数据的cursor
 
 
@@ -46,7 +49,7 @@ def delete_item_type(mongo, condition=None):
     return True, None
 
 
-def update_item_type(mongo, condition=None, update_dict= None):
+def update_item_type(mongo, condition=None, update_dict=None):
     if condition is None:
         condition = dict()
         condition['using'] = True
@@ -56,14 +59,16 @@ def update_item_type(mongo, condition=None, update_dict= None):
         return None, e
     return True, None
 
+
 # 传入一个判断字典，将using字段值更改
 
 
 def request_to_class(json_request=None):
     item_type = ItemType()
     for k, v in json_request.items():
-            item_type.model[k]= v
+        item_type.model[k] = v
     return item_type
+
 
 # 传入request.json字典,返回一个ItemType对象
 
@@ -71,8 +76,5 @@ def request_to_class(json_request=None):
 def request_to_change(json_request=None):
     change = {}
     for k, v in json_request.items():
-            change[k] = v
+        change[k] = v
     return change
-
-
-

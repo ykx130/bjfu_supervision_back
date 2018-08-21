@@ -5,8 +5,8 @@ from app.core.models.lesson import Lesson, LessonCase, Term
 
 
 def update_database():
-    lesson_db = pymysql.connect(host="localhost",user="root",passwd="wshwoaini",db="lessons",charset='utf8',
-    cursorclass=pymysql.cursors.DictCursor)
+    lesson_db = pymysql.connect(host="localhost", user="root", passwd="wshwoaini", db="lessons", charset='utf8',
+                                cursorclass=pymysql.cursors.DictCursor)
     cursor = lesson_db.cursor()
 
     cursor.execute("select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name, \
@@ -15,11 +15,11 @@ def update_database():
     datas = cursor.fetchall()
     for data in datas:
         teacher_name = data['lesson_teacher_name']
-        teachers = data['lesson_teacher_name'].replace(' ','').split(',')
+        teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
         data['lesson_teacher_name'] = teachers
-        teacher_ids = data['lesson_teacher_id'].replace(' ','').split(',')
+        teacher_ids = data['lesson_teacher_id'].replace(' ', '').split(',')
         data['lesson_teacher_id'] = teacher_ids
-        teacher_units = data['lesson_teacher_unit'].replace(' ','').split(',')
+        teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
         data['lesson_teacher_unit'] = teacher_units
         for index in range(len(teachers)):
             lesson = Lesson()

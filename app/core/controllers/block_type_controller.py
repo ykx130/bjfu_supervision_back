@@ -8,6 +8,8 @@ def insert_block_type(mongo, block_type):
     except Exception as e:
         return False, e
     return True, None
+
+
 # 传入BlockType对象，存入数据库
 
 
@@ -31,6 +33,7 @@ def find_block_types(mongo, condition=None):
     except Exception as e:
         return None, e
     return datas, None
+
 
 # 传入一个判断的字典，返回查询数据的cursor
 
@@ -56,14 +59,16 @@ def update_block_type(mongo, condition=None, update_dict=None):
         return False, e
     return True, None
 
+
 # 传入一个判断字典，将using字段值更改
 
 
 def request_to_class(json_request=None):
     block_type = BlockType()
     for k, v in json_request.items():
-        block_type.model[k]= v
+        block_type.model[k] = v
     return block_type
+
 
 # 传入request.json字典,返回一个BlockType对象
 
@@ -71,13 +76,7 @@ def request_to_class(json_request=None):
 def request_to_change(json_request=None):
     change = {}
     for k, v in json_request.items():
-            change[k] = v
+        change[k] = v
     return change
 
-
-
-
-
-
-#将不可序列化的对象可序列化
-
+# 将不可序列化的对象可序列化

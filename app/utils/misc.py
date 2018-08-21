@@ -21,7 +21,7 @@ def convert_struct_time_to_string(struct_time, format="%Y-%m-%d %H:%M:%S"):
     return time.strftime(format, struct_time) if struct_time else ''
 
 
-def convert_datetime_to_string(datetime_time,format="%Y-%m-%d %H:%M:%S"):
+def convert_datetime_to_string(datetime_time, format="%Y-%m-%d %H:%M:%S"):
     return datetime_time.strftime(format) if datetime_time else ''
 
 

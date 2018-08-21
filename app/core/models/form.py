@@ -2,7 +2,7 @@ class FormMeta(object):
 
     def __init__(self):
         self.model = {
-            'meta': {'create_by':None},
+            'meta': {'create_by': None},
             'name': None,
             'version': None,
             'using': True,
@@ -94,7 +94,6 @@ class Item(object):
     def extra(self, extra_data):
         self.model['extra'] = extra_data
 
-
     @property
     def payload(self):
         return self.model['payload']
@@ -116,7 +115,7 @@ class ItemType(object):
 
     def __init__(self):
         self.model = {
-            'item_type_name':None,
+            'item_type_name': None,
             'item_detail': None,
             'using': True
         }
@@ -150,7 +149,7 @@ class BlockType(object):
 
     def __init__(self):
         self.model = {
-            'block_type_name':None,
+            'block_type_name': None,
             'block_detail': None,
             'using': True
         }
@@ -183,16 +182,16 @@ class BlockType(object):
 class Form(object):
     def __init__(self):
         self.model = {
-            "bind_meta_id":None,
-            "bind_meta_name":None,
-            "bind_meta_version":None,
-            "meta":{
-                "create_at":None,
-                "creator":{}
+            "bind_meta_id": None,
+            "bind_meta_name": None,
+            "bind_meta_version": None,
+            "meta": {
+                "create_at": None,
+                "creator": {}
             },
-            "status":None,
-            "using":True,
-            "values":[]
+            "status": None,
+            "using": True,
+            "values": []
         }
         self.values = []
 
@@ -244,7 +243,6 @@ class Form(object):
     def meta(self, meta_data):
         self.model['meta'] = meta_data
 
-
     def value_to_dict(self):
         for value in self.values:
             try:
@@ -256,9 +254,11 @@ class Form(object):
 class Value(object):
     def __init__(self):
         self.model = {
-            'item_type':None,
-            'item_name':None,
-            'value':None,
+            'item_type': None,
+            'item_name': None,
+            "type": None,
+            'value': None,
+            "pyload":dict()
         }
 
     @property

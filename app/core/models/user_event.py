@@ -1,6 +1,6 @@
 class User(object):
     def __init__(self):
-        self.model={
+        self.model = {
             'name': None,
             'information': {
                 'birth': None,
@@ -9,12 +9,11 @@ class User(object):
             'events': [],
             'using': True
         }
-        self.events= list()
+        self.events = list()
 
     @property
     def id(self):
         return self.model['id']
-
 
     @id.setter
     def id(self, id_data):
