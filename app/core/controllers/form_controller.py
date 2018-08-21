@@ -3,66 +3,89 @@ from app.core.models.form import Form, Value
 
 
 def find_forms(mongo, condition=None):
-    condition['using'] = True
     if condition is None:
-        return mongo.db.form.find()
+        condition['using'] = True
+        return mongo.db.form.find(condition), None
     if '_id' in condition:
         condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
-    datas = mongo.db.form.find(condition)
-    return datas
+    try:
+        datas = mongo.db.form.find(condition)
+    except Exception as e:
+        return None, e
+    return datas, None
 
 
 def find_form(mongo, _id):
     condition = {'using': True, '_id': ObjectId(_id)}
-    data = mongo.db.form.find_one(condition)
-    return data
+    try:
+        data = mongo.db.form.find_one(condition)
+    except Exception as e:
+        return None, e
+    return data, None
 
 
 def insert_form(mongo, form):
     form.value_to_dict()
-    mongo.db.form.insert(form.model)
+    try:
+        mongo.db.form.insert(form.model)
+    except Exception as e:
+        return False, e
+    return True, None
 
 
 def delete_form(mongo, condition=None):
     if condition is None:
-        return False
-    mongo.db.form.update(condition, {"$set": {"using": False}})
-    return True
+        return False, None
+    try:
+        mongo.db.form.update(condition, {"$set": {"using": False}})
+    except Exception as e:
+        return False, e
+    return True, None
 
 
-def update_form(mongo, condition=None, change_item = None):
+def update_form(mongo, condition=None, change_item=None):
     if condition is None:
-        return False
-    mongo.db.form.update(condition, {"$set": change_item})
-    return True
+        condition = dict()
+        condition['using'] = True
+    try:
+        mongo.db.form.update(condition, {"$set": change_item})
+    except Exception as e:
+        return False, e
+    return True, None
 
 
 def to_json_list(form):
     _id = form.get('_id', None)
     meta = form.get('meta', {})
-    meta_table_id = form.get('meta_table_id', None)
+    bind_meta_id = form.get('bind_meta_id', None)
+    bind_meta_name = form.get('bind_meta_name', None)
+    bind_meta_version = form.get('bind_meta_version', None)
     json_list = {
         '_id':_id,
         'meta':meta,
-        'meta_table_id':meta_table_id
+        'bind_meta_id':bind_meta_id,
+        'bind_meta_name':bind_meta_name,
+        'bind_meta_version':bind_meta_version
     }
     return json_list
 
 
 def request_to_class(json_request):
     form = Form()
-    meta_table_id = json_request.get('meta_table_id', None)
+    bind_meta_id = json_request.get('bind_meta_id', None)
+    bind_meta_name = json_request.get('bind_meta_name', None)
+    bind_meta_version = json_request.get('bind_meta_version', None)
     meta = json_request.get('meta', {})
-    values = json_request.get('values', {})
+    values = json_request.get('values', [])
     using = json_request.get('using', True)
     form.using = using
-    form.meta_table_id = meta_table_id
-    if meta is not None:
-        form.meta = meta
-    if values is not None:
-        for value_item in values:
-            value = Value()
-            for k, v in value_item.items():
-                value.model[k] = v
-            form.values.append(value)
+    form.bind_meta_id = bind_meta_id
+    form.bind_meta_name = bind_meta_name
+    form.bind_meta_version = bind_meta_version
+    form.meta = meta
+    for value_item in values:
+        value = Value()
+        for k, v in value_item.items():
+            value.model[k] = v
+        form.values.append(value)
     return form

@@ -2,20 +2,29 @@ class FormMeta(object):
 
     def __init__(self):
         self.model = {
-            'meta': {},
-            "identify": None,
+            'meta': {'create_by':None},
+            'name': None,
+            'version': None,
             'using': True,
             'items': []
         }
         self.items = list()
 
     @property
-    def identify(self):
-        return self.model['identify']
+    def name(self):
+        return self.model['name']
 
-    @identify.setter
-    def identify(self, identify_data):
-        self.model['identify'] = identify_data
+    @name.setter
+    def name(self, name_data):
+        self.model['name'] = name_data
+
+    @property
+    def version(self):
+        return self.model['version']
+
+    @version.setter
+    def version(self, version_data):
+        self.model['version'] = version_data
 
     @property
     def using(self):
@@ -34,9 +43,8 @@ class FormMeta(object):
         self.model['meta'].update(meta_data)
 
     def items_to_dict(self):
-        for item_id, data in enumerate(self.items):
+        for data in self.items:
             try:
-                data.item_id = item_id
                 self.model['items'].append(data.model)
             except:
                 pass
@@ -45,23 +53,22 @@ class FormMeta(object):
 class Item(object):
     def __init__(self):
         self.model = {
-            'item_id': None,
             'item_name': None,
             'item_type': None,
             'extra': None,
-            'type':None,
+            'type': None,
             'payload': {
                 'options': []
             }
         }
 
     @property
-    def item_id(self):
-        return self.model['item_id']
+    def type(self):
+        return self.model['type']
 
-    @item_id.setter
-    def item_id(self, id_data):
-        self.model['item_id'] = id_data
+    @type.setter
+    def type(self, type_data):
+        self.model['type'] = type_data
 
     @property
     def item_type(self):
@@ -176,23 +183,50 @@ class BlockType(object):
 class Form(object):
     def __init__(self):
         self.model = {
-            "meta_table_id":None,
+            "bind_meta_id":None,
+            "bind_meta_name":None,
+            "bind_meta_version":None,
             "meta":{
                 "create_at":None,
                 "creator":{}
             },
+            "status":None,
             "using":True,
             "values":[]
         }
         self.values = []
 
     @property
-    def meta_table_id(self):
-        return self.model['meta_table_id']
+    def status(self):
+        return self.model['status']
 
-    @meta_table_id.setter
-    def meta_table_id(self, meta_table_id_data):
-        self.model['meta_table_id'] = meta_table_id_data
+    @status.setter
+    def status(self, status_data):
+        self.model['status'] = status_data
+
+    @property
+    def bind_meta_id(self):
+        return self.model['bind_meta_id']
+
+    @bind_meta_id.setter
+    def bind_meta_id(self, meta_table_id_data):
+        self.model['bind_meta_id'] = meta_table_id_data
+
+    @property
+    def bind_meta_name(self):
+        return self.model['bind_meta_name']
+
+    @bind_meta_name.setter
+    def bind_meta_name(self, bind_meta_name_data):
+        self.model['bind_meta_name'] = bind_meta_name_data
+
+    @property
+    def bind_meta_version(self):
+        return self.model['bind_meta_version']
+
+    @bind_meta_version.setter
+    def bind_meta_version(self, bind_meta_version_data):
+        self.model['bind_meta_version'] = bind_meta_version_data
 
     @property
     def meta(self):
@@ -222,19 +256,10 @@ class Form(object):
 class Value(object):
     def __init__(self):
         self.model = {
-            'item_id':None,
             'item_type':None,
             'item_name':None,
             'value':None,
         }
-
-    @property
-    def item_id(self):
-        return self.model['item_id']
-
-    @item_id.setter
-    def item_id(self, item_id_data):
-        self.model['item_id'] = item_id_data
 
     @property
     def item_type(self):

@@ -1,6 +1,7 @@
 from app.core.models.user_event import User,Event
 from flask_pymongo import ObjectId
 
+
 def find_users(mongo,condition=None):
     condition['using']=True
     if condition is None:
@@ -9,6 +10,7 @@ def find_users(mongo,condition=None):
         condition['_id']['$in']=[ObjectId(item) for item in condition['_id']['$in']]
     datas=mongo.db.user.find(condition)
     return datas
+
 
 def find_user(mongo, _id):
     condition = {'using': True, '_id': ObjectId(_id)}
@@ -67,6 +69,7 @@ def to_json_list(user):
     }
     return json_list
 
+
 def request_to_class_event(json_request):
     event = Event()
     event_id = json_request.get('event_id', None)
@@ -103,6 +106,7 @@ def find_event(mongo,_id,event_id):
         if event_data["event_id"]==event_id:
             return event_data
     return None
+
 
 def delete_event(mongo,_id,event_id):
     condition_user = {'using': True, '_id': ObjectId(_id)}

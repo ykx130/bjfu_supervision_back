@@ -1,13 +1,12 @@
 import pymysql
-from flask_pymongo import ObjectId
 from app import db
 import json
 from app.core.models.lesson import Lesson, LessonCase, Term
-from app.core.controllers.common_controller import dict_serializable
+
 
 def update_database():
     lesson_db = pymysql.connect(host="localhost",user="root",passwd="wshwoaini",db="lessons",charset='utf8',
-    cursorclass = pymysql.cursors.DictCursor)
+    cursorclass=pymysql.cursors.DictCursor)
     cursor = lesson_db.cursor()
 
     cursor.execute("select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name, \
@@ -72,17 +71,29 @@ def lesson_to_model(lesson):
                     "assign_group": lesson.assgin_group, "lesson_cases": lesson_cases}
     return lesson_model
 
+
 def find_lesson(id):
-    lesson = Lesson.query.filter(Lesson.id == id).first()
+    try:
+        lesson = Lesson.query.filter(Lesson.id == int(id)).first()
+    except Exception as e:
+        return None, e
     lesson_model = lesson_to_model(lesson)
-    return lesson_model
+    return lesson_model, None
+
 
 def has_lesson(id):
-    lesson = Lesson.query.filter(Lesson.id == id).first()
-    return False if lesson is None else True
+    try:
+        lesson = Lesson.query.filter(Lesson.id == id).first()
+    except Exception as e:
+        return None, e
+    return False, None if lesson is None else True, None
+
 
 def find_lessons(condition):
-    lessons = Lesson.lessons(condition)
+    try:
+        lessons = Lesson.lessons(condition)
+    except Exception as e:
+        return None, None, e
     page = condition['_page'] if '_page' in condition else 1
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
@@ -91,22 +102,39 @@ def find_lessons(condition):
     for lesson in lesson_page:
         lesson_model = lesson_to_model(lesson)
         lesson_models.append(lesson_model)
-    return lesson_models, pagination.total
+    return lesson_models, pagination.total, None
 
 
 def change_lesson(id, request_json):
-    lesson = Lesson.query.filter(Lesson.id == id).first()
+    try:
+        lesson = Lesson.query.filter(Lesson.id == id).first()
+    except Exception as e:
+        return False, e
     for k, v in request_json.items():
         if hasattr(lesson, k):
             setattr(lesson, k, v)
+    db.session.add(lesson)
+    try:
+        db.session.commit()
+    except Exception as e:
+        return False, e
+    return True, None
 
 
 def find_terms(condition):
-    terms = Term.terms(condition)
+    try:
+        terms = Term.terms(condition)
+    except Exception as e:
+        return None, None, e
     page = condition['_page'] if '_page' in condition else 1
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = terms.paginate(page=page, per_page=per_page, error_out=False)
-    return pagination
+    return pagination.items, pagination.total, None
+
 
 def find_now_term():
-    return Term.query.order_by(Term.id.desc()).first()
+    try:
+        term = Term.query.order_by(Term.name.desc()).first()
+    except Exception as e:
+        return None, e
+    return term, None

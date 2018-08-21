@@ -2,36 +2,52 @@ from app.core.models.form import FormMeta, Item
 from flask_pymongo import ObjectId
 import json
 
+
 def find_form_meta(mongo, _id):
     condition = {'using': True, '_id': ObjectId(_id)}
-    data = mongo.db.form_meta.find_one(condition)
-    return data
+    try:
+        data = mongo.db.form_meta.find_one(condition)
+    except Exception as e:
+        return None, e
+    return data, None
+
 
 def find_form_metas(mongo, condition=None):
-    condition['using'] = True
     if condition is None:
-        return mongo.db.form_meta.find()
+        condition['using'] = True
+        return mongo.db.form_meta.find(), None
     if '_id' in condition:
         condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
-    datas = mongo.db.form_meta.find(condition)
-    return datas
+    try:
+        datas = mongo.db.form_meta.find(condition)
+    except Exception as e:
+        return None, e
+    return datas, None
 
 # 传入字典型返回筛选过的数据的cursor, 遍历cursor得到的是字典
 
 
 def insert_form_meta(mongo, form_meta):
     form_meta.items_to_dict()
-    mongo.db.form_meta.insert(form_meta.model)
+    try:
+        mongo.db.form_meta.insert(form_meta.model)
+    except Exception as e:
+        return False, e
+    return True, None
 
 # 传入一个FormMeta对象，存入数据库
 
 
 def delete_form_meta(mongo, condition=None):
-    condition['using'] = True
     if condition is None:
-        return False
-    mongo.db.form_meta.update(condition, {"$set": {"using": False}})
-    return True
+        return False, None
+    condition['using'] = True
+    try:
+        mongo.db.form_meta.update(condition, {"$set": {"using": False}})
+    except Exception as e:
+        return False, e
+    return True, None
+
 # 传入一个用于匹配的字典，更改匹配到的所有文档的using值
 
 
@@ -55,13 +71,14 @@ def request_to_class(json_request):
 
 def to_json_list(form_meta):
     _id = form_meta.get('_id', None)
+    name = form_meta.get('name', None)
+    version = form_meta.get('version', None)
     meta = form_meta.get('meta', {})
-    identify = form_meta.get('identify', None)
-    using = form_meta.get('using', None)
     json_list = {
         '_id': _id,
         'meta': meta,
-        'identify': identify
+        'name': name,
+        'version': version,
     }
     return json_list
 
