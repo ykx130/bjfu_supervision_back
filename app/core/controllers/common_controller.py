@@ -36,30 +36,31 @@ class UrlCondition(object):
                 if k == '_per_page' or k == '_page':
                     self.page_dict[k] = v
                 elif k == '_sort':
-                    v = v.replace(' ','')
+                    v = v.replace(' ', '')
                     sort_list = v.split(',')
                 elif k == '_order':
-                    v = v.replace(' ','')
+                    v = v.replace(' ', '')
                     order_list = [int(item_order) for item_order in v.split(',')]
                 elif k == '_limit':
                     self.sort_limit_dict[k] = v
                 else:
-                    isEqual = True #筛选是相等的标志
+                    isEqual = True  # 筛选是相等的标志
                     for item in filter_list:
                         if item in k and k.endswith(item):
                             isEqual = False
-                            k = k[:len(k)-len(item)]
-                            self.filter_dict[k] = {'${}'.format(item[1:]):v}
+                            k = k[:len(k) - len(item)]
+                            self.filter_dict[k] = {'${}'.format(item[1:]): v}
                             break
                     if isEqual:
                         if k not in self.filter_dict:
-                            self.filter_dict[k]={'$in':[v]}
+                            self.filter_dict[k] = {'$in': [v]}
                         else:
                             self.filter_dict[k]['$in'].append(v)
         if len(order_list) == len(sort_list):
             self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, order_list))
         elif len(order_list) == 0:
             self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, [1 for i in range(len(sort_list))]))
+
 
 # 将请求的url_args分解成三个字典
 # sort_limit_dict 用于排序和限制数量
@@ -81,7 +82,7 @@ class Paginate(object):
         self.next = self.page + 1 if self.page < self.page_num else None
         self.has_prev = True if self.page > 1 else False
         self.has_next = True if self.page < self.page_num else False
-        self.data_page = _data.limit(self.per_page).skip((self.page-1)*self.per_page)
+        self.data_page = _data.limit(self.per_page).skip((self.page - 1) * self.per_page)
 
 
 def sort_limit(datas, sort_limit_dict):

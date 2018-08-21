@@ -11,15 +11,15 @@ from app.config import config
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
-
 db = SQLAlchemy()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 
+
 def create_app(config_name):
-    app = Flask(__name__, static_folder=basedir+'/static')
+    app = Flask(__name__, static_folder=basedir + '/static')
 
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
@@ -48,5 +48,6 @@ def create_app(config_name):
     app.register_blueprint(user_blueprint)
 
     return app
+
 
 app = create_app('default')

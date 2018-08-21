@@ -87,7 +87,7 @@ def insert_user(request_json):
 def update_user(username, request_json):
     if username is None:
         return False, None
-    user = User.query.filter(User.username==username).first()
+    user = User.query.filter(User.username == username).first()
     for key, value in request_json.items():
         if hasattr(user, key):
             setattr(user, key, value)
@@ -98,7 +98,8 @@ def update_user(username, request_json):
         return False, e
     term = Term.query.order_by(Term.id.desc()).first().name
     if 'role_names' in request_json:
-        [db.session.delete(user_role) for user_role in UserRole.query.filter(UserRole.user_id == user.id).filter(UserRole.term == term)]
+        [db.session.delete(user_role) for user_role in
+         UserRole.query.filter(UserRole.user_id == user.id).filter(UserRole.term == term)]
         for role_name in request_json['role_names']:
             user_role = UserRole()
             role = Role.query.filter(Role.name == role_name).first()
@@ -158,7 +159,7 @@ def insert_role(request_json):
     return True, None
 
 
-def update_role(role_name,request_json):
+def update_role(role_name, request_json):
     try:
         role = Role.query.filter(Role.name == role_name).first()
     except Exception as e:

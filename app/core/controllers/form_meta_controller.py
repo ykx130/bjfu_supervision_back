@@ -24,6 +24,7 @@ def find_form_metas(mongo, condition=None):
         return None, e
     return datas, None
 
+
 # 传入字典型返回筛选过的数据的cursor, 遍历cursor得到的是字典
 
 
@@ -34,6 +35,7 @@ def insert_form_meta(mongo, form_meta):
     except Exception as e:
         return False, e
     return True, None
+
 
 # 传入一个FormMeta对象，存入数据库
 
@@ -47,6 +49,7 @@ def delete_form_meta(mongo, condition=None):
     except Exception as e:
         return False, e
     return True, None
+
 
 # 传入一个用于匹配的字典，更改匹配到的所有文档的using值
 
@@ -63,9 +66,11 @@ def request_to_class(json_request):
         for item_data in item_datas:
             item = Item()
             for k, v in item_data.items():
-                item.model[k]= v
+                item.model[k] = v
             form_meta.items.append(item)
     return form_meta
+
+
 # 传入request.json字典,返回一个FormMeta对象
 
 
@@ -81,4 +86,3 @@ def to_json_list(form_meta):
         'version': version,
     }
     return json_list
-

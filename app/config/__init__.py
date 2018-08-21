@@ -10,7 +10,7 @@ import psutil
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY')or 'hard to guess string'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     PATIENTS_PRE_PAGE = 20
     MONGO_URI = "mongodb://supervision:root@101.200.52.233:27017/supervision"
     MONGO_HOST = "localhost"
@@ -29,14 +29,18 @@ class Config:
     def init_app(app):
         pass
 
+
 class DevelopmentConfig(Config):
     DEBUG = True
+
 
 class TestingConfig(Config):
     TESTING = True
 
+
 class ProductionConfig(Config):
     pass
+
 
 config = {
     'development': DevelopmentConfig,

@@ -9,7 +9,8 @@ from kafka import KafkaProducer
 from app import app
 from app.utils.logger import log
 
-producer = KafkaProducer(bootstrap_servers=app.config.get("KAFLKA_HOST"), value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers=app.config.get("KAFLKA_HOST"),
+                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 topic = app.config.get("KAFLKA_TOPIC")
 
 
