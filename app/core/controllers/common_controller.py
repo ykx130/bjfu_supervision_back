@@ -1,11 +1,13 @@
 import json
 from flask_pymongo import ObjectId
 
+
 def object_to_str(dict_unserializalbe):
     for k, v in dict_unserializalbe.items():
         if type(v) == ObjectId:
             dict_unserializalbe[k] = str(v)
     return dict_unserializalbe
+
 
 def dict_serializable(dict_unserializalbe):
     r = {}
@@ -59,10 +61,10 @@ class UrlCondition(object):
         elif len(order_list) == 0:
             self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, [1 for i in range(len(sort_list))]))
 
-#将请求的url_args分解成三个字典
-#sort_limit_dict 用于排序和限制数量
-#page_dict 用于分页
-#filter_dict 用于筛选数据
+# 将请求的url_args分解成三个字典
+# sort_limit_dict 用于排序和限制数量
+# page_dict 用于分页
+# filter_dict 用于筛选数据
 
 
 class Paginate(object):
@@ -82,7 +84,6 @@ class Paginate(object):
         self.data_page = _data.limit(self.per_page).skip((self.page-1)*self.per_page)
 
 
-
 def sort_limit(datas, sort_limit_dict):
     dataspage = datas
     _limit = sort_limit_dict.get('_limit', None)
@@ -92,4 +93,3 @@ def sort_limit(datas, sort_limit_dict):
     if _sort_dict != {}:
         dataspage = dataspage.sort(_sort_dict)
     return dataspage
-
