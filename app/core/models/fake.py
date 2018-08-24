@@ -1,7 +1,17 @@
 from app.core.models.user import User, UserRole, Group, Role
+from app.core.models.lesson import Term
+from datetime import datetime
 from app import db
 
 def insert_user():
+    term1 = Term()
+    term1.name = '2017-2018-1'
+    term1.begin_time = datetime.now()
+    term1.end_time = datetime.now()
+    term2 = Term()
+    term2.name = '2016-2017-1'
+    term2.begin_time = datetime.now()
+    term2.end_time = datetime.now()
     user1 = User()
     user1.username = "admin"
     user1.password = "root"
