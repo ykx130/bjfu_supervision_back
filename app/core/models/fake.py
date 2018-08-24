@@ -53,5 +53,8 @@ def insert_user():
     db.session.add(user_role1)
     db.session.add(user_role2)
     db.session.add(user_role3)
+    db.session.add(term1)
+    db.session.add(term2)
+    db.session.commit()
 
 
