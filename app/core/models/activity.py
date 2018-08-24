@@ -44,7 +44,7 @@ class Activity(db.Model):
 
 
 class ActivityUser(db.Model):
-    __tablename__ = 'activities'
+    __tablename__ = 'activity_users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default="")
     activity_id = db.Column(db.Integer, default=-1)
