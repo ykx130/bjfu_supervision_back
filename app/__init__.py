@@ -44,6 +44,9 @@ def create_app(config_name):
     from app.http.handler.lesson import lesson_blueprint
     app.register_blueprint(lesson_blueprint)
 
+    from app.http.handler.activity import activity_blueprint
+    app.register_blueprint(activity_blueprint)
+
     from app.http.handler.user import user_blueprint
     app.register_blueprint(user_blueprint)
 

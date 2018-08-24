@@ -11,7 +11,7 @@ from app.core.controllers.common_controller import UrlCondition
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    username = db.Column(db.String(64), unique=True, index=True, default="")
+    username = db.Column(db.String(64), index=True, default="")
     name = db.Column(db.String(64), default="")
     password_hash = db.Column(db.String(128), default="")
     start_time = db.Column(db.TIMESTAMP, default=datetime.now())
@@ -26,11 +26,14 @@ class User(db.Model, UserMixin):
     prorank = db.Column(db.String(8), default="")
     skill = db.Column(db.String(16), default="")
     group = db.Column(db.String(16), default="")
+    using = db.Column(db.Boolean, default=True)
 
     @staticmethod
     def users(condition):
         name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole}
-        users = User.query.join(UserRole, UserRole.user_id == User.id).join(Role, UserRole.role_id == Role.id)
+        users = User.query.join(UserRole, UserRole.username == User.username).join(Role,
+                                                                                   UserRole.role_id == Role.id).filter(
+            User, User.using == True).filter(Role.using == True).filter(UserRole.using == True)
         for key, value in condition.items():
             if hasattr(User, key):
                 users = users.filter(getattr(User, key) == value)
@@ -42,7 +45,8 @@ class User(db.Model, UserMixin):
 
     @property
     def roles(self):
-        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.user_id == self.id)
+        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.user_id == self.id).filter(
+            Role.using == True).filter(UserRole.using == True).filter(User.using == True)
 
     @property
     def password(self):
@@ -80,10 +84,11 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     name = db.Column(db.String(64), unique=True, default="")
     leader_name = db.Column(db.String(64), default="")
+    using = db.Column(db.Boolean, default=True)
 
     @staticmethod
     def groups(condition):
-        groups = Group.query
+        groups = Group.query.filter(Group.using == True)
         for key, value in condition.items():
             if hasattr(Group, key):
                 groups = groups.filter(getattr(Group, key) == value)
@@ -91,19 +96,21 @@ class Group(db.Model):
 
     @property
     def leader(self):
-        return User.query.join(Group, User.username == Group.leader_name).first()
+        return User.query.join(Group, User.username == Group.leader_name).filter(Group.id == self.id).filter(
+            Group.using == True).first()
 
 
 class UserRole(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    user_id = db.Column(db.Integer, default=-1)
+    username = db.Column(db.String(64), default="")
     role_id = db.Column(db.Integer, default=-1)
     term = db.Column(db.String(32), default="")
+    using = db.Column(db.Boolean, default=True)
 
     @staticmethod
-    def userroles(condition):
-        return UserRole.query
+    def user_roles(condition):
+        return UserRole.query.filter(UserRole.using == True)
 
 
 class Role(db.Model):
@@ -111,14 +118,33 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     name = db.Column(db.String(64), unique=True, default="")
     permissions = db.Column(db.JSON, default=[])
+    using = db.Column(db.Boolean, default=True)
 
     @staticmethod
     def roles(condition):
-        roles = Role.query
+        roles = Role.query.filter(Role.using == True)
         for key, value in condition.items():
             if hasattr(Role, key):
                 roles = roles.filter(getattr(Role, key) == value)
         return roles
+
+
+class Event(db.Model):
+    __tablename__ = 'events'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    name = db.Column(db.String(255), default="")
+    username = db.Column(db.String(64), default="")
+    detail = db.Column(db.String(1023), default="")
+    timestamp = db.Column(db.TIMESTAMP, default=datetime.now())
+    using = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def events(condition):
+        event_data = Event.query.filter(Event.using == True)
+        for key, value in condition.items():
+            if hasattr(Event, key):
+                event_data = event_data.filter(getattr(Event, key) == value)
+        return event_data
 
 
 def permission_required_d(permission):

@@ -60,7 +60,7 @@ def lesson_to_model(lesson):
     lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
                      "lesson_weekday": lesson_case.lesson_weekday, "lesson_room": lesson_case.lesson_weekday} for
                     lesson_case in lesson.lesson_cases]
-    lesson_model = {"lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
+    lesson_model = {"id": lesson.id, "lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
                     "lesson_state": lesson.lesson_state, "lesson_teacher_id": lesson.lesson_teacher_id,
                     "lesson_name": lesson.lesson_name, "lesson_teacher_name": lesson.lesson_teacher_name,
                     "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
@@ -74,7 +74,7 @@ def lesson_to_model(lesson):
 
 def find_lesson(id):
     try:
-        lesson = Lesson.query.filter(Lesson.id == int(id)).first()
+        lesson = Lesson.query.filter(Lesson.id == int(id)).filter(Lesson.using == True).first()
     except Exception as e:
         return None, e
     lesson_model = lesson_to_model(lesson)
@@ -107,9 +107,11 @@ def find_lessons(condition):
 
 def change_lesson(id, request_json):
     try:
-        lesson = Lesson.query.filter(Lesson.id == id).first()
+        lesson = Lesson.query.filter(Lesson.id == id).filter(Lesson.using == True).first()
     except Exception as e:
         return False, e
+    if lesson is None:
+        return False, None
     for k, v in request_json.items():
         if hasattr(lesson, k):
             setattr(lesson, k, v)
@@ -134,7 +136,7 @@ def find_terms(condition):
 
 def find_now_term():
     try:
-        term = Term.query.order_by(Term.name.desc()).first()
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first()
     except Exception as e:
         return None, e
     return term, None
