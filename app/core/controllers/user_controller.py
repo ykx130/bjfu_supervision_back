@@ -17,40 +17,37 @@ def find_users(condition):
 
 def has_user(username):
     try:
-        user = User.query.filter(User.username == username).first()
+        user = User.query.filter(User.username == username).filter(User.using == True).first()
     except Exception as e:
         return False, e
     return False, None if user is None else True, None
 
 
-def user_to_json(user):
-    try:
-        user_dict = {
-            'id': user.id,
-            'username': user.username,
-            'name': user.name,
-            'start_time': convert_datetime_to_string(user.start_time),
-            'end_time': convert_datetime_to_string(user.end_time),
-            'sex': user.sex,
-            'email': user.email,
-            'phone': user.phone,
-            'state': user.state,
-            'unit': user.unit,
-            'status': user.status,
-            'work_state': user.work_state,
-            'prorank': user.prorank,
-            'skill': user.skill,
-            'group': user.group,
-            'role_names': [role.name for role in user.roles]
-        }
-    except Exception as e:
-        return None, e
-    return user_dict, None
+def user_to_dict(user):
+    user_dict = {
+        'id': user.id,
+        'username': user.username,
+        'name': user.name,
+        'start_time': convert_datetime_to_string(user.start_time),
+        'end_time': convert_datetime_to_string(user.end_time),
+        'sex': user.sex,
+        'email': user.email,
+        'phone': user.phone,
+        'state': user.state,
+        'unit': user.unit,
+        'status': user.status,
+        'work_state': user.work_state,
+        'prorank': user.prorank,
+        'skill': user.skill,
+        'group': user.group,
+        'role_names': [role.name for role in user.roles]
+    }
+    return user_dict
 
 
 def find_user(username):
     try:
-        user = User.query.filter(User.username == username).first()
+        user = User.query.filter(User.username == username).filter(User.using == True).first()
     except Exception as e:
         return None, e
     return user, None
@@ -64,15 +61,11 @@ def insert_user(request_json):
         if hasattr(user, key):
             setattr(user, key, value)
     db.session.add(user)
-    try:
-        db.session.commit()
-    except Exception as e:
-        return False, e
-    term = Term.query.order_by(Term.name.desc()).first().name
-    role_names = request_json['role_names'] if 'role_names' not in request_json else []
+    term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    role_names = request_json['role_names'] if 'role_names' in request_json else []
     for role_name in role_names:
         user_role = UserRole()
-        role = Role.query.filter(Role.name == role_name).first()
+        role = Role.query.filter(Role.name == role_name).filter(Term.using == True).first()
         user_role.user_id = user.id
         user_role.role_id = role.id
         user_role.term = term
@@ -80,6 +73,21 @@ def insert_user(request_json):
     try:
         db.session.commit()
     except Exception as e:
+        db.session.rollback()
+        return False, e
+    return True, None
+
+
+def delete_user_roles(username, term):
+    user_roles = UserRole.filter(UserRole.term == term).filter(UserRole.username == username).filter(
+        UserRole.using == True)
+    for user_role in user_roles:
+        user_role.using = False
+        db.session.add(user_role)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
         return False, e
     return True, None
 
@@ -87,39 +95,40 @@ def insert_user(request_json):
 def update_user(username, request_json):
     if username is None:
         return False, None
-    user = User.query.filter(User.username == username).first()
+    user = User.query.filter(User.username == username).filter(UserRole.using == True).first()
     for key, value in request_json.items():
         if hasattr(user, key):
             setattr(user, key, value)
     db.session.add(user)
-    try:
-        db.session.commit()
-    except Exception as e:
-        return False, e
-    term = Term.query.order_by(Term.id.desc()).first().name
+    term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
     if 'role_names' in request_json:
-        [db.session.delete(user_role) for user_role in
-         UserRole.query.filter(UserRole.user_id == user.id).filter(UserRole.term == term)]
+        (_, err) = delete_user_roles(user.username, term)
+        if err is not None:
+            return False, err
         for role_name in request_json['role_names']:
             user_role = UserRole()
-            role = Role.query.filter(Role.name == role_name).first()
+            role = Role.query.filter(Role.name == role_name).filter(Role.using == True).first()
             user_role.role_id = role.id
             user_role.user_id = user.id
             user_role.term = term
             db.session.add(user_role)
-        try:
-            db.session.commit()
-        except Exception as e:
-            return False, e
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, e
     return True, None
 
 
 def delete_user(username):
     try:
-        user = User.query.filter(User.username == username).first()
+        user = User.query.filter(User.username == username).filter(User.using == True).first()
     except Exception as e:
         return False, e
-    db.session.delete(user)
+    if user is None:
+        return False, None
+    user.using = False
+    db.session.add(user)
     try:
         db.session.commit()
     except Exception as e:
@@ -129,9 +138,11 @@ def delete_user(username):
 
 def find_role(role_name):
     try:
-        role = Role.query.filter(Role.name == role_name).first()
+        role = Role.query.filter(Role.name == role_name).filter(Role.using == True).first()
     except Exception as e:
         return None, e
+    if role is None:
+        return None, None
     return role, None
 
 
@@ -161,7 +172,7 @@ def insert_role(request_json):
 
 def update_role(role_name, request_json):
     try:
-        role = Role.query.filter(Role.name == role_name).first()
+        role = Role.query.filter(Role.name == role_name).filter(Role.using == True).first()
     except Exception as e:
         return False, e
     for key, value in request_json:
@@ -177,11 +188,13 @@ def update_role(role_name, request_json):
 
 def delete_role(role_name):
     try:
-        role = Role.query.filter(Role.name == role_name)
+        role = Role.query.filter(Role.name == role_name).filter(Role.using == True)
     except Exception as e:
         return False, e
+    if role is None:
+        return None, None
+    role.using = True
     try:
-        db.session.delete(role)
         db.session.commit()
     except Exception as e:
         return False, e

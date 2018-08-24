@@ -27,10 +27,11 @@ class Lesson(db.Model):
     assgin_group = db.Column(db.String(8), default="")
     lesson_attention_reason = db.Column(db.String(255), default="")
     lesson_model = db.Column(db.Boolean, default=False)
+    using = db.Column(db.Boolean, default=True)
 
     @staticmethod
     def lessons(condition):
-        lesson_data = Lesson.query
+        lesson_data = Lesson.query.filter(Lesson.using == True)
         for key, value in condition.items():
             if hasattr(Lesson, key):
                 lesson_data = lesson_data.filter(getattr(Lesson, key) == value)
@@ -49,6 +50,7 @@ class LessonCase(db.Model):
     lesson_weekday = db.Column(db.Integer, default=0)
     lesson_week = db.Column(db.String(48), default="")
     lesson_time = db.Column(db.String(48), default="")
+    using = db.Column(db.Boolean, default=True)
 
 
 class Term(db.Model):
@@ -57,10 +59,12 @@ class Term(db.Model):
     name = db.Column(db.String(16))
     begin_time = db.Column(db.TIMESTAMP)
     end_time = db.Column(db.TIMESTAMP)
+    using = db.Column(db.Boolean, default=True)
+
 
     @staticmethod
     def terms(condition):
-        terms_data = Term.query
+        terms_data = Term.query.filter(Term.using == True)
         for key, value in condition:
             if hasattr(Term, key):
                 terms_data = terms_data.filter(getattr(Term, key) == value)

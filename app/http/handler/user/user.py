@@ -1,5 +1,5 @@
 from app.core.controllers.user_controller import find_user, find_users, delete_user, update_user, insert_user, \
-    find_roles, find_groups, has_user, user_to_json
+    find_roles, find_groups, has_user, user_to_dict
 from flask import request, jsonify, url_for, json
 from app.utils.misc import convert_datetime_to_string
 from app.http.handler.user import user_blueprint
@@ -19,7 +19,7 @@ def get_users():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_to_json(user) for user in users],
+        'users': [user_to_dict(user) for user in users],
         'message': ''
     }), 200
 
@@ -40,7 +40,7 @@ def get_user(username):
         }), 404
     return jsonify({
         'code': 200,
-        'user': user_to_json(user),
+        'user': user_to_dict(user),
         'message': '',
     }), 200
 
@@ -168,7 +168,7 @@ def get_groups():
         'groups': [{
             'id': group.id,
             'name': group.name,
-            'leader': user_to_json(group.leader)
+            'leader': user_to_dict(group.leader)
         } for group in groups],
         'total': total,
         'message': ''
