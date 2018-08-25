@@ -45,7 +45,7 @@ class User(db.Model, UserMixin):
 
     @property
     def roles(self):
-        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.user_id == self.id).filter(
+        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.username == self.username).filter(
             Role.using == True).filter(UserRole.using == True).filter(User.using == True)
 
     @property
