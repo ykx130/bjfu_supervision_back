@@ -184,7 +184,7 @@ def find_activity_user(id, username):
 def insert_activity_user(id, request_json):
     if 'username' not in request_json:
         return False, "no username"
-    user = User.query.filter(User.username == request_json['username']).filter(User.using == True).first()
+    user = User.query.filter(User.username == request_json['user']['username']).filter(User.using == True).first()
     if user is None:
         return False, "no this user"
     activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
