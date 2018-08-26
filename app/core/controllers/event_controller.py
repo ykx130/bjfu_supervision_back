@@ -13,10 +13,20 @@ def find_events(condition):
     return pagination.items, pagination.total, None
 
 
+def event_to_dict(event):
+    return {
+        'id': event.id,
+        'username': event.username,
+        'detail': event.detail,
+        'timestamp': event.timestamp,
+        'using': event.using
+    }
+
+
 def insert_event(request_json):
     event = Event()
     if 'username' not in request_json:
-        return False, None
+        return False, 'username can not be empty'
     for key, value in request_json.items():
         if hasattr(event, key):
             setattr(event, key, value)
