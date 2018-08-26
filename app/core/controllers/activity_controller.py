@@ -146,7 +146,7 @@ def find_activities(condition):
 
 def find_activity(id):
     try:
-        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id)
+        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, e
     if activity is None:
@@ -156,7 +156,7 @@ def find_activity(id):
 
 def find_activity_users(id, condition):
     try:
-        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id)
+        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, None, e
     try:
@@ -171,7 +171,7 @@ def find_activity_users(id, condition):
 
 def find_activity_user(id, username):
     try:
-        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id)
+        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, e
     try:
@@ -182,8 +182,6 @@ def find_activity_user(id, username):
 
 
 def insert_activity_user(id, request_json):
-    if 'username' not in request_json:
-        return False, "no username"
     user = User.query.filter(User.username == request_json['user']['username']).filter(User.using == True).first()
     if user is None:
         return False, "no this user"
@@ -195,8 +193,9 @@ def insert_activity_user(id, request_json):
     if activity.remainder_num <= 0:
         return False, "remainder_num is 0"
     activity_user = ActivityUser()
+    activity_user.username = user.username
     for key, value in request_json.items():
-        if key in ['state']:
+        if key in ['state', 'user']:
             continue
         if hasattr(activity_user, key):
             setattr(activity_user, key, value)
@@ -228,7 +227,7 @@ def update_activity_user(id, username, request_json):
     if activity_user is None:
         return False, "user does not attend this activity"
     for key, value in request_json.items():
-        if key in ['state']:
+        if key in ['state', 'user']:
             continue
         if hasattr(activity_user, key):
             setattr(activity_user, key, value)

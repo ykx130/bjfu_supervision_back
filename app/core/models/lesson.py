@@ -39,7 +39,8 @@ class Lesson(db.Model):
 
     @property
     def lesson_cases(self):
-        return LessonCase.query.join(Lesson, LessonCase.lesson_id == Lesson.id).filter(LessonCase.lesson_id == self.id)
+        return LessonCase.query.join(Lesson, LessonCase.lesson_id == Lesson.id).filter(
+            LessonCase.lesson_id == self.id).filter(LessonCase.using == True)
 
 
 class LessonCase(db.Model):
@@ -60,7 +61,6 @@ class Term(db.Model):
     begin_time = db.Column(db.TIMESTAMP)
     end_time = db.Column(db.TIMESTAMP)
     using = db.Column(db.Boolean, default=True)
-
 
     @staticmethod
     def terms(condition):

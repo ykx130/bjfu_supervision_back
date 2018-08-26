@@ -14,11 +14,14 @@ def insert_user():
     term2.end_time = datetime.now()
     user1 = User()
     user1.username = "admin"
+    user1.name = "admin"
     user1.password = "root"
     user2 = User()
     user2.username = "leader"
+    user2.name = "leader"
     user2.password = "root"
     user3 = User()
+    user3.name = "root"
     user3.username = "admin01"
     user3.password = "admin01"
     group1 = Group()

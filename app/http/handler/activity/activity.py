@@ -46,18 +46,16 @@ def get_activity(id):
             'message': str(err),
             'activity': None
         }), 200 if type(err) is str else 500
-    (users, err) = find_activity_users(id, request.args)
-    if err is not None:
+    if activity is None:
         return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
-        }), 200 if type(err) is str else 500
+            'code':404,
+            'message':'not found'
+        }), 404
     return jsonify({
         'code': 200,
         'message': '',
         'activity': activity_dict(activity),
-        'activity_users': [activity_user_dict(id, user) for user in users]
+        'activity_users': [activity_user_dict(id, user) for user in activity.activity_users]
     })
 
 
@@ -93,7 +91,7 @@ def change_activity(id):
     })
 
 
-@activity_blueprint.route('/activities/<int:id>/users')
+@activity_blueprint.route('/activities/<int:id>/activity_users')
 def get_activity_users(id):
     (activity, err) = find_activity(id)
     if err is not None:
@@ -102,11 +100,17 @@ def get_activity_users(id):
             'message': str(err),
             'activity': None
         }), 200 if type(err) is str else 500
+    if activity is None:
+        return jsonify({
+            'code':404,
+            'message': 'not found',
+            'activity': None
+        }), 404
     (users, total, err) = find_activity_users(id, request.args)
     if err is not None:
         return jsonify({
             'code': 500,
-            'message': '',
+            'message': str(err),
             'activity': None
         }), 500
     return jsonify({
@@ -117,7 +121,7 @@ def get_activity_users(id):
     })
 
 
-@activity_blueprint.route('/activities/<int:id>/users', methods=['POST'])
+@activity_blueprint.route('/activities/<int:id>/activity_users', methods=['POST'])
 def new_activity_user(id):
     (ifSuccess, err) = insert_activity_user(id, request.json)
     if err is not None:
@@ -134,7 +138,7 @@ def new_activity_user(id):
     })
 
 
-@activity_blueprint.route('/activities/<int:id>/users/<string:username>')
+@activity_blueprint.route('/activities/<int:id>/activity_users/<string:username>')
 def get_activity_user(id, username):
     (activity, err) = find_activity(id)
     if err is not None:
@@ -158,7 +162,7 @@ def get_activity_user(id, username):
     })
 
 
-@activity_blueprint.route('/activities/<int:id>/users/<string:username>', methods=['DELETE'])
+@activity_blueprint.route('/activities/<int:id>/activity_users/<string:username>', methods=['DELETE'])
 def del_activity_user(id, username):
     (ifSuccess, err) = delete_activity_user(id, username)
     if err is not None:
@@ -175,7 +179,7 @@ def del_activity_user(id, username):
     })
 
 
-@activity_blueprint.route('/activities/<int:id>/users/<string:username>', methods=['PUT'])
+@activity_blueprint.route('/activities/<int:id>/activity_users/<string:username>', methods=['PUT'])
 def change_activity_user(id, username):
     (ifSuccess, err) = update_activity_user(id, username, request.json)
     if err is not None:
