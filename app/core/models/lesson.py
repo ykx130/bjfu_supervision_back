@@ -1,10 +1,5 @@
-from flask_login import UserMixin, AnonymousUserMixin, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login_manager
-from flask import jsonify
-from functools import wraps
-import json
-
+from app import db
+from datetime import datetime
 
 class Lesson(db.Model):
     __tablename__ = 'lessons'
@@ -51,6 +46,7 @@ class LessonCase(db.Model):
     lesson_weekday = db.Column(db.Integer, default=0)
     lesson_week = db.Column(db.String(48), default="")
     lesson_time = db.Column(db.String(48), default="")
+    lesson_date = db.Column(db.Date, default=datetime.now())
     using = db.Column(db.Boolean, default=True)
 
 

@@ -29,9 +29,9 @@ class User(db.Model, UserMixin):
     @staticmethod
     def users(condition):
         name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole}
-        users = User.query.join(UserRole, UserRole.username == User.username).join(Role,
+        users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Role,
                                                                                    UserRole.role_id == Role.id).filter(
-            User.using == True).filter(Role.using == True).filter(UserRole.using == True)
+            User.using == True)
         for key, value in condition.items():
             if hasattr(User, key):
                 users = users.filter(getattr(User, key) == value)

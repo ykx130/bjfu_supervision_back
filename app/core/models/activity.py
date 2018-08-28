@@ -24,7 +24,9 @@ class Activity(db.Model):
 
     @staticmethod
     def activities(condition):
-        activity_datas = Activity.query.filter(Activity.using == True)
+        activity_datas = Activity.query.outerjoin(ActivityUser, ActivityUser.activity_id == Activity.id).outerjoin(User,
+                                                                                                                   User.username == ActivityUser.username).filter(
+            Activity.using == True)
         for key, value in condition.items():
             if hasattr(Activity, key):
                 activity_datas = activity_datas.filter(getattr(Activity, key) == value)

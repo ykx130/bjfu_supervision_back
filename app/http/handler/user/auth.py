@@ -16,7 +16,7 @@ def login():
                 "message": "username or password can not be null"
             }), 200
         try:
-            user = User.query.filter(User.username == username).first()
+            user = User.query.filter(User.username == username).filter(User.using == True).first()
             if user is None or not user.verify_password(password=password):
                 return jsonify({
                     "code": 500,
@@ -54,7 +54,7 @@ def logout():
 @login_required
 def get_current():
     try:
-        user = User.query.filter(User.username == current_user.username).first()
+        user = User.query.filter(User.username == current_user.username).filter(User.using == True).first()
     except Exception as e:
         return jsonify({
             "code": 500,
