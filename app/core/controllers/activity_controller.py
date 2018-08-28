@@ -2,6 +2,8 @@ from app.core.models.activity import Activity, ActivityUser
 from app.core.controllers.user_controller import user_to_dict
 from app.core.models.lesson import Term
 from app.core.models.user import User
+from flask_login import current_user
+from sqlalchemy.sql import or_
 from datetime import datetime
 from app import db
 
@@ -146,7 +148,7 @@ def find_activities(condition):
 
 def find_activity(id):
     try:
-        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id)
+        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, e
     if activity is None:
@@ -156,7 +158,7 @@ def find_activity(id):
 
 def find_activity_users(id, condition):
     try:
-        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id)
+        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, None, e
     try:
@@ -171,7 +173,7 @@ def find_activity_users(id, condition):
 
 def find_activity_user(id, username):
     try:
-        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id)
+        activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, e
     try:
@@ -182,9 +184,9 @@ def find_activity_user(id, username):
 
 
 def insert_activity_user(id, request_json):
-    if 'username' not in request_json:
-        return False, "no username"
-    user = User.query.filter(User.username == request_json['username']).filter(User.using == True).first()
+    username = request_json['user']['username'] if 'user' in request_json and 'username' in request_json[
+        'user'] else current_user.username
+    user = User.query.filter(User.username == username).filter(User.using == True).first()
     if user is None:
         return False, "no this user"
     activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
@@ -195,8 +197,9 @@ def insert_activity_user(id, request_json):
     if activity.remainder_num <= 0:
         return False, "remainder_num is 0"
     activity_user = ActivityUser()
+    activity_user.username = user.username
     for key, value in request_json.items():
-        if key in ['state']:
+        if key in ['state', 'user']:
             continue
         if hasattr(activity_user, key):
             setattr(activity_user, key, value)
@@ -228,7 +231,7 @@ def update_activity_user(id, username, request_json):
     if activity_user is None:
         return False, "user does not attend this activity"
     for key, value in request_json.items():
-        if key in ['state']:
+        if key in ['state', 'user']:
             continue
         if hasattr(activity_user, key):
             setattr(activity_user, key, value)
@@ -264,3 +267,28 @@ def delete_activity_user(id, username):
         db.session.rollback()
         return False, e
     return True, None
+
+
+def find_current_user_activities(condition=None):
+    try:
+        username = condition['username'] if 'username' in condition else current_user.username
+    except Exception as e:
+        return None, None, e
+    # activity_users = ActivityUser.query.filter(ActivityUser.using == True)
+    # users = User.query.filter(User.using == True)
+    activities = Activity.query.filter(Activity.using == True).outerjoin(
+        ActivityUser, ActivityUser.activity_id == Activity.id).outerjoin(
+        User, User.username == ActivityUser.username)
+    if 'state' not in condition:
+        return None, None, 'state must be gave'
+    state = condition['state']
+    if state == 'hasAttended':
+        activities = activities.filter(ActivityUser.state == "已报名").filter(
+            ActivityUser.username == username)
+    if state == 'canAttend':
+        activities = activities.filter(Activity.using == True).filter(Activity.apply_state == "报名进行中").filter(
+            or_(ActivityUser.state == None, ActivityUser.state == '未报名'))
+    page = int(condition['_page']) if '_page' in condition else 1
+    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    pagination = activities.paginate(page=int(page), per_page=int(per_page), error_out=False)
+    return pagination.items, pagination.total, None

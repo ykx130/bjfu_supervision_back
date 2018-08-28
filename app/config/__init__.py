@@ -12,12 +12,12 @@ import psutil
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     PATIENTS_PRE_PAGE = 20
-    MONGO_URI = "mongodb://supervision:root@101.200.52.233:27017/supervision"
+    MONGO_URI = "mongodb://supervision:root@localhost:27017/supervision"
     MONGO_HOST = "localhost"
     MONGO_USERNAME = 'supervision'
     MONGO_DBNAME = 'supervision'
     MONGO_PASSWORD = 'root'
-    # SQLALCHEMY_ECHO = True
+    #SQLALCHEMY_ECHO = True
     MONGO_PORT = 27017
     MAIL_DEBUG = True
     SQLALCHEMY_DATABASE_URI = \

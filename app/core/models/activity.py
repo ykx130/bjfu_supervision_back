@@ -24,11 +24,9 @@ class Activity(db.Model):
 
     @staticmethod
     def activities(condition):
-        activity_datas = Activity.query.join(ActivityUser, ActivityUser.activity_id).join(User,
-                                                                                          User.username == ActivityUser.username).filter(
-            Activity.using == True).filter(Activity.using == True).filter(ActivityUser,
-                                                                          ActivityUser.using == True).filter(
-            User.using == True)
+        activity_datas = Activity.query.outerjoin(ActivityUser, ActivityUser.activity_id == Activity.id).outerjoin(User,
+                                                                                                                   User.username == ActivityUser.username).filter(
+            Activity.using == True)
         for key, value in condition.items():
             if hasattr(Activity, key):
                 activity_datas = activity_datas.filter(getattr(Activity, key) == value)
@@ -44,12 +42,13 @@ class Activity(db.Model):
 
 
 class ActivityUser(db.Model):
-    __tablename__ = 'activities'
+    __tablename__ = 'activity_users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default="")
     activity_id = db.Column(db.Integer, default=-1)
     state = db.Column(db.String(16), default="")
     fin_state = db.Column(db.String(16), default="")
+    using = db.Column(db.Boolean, default=True)
 
     @staticmethod
     def activity_user_state(id, username):

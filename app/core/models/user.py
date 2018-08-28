@@ -4,8 +4,6 @@ from app import db, login_manager
 from datetime import datetime
 from flask import jsonify
 from functools import wraps
-import json
-from app.core.controllers.common_controller import UrlCondition
 
 
 class User(db.Model, UserMixin):
@@ -31,9 +29,9 @@ class User(db.Model, UserMixin):
     @staticmethod
     def users(condition):
         name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole}
-        users = User.query.join(UserRole, UserRole.username == User.username).join(Role,
+        users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Role,
                                                                                    UserRole.role_id == Role.id).filter(
-            User, User.using == True).filter(Role.using == True).filter(UserRole.using == True)
+            User.using == True)
         for key, value in condition.items():
             if hasattr(User, key):
                 users = users.filter(getattr(User, key) == value)
@@ -45,7 +43,7 @@ class User(db.Model, UserMixin):
 
     @property
     def roles(self):
-        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.user_id == self.id).filter(
+        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.username == self.username).filter(
             Role.using == True).filter(UserRole.using == True).filter(User.using == True)
 
     @property
