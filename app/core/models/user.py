@@ -27,10 +27,10 @@ class User(db.Model, UserMixin):
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
-    def users(condition):
+    def users(condition: dict):
         name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole}
         users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Role,
-                                                                                   UserRole.role_id == Role.id).filter(
+                                                                                             UserRole.role_id == Role.id).filter(
             User.using == True)
         for key, value in condition.items():
             if hasattr(User, key):
@@ -59,13 +59,13 @@ class User(db.Model, UserMixin):
         return permissions
 
     @password.setter
-    def password(self, password):
+    def password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
-    def verify_password(self, password):
+    def verify_password(self, password: str):
         return check_password_hash(self.password_hash, password)
 
-    def can(self, perm):
+    def can(self, perm: str):
         return perm in self.permissions
 
 

@@ -50,6 +50,9 @@ def create_app(config_name):
     from app.http.handler.user import user_blueprint
     app.register_blueprint(user_blueprint)
 
+    from app.http.handler.consult import consult_blueprint
+    app.register_blueprint(consult_blueprint)
+
     return app
 
 

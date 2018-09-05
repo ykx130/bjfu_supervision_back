@@ -39,7 +39,7 @@ def get_events():
 @event_blueprint.route('/events/<int:id>')
 def get_user(id):
     (event, err) = find_event(id)
-    if err is None:
+    if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
@@ -61,7 +61,7 @@ def get_user(id):
 @event_blueprint.route('/events/<int:id>', methods=['DELETE'])
 def del_event(id):
     (event, err) = find_event(id)
-    if err is None:
+    if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
@@ -90,7 +90,7 @@ def del_event(id):
 @event_blueprint.route('/events/<int:id>', methods=['PUT'])
 def change_event(id):
     (event, err) = find_event(id)
-    if err is None:
+    if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
