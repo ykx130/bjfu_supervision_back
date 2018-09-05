@@ -32,7 +32,7 @@ def insert_event(request_json):
             setattr(event, key, value)
     db.session.add(event)
     try:
-        db.session.commit(event)
+        db.session.commit()
     except Exception as e:
         return False, e
     return True, None

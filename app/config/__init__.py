@@ -22,7 +22,7 @@ class Config:
     MAIL_DEBUG = True
     SQLALCHEMY_DATABASE_URI = \
         "mysql+pymysql://root:wshwoaini@localhost:3306/supervision?charset=utf8mb4"
-    KAFLKA_HOST = ["101.200.52.233:9091", ]
+    KAFLKA_HOST = ["47.92.110.74:9091", ]
     KAFLKA_TOPIC = "bjfu_calculate_send_topic"
 
     @staticmethod
