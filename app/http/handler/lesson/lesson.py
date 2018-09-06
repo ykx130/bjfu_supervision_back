@@ -1,13 +1,9 @@
 from app.http.handler.lesson import lesson_blueprint
-from flask_pymongo import ObjectId
 from flask import jsonify, request
-from sqlalchemy.exc import IntegrityError
 from app.utils.misc import convert_datetime_to_string
-from flask import url_for
-from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
 from app.core.controllers.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, \
-    find_terms, change_lesson, has_lesson
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, sort_limit
+    find_terms, change_lesson
+from app.utils.url_condition.url_condition import dict_serializable
 
 
 @lesson_blueprint.route('/lessons', methods=['POST'])
