@@ -22,15 +22,15 @@ def insert_activity(request_json):
     if activity.apply_end_time > activity.start_time:
         return False, "apply_end_time can not be after start_time"
     now = datetime.now()
-    if now > activity.apply_end_time:
+    if str(now) > activity.apply_end_time:
         activity.apply_state = '报名已结束'
-    elif now < activity.apply_start_time:
+    elif str(now) < activity.apply_start_time:
         activity.apply_state = '报名未开始'
     else:
         activity.apply_state = '报名进行中'
-    if now > activity.end_time:
+    if str(now) > activity.end_time:
         activity.state = '活动已结束'
-    elif now < activity.start_time:
+    elif str(now) < activity.start_time:
         activity.state = '活动未开始'
     else:
         activity.state = '活动进行中'
