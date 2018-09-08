@@ -53,6 +53,9 @@ def create_app(config_name):
     from app.http.handler.consult import consult_blueprint
     app.register_blueprint(consult_blueprint)
 
+    from app.http.handler.notices import notices_blueprint
+    app.register_blueprint(notices_blueprint)
+
     return app
 
 

@@ -15,8 +15,23 @@ topic = app.config.get("KAFLKA_TOPIC")
 
 
 def send_kafka_message(method, **args):
+    """
+    基本的用来发送消息的方法
+    :param method:
+    :param args:
+    :return:
+    """
     producer.send(topic, {
         "method": method,
         "args": args
     })
     log.info("SEND MESSAGE  method : {} args: {}".format(method, str(args)))
+
+
+def send_push_message(title, receiver, body=''):
+    """
+    :param title:
+    :param body:
+    :return:
+    """
+    pass
