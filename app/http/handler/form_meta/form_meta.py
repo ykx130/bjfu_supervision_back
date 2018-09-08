@@ -3,7 +3,7 @@ from app.http.handler.form_meta import form_meta_blueprint
 from app.core.controllers.form_meta_controller import find_form_meta, delete_form_meta, insert_form_meta, \
     request_to_class, \
     to_json_list, find_form_metas
-from app.utils.url_condition.url_condition import UrlCondition, Paginate, sort_limit, object_to_str
+from app.utils.url_condition.url_condition_mongodb import UrlCondition, Paginate, sort_limit, object_to_str
 
 
 @form_meta_blueprint.route('/form_metas', methods=['POST'])

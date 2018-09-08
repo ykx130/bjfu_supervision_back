@@ -3,7 +3,7 @@ from flask_pymongo import ObjectId
 from flask import jsonify, request
 from app.core.controllers.block_type_controller import insert_block_type, delete_block_type, find_block_type, \
     update_block_type, request_to_class, request_to_change, find_block_types
-from app.utils.url_condition.url_condition import UrlCondition, sort_limit, Paginate, object_to_str
+from app.utils.url_condition.url_condition_mongodb import UrlCondition, sort_limit, Paginate, object_to_str
 
 
 @block_type_blueprint.route('/block_types')
