@@ -1,6 +1,7 @@
 from app import db
 from datetime import datetime
 
+
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
@@ -68,3 +69,16 @@ class Term(db.Model):
             terms_data = terms_data.filter(Term.begin_time < condition['time']).filter(
                 Term.end_time >= condition['time'])
         return terms_data
+
+
+class SchoolTerm():
+    def __init__(self, term_name= None):
+        self.term_name = term_name
+
+    def __add__(self, other):
+        term_parts = self.term_name.split("-")
+        term_future = 2 if (int(term_parts[2]) + other) % 2 == 0 else 1
+        years = other / 2 if (int(term_parts[2]) == 1) else other / 2 + 1
+        begin_year = (int(term_parts[0]) + years)
+        end_year = (int(term_parts[1]) + years)
+        return SchoolTerm(term_name="-".join([str(begin_year), str(end_year), str(term_future)]))

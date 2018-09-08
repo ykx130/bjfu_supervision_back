@@ -12,8 +12,6 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(64), index=True, default="")
     name = db.Column(db.String(64), default="")
     password_hash = db.Column(db.String(128), default="")
-    start_time = db.Column(db.TIMESTAMP, default=datetime.now())
-    end_time = db.Column(db.TIMESTAMP, default=datetime.now())
     sex = db.Column(db.String(16), default="男")
     email = db.Column(db.String(64), default="")
     phone = db.Column(db.String(16), default="")
@@ -102,7 +100,7 @@ class UserRole(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default="")
-    role_id = db.Column(db.Integer, default=-1)
+    role_name = db.Column(db.string(32), default="")
     term = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 
@@ -145,7 +143,7 @@ class Event(db.Model):
         return event_data
 
 
-def permission_required_d(permission):
+def permission_required(permission):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):

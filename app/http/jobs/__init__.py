@@ -11,10 +11,9 @@ from app.utils.logger import log
 
 producer = KafkaProducer(bootstrap_servers=app.config.get("KAFLKA_HOST"),
                          value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-topic = app.config.get("KAFLKA_TOPIC")
 
 
-def send_kafka_message(method, **args):
+def send_kafka_message(method, topic, **args):
     producer.send(topic, {
         "method": method,
         "args": args

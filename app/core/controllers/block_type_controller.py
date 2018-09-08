@@ -1,82 +1,48 @@
-from app.core.models.form import BlockType
-from flask_pymongo import ObjectId
+from app.core.services import block_type_service
 
 
 def insert_block_type(mongo, block_type):
-    try:
-        mongo.db.block_type.insert(block_type.model)
-    except Exception as e:
-        return False, e
-    return True, None
+    (ifSuccess, err) = block_type_service.insert_block_type(mongo, block_type)
+    return ifSuccess, err
 
 
 # 传入BlockType对象，存入数据库
 
 
 def find_block_type(mongo, _id):
-    try:
-        condition = {'using': True, '_id': ObjectId(_id)}
-        data = mongo.db.block_type.find_one(condition)
-    except Exception as e:
-        return None, e
-    return data, None
+    (block_type, err) = block_type_service.find_block_type(mongo, _id)
+    return block_type, err
 
 
 def find_block_types(mongo, condition=None):
-    if condition is None:
-        condition['using'] = True
-        return mongo.db.block_type.find(), None
-    if '_id' in condition:
-        condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
-    try:
-        datas = mongo.db.block_type.find(condition)
-    except Exception as e:
-        return None, e
-    return datas, None
+    (block_types, err) = block_type_service.find_block_types(mongo, condition)
+    return block_types, err
 
 
 # 传入一个判断的字典，返回查询数据的cursor
 
 
 def delete_block_type(mongo, condition=None):
-    if condition is None:
-        return False, None
-    condition['using'] = True
-    try:
-        mongo.db.block_type.update(condition, {"$set": {"using": False}})
-    except Exception as e:
-        return False, e
-    return True, None
+    (ifSuccess, err) = block_type_service.delete_block_type(mongo, condition)
+    return ifSuccess, err
 
 
 def update_block_type(mongo, condition=None, update_dict=None):
-    if condition is None:
-        condition = dict()
-        condition['using'] = True
-    try:
-        mongo.db.block_type.update(condition, {"$set": update_dict})
-    except Exception as e:
-        return False, e
-    return True, None
+    (ifSuccess, err) = block_type_service.update_block_type(mongo, condition, update_dict)
+    return ifSuccess, err
 
 
 # 传入一个判断字典，将using字段值更改
 
 
 def request_to_class(json_request=None):
-    block_type = BlockType()
-    for k, v in json_request.items():
-        block_type.model[k] = v
-    return block_type
+    return block_type_service.request_to_class(json_request)
 
 
 # 传入request.json字典,返回一个BlockType对象
 
 
 def request_to_change(json_request=None):
-    change = {}
-    for k, v in json_request.items():
-        change[k] = v
-    return change
+    return block_type_service.request_to_change(json_request)
 
 # 将不可序列化的对象可序列化

@@ -1,10 +1,9 @@
 from app.http.handler.item_type import item_type_blueprint
 from flask_pymongo import ObjectId
 from flask import jsonify, request
-from flask import url_for
 from app.core.controllers.item_type_controller import insert_item_type, delete_item_type, find_item_type, \
     update_item_type, request_to_class, request_to_change, find_item_types
-from app.core.controllers.common_controller import dict_serializable, UrlCondition, sort_limit, Paginate, object_to_str
+from app.utils.url_condition.url_condition import UrlCondition, sort_limit, Paginate, object_to_str
 
 
 @item_type_blueprint.route('/item_types')
