@@ -106,63 +106,6 @@ def update_user(username, request_json):
     return True, None
 
 
-def get_supervisior(username=None, term=None):
-    term = term if term is not None else Term.query.order_by(
-        Term.name.desc()).filter(Term.using == True).first().name
-    user_role = UserRole.query.filter(UserRole.username == username).filter(UserRole.role_name == "督导").filter(
-        UserRole.term == term).filter(UserRole.using == True).first()
-    if user_role is None:
-        return None, None
-    try:
-        supervisior = User.query.filter(User.username == username).first()
-    except Exception as e:
-        return None, e
-    return supervisior, None
-
-
-def get_supervisiors(condition=None):
-    term = condition['term'] if condition is not None and 'term' in condition else Term.query.order_by(
-        Term.name.desc()).filter(Term.using == True).first().name
-    usernames = [user_role.username for user_role in
-                 UserRole.filter(UserRole.role_name == "督导").filter(UserRole.term == term).filter(
-                     UserRole.using == True)]
-    try:
-        users = User.query.filter(User.username.in_(usernames))
-        for key, value in condition.items():
-            if hasattr(User, key):
-                users = users.filter(getattr(User, key) == value)
-    except Exception as e:
-        return None, None, e
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
-    pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
-    return pagination.items, pagination.total, None
-
-
-def get_supervisiors_expire(condition=None):
-    term = condition['term'] if condition is not None and 'term' in condition else Term.query.order_by(
-        Term.name.desc()).filter(Term.using == True).first().name
-    new_term = (SchoolTerm(term) + 1).term_name
-    all_usernames = [user_role.username for user_role in
-                     UserRole.query.filter(UserRole.role_name == "督导").filter(UserRole.term == term).filter(
-                         UserRole.using == True)]
-    can_usernames = [user_role.username for user_role in
-                     UserRole.query.filter(UserRole.role_name == "督导").filter(UserRole.term == new_term).filter(
-                         UserRole.using == True)]
-    expire_usernames = [username for username in set(all_usernames) - set(can_usernames)]
-    try:
-        users = User.query.filter(User.username.in_(expire_usernames))
-        for key, value in condition.items():
-            if hasattr(User, key):
-                users = users.filter(getattr(User, key) == value)
-    except Exception as e:
-        return None, None, e
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
-    pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
-    return pagination.items, pagination.total, None
-
-
 def batch_renewal(request_json=None):
     usernames = request_json['usernames'] if 'usernames' in request_json else None
     term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(
@@ -200,10 +143,10 @@ def update_user_role(username=None, request_json=None):
     new_role_names = list(set(future_role_names) - set(role_names))
     del_role_names = list(set(role_names) - set(future_role_names))
     if "督导" in del_role_names:
-        supervisiors = UserRole.query.filter(UserRole.username == username).filter(UserRole.role_name == "督导").filter(
+        supervisors = UserRole.query.filter(UserRole.username == username).filter(UserRole.role_name == "督导").filter(
             UserRole.term >= term).filter(UserRole.using == True)
-        for supervisior in supervisiors:
-            db.session.delete(supervisior)
+        for supervisor in supervisors:
+            db.session.delete(supervisor)
     if "督导" in new_role_names:
         school_term = SchoolTerm(term)
         for i in range(4):

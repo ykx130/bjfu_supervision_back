@@ -96,6 +96,27 @@ class Group(db.Model):
             Group.using == True).first()
 
 
+class Supervisor(db.Model):
+    __tablename__ = 'supervisors'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    username = db.Column(db.String(64), default="")
+    term = db.Column(db.String(32), default="")
+    using = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def supervisors(condition):
+        users = User.query.filter(User.using == True)
+        for key, value in condition:
+            if hasattr(User, key):
+                users = users.filter(getattr(User, key) == value)
+        supervisors = Supervisor.query.filter(Supervisor.username.in_([user.username for user in users])).filter(
+            Supervisor.using == True)
+        for key, value in condition:
+            if hasattr(Supervisor, key):
+                supervisors = supervisors.filter(getattr(Supervisor, key) == value)
+        return supervisors
+
+
 class UserRole(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)

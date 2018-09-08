@@ -3,6 +3,8 @@ from flask import request, jsonify
 from flask_login import login_required
 from app.core.controllers.activity_controller import *
 from app.core.controllers.user_controller import find_user
+from app.core.models.activity import ActivityUser
+from flask_login import current_user
 
 
 @activity_blueprint.route('/activities')
