@@ -2,7 +2,7 @@ from app.core.services import user_service
 
 
 def find_users(condition):
-    (users, num, err) = user_service.find_user(condition)
+    (users, num, err) = user_service.find_users(condition)
     return users, num, err
 
 
@@ -17,7 +17,7 @@ def user_to_dict(user):
 
 def find_user(username):
     (user, err) = user_service.find_user(username)
-    return user,err
+    return user, err
 
 
 def insert_user(request_json):
@@ -32,6 +32,24 @@ def delete_user_roles(username, term):
 
 def update_user(username, request_json):
     (ifSuccess, err) = user_service.update_user(username, request_json)
+    if err is not None:
+        return ifSuccess, err
+    (ifSuccess, err) = user_service.update_user_role(username, request_json)
+    return ifSuccess, err
+
+
+def find_supervisiors(condition):
+    (supervisiors, num, err) = user_service.get_supervisiors(condition)
+    return supervisiors, num, err
+
+
+def find_supervisiors_expire(condition):
+    (supervisiors, num, err) = user_service.get_supervisiors_expire(condition)
+    return supervisiors, num, err
+
+
+def batch_renewal(request_json):
+    (ifSuccess, err) = user_service.batch_renewal(request_json)
     return ifSuccess, err
 
 
@@ -56,7 +74,7 @@ def insert_role(request_json):
 
 
 def update_role(role_name, request_json):
-    (ifSuccess, err) = update_role(role_name, request_json)
+    (ifSuccess, err) = user_service.update_role(role_name, request_json)
     return ifSuccess, err
 
 

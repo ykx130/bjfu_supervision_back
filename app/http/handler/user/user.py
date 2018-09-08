@@ -1,5 +1,4 @@
-from app.core.controllers.user_controller import find_user, find_users, delete_user, update_user, insert_user, \
-    find_roles, find_groups, has_user, user_to_dict
+from app.core.controllers import user_controller
 from flask import request, jsonify, url_for, json
 from app.utils.misc import convert_datetime_to_string
 from app.http.handler.user import user_blueprint
@@ -8,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 @user_blueprint.route('/users')
 def get_users():
-    (users, total, err) = find_users(request.args)
+    (users, total, err) = user_controller.find_users(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -19,14 +18,14 @@ def get_users():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_to_dict(user) for user in users],
+        'users': [user_controller.user_to_dict(user) for user in users],
         'message': ''
     }), 200
 
 
 @user_blueprint.route('/users/<string:username>')
 def get_user(username):
-    (user, err) = find_user(username)
+    (user, err) = user_controller.find_user(username)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -40,14 +39,14 @@ def get_user(username):
         }), 404
     return jsonify({
         'code': 200,
-        'user': user_to_dict(user),
+        'user': user_controller.user_to_dict(user),
         'message': '',
     }), 200
 
 
 @user_blueprint.route('/users', methods=['POST'])
 def new_user():
-    (user, err) = find_user(request.json['username'])
+    (user, err) = user_controller.find_user(request.json['username'])
     if err is not None:
         return jsonify({
             'code': 500,
@@ -59,7 +58,7 @@ def new_user():
             'code': 500,
             'message': 'the username has been used'
         })
-    (_, err) = insert_user(request.json)
+    (_, err) = user_controller.insert_user(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -75,7 +74,7 @@ def new_user():
 
 @user_blueprint.route('/users/<string:username>', methods=['PUT'])
 def change_user(username):
-    (user, err) = find_user(username)
+    (user, err) = user_controller.find_user(username)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -88,7 +87,7 @@ def change_user(username):
             'message': 'not found',
             'user': None
         }), 404
-    (_, err) = update_user(username, request.json)
+    (_, err) = user_controller.update_user(username, request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -104,7 +103,7 @@ def change_user(username):
 
 @user_blueprint.route('/users/<string:username>', methods=['DELETE'])
 def del_user(username):
-    (user, err) = find_user(username)
+    (user, err) = user_controller.find_user(username)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -117,7 +116,7 @@ def del_user(username):
             'message': 'not found',
             'user': None
         }), 404
-    (_, err) = delete_user(username)
+    (_, err) = user_controller.delete_user(username)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -131,9 +130,59 @@ def del_user(username):
     }), 200
 
 
+@user_blueprint.route('/supervisiors', methods=['GET'])
+def get_supervisiros():
+    (supervisiors, total, err) = user_controller.find_supervisiors(request.args)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err),
+            'users': [],
+            'total': 0
+        }), 200 if type(err) == str else 500
+    return jsonify({
+        'code': 200,
+        'total': total,
+        'users': [user_controller.user_to_dict(user) for user in supervisiors],
+        'message': ''
+    }), 200
+
+
+@user_blueprint.route('/supervisiors_expire', methods=['GET'])
+def find_supervisiors_expire():
+    (supervisiors, total, err) = user_controller.find_supervisiors(request.args)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err),
+            'users': [],
+            'total': 0
+        }), 200 if type(err) == str else 500
+    return jsonify({
+        'code': 200,
+        'total': total,
+        'users': [user_controller.user_to_dict(user) for user in supervisiors],
+        'message': ''
+    }), 200
+
+
+@user_blueprint.route('/batch_renewal', methods=['POST'])
+def batch_renewal():
+    (ifSuccess, err) = user_controller.batch_renewal(request.json)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err)
+        }), 200 if type(err) == str else 500
+    return jsonify({
+        'code': 200,
+        'message': ''
+    }), 200
+
+
 @user_blueprint.route('/roles', methods=['GET'])
 def get_roles():
-    (roles, total, err) = find_roles(request.args)
+    (roles, total, err) = user_controller.find_roles(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -155,7 +204,7 @@ def get_roles():
 
 @user_blueprint.route('/groups', methods=['GET'])
 def get_groups():
-    (groups, total, err) = find_groups(request.args)
+    (groups, total, err) = user_controller.find_groups(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -168,7 +217,7 @@ def get_groups():
         'groups': [{
             'id': group.id,
             'name': group.name,
-            'leader': user_to_dict(group.leader)
+            'leader': user_controller.user_to_dict(group.leader)
         } for group in groups],
         'total': total,
         'message': ''
