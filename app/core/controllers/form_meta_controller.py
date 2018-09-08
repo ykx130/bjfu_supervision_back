@@ -1,10 +1,19 @@
 from app.core.models.form import FormMeta, Item
 from flask_pymongo import ObjectId
+from flask_login import current_user
 import json
+from datetime import datetime
 
 
-def find_form_meta(mongo, _id):
-    condition = {'using': True, '_id': ObjectId(_id)}
+def find_form_meta(mongo, name, version=None):
+    if version is None:
+        condition = {'using': True, 'name': name}
+        try:
+            data = mongo.db.form_meta.find_one(condition)
+        except Exception as e:
+            return None, e
+        return data, None
+    condition = {'name': name, 'version': version}
     try:
         data = mongo.db.form_meta.find_one(condition)
     except Exception as e:
@@ -14,7 +23,6 @@ def find_form_meta(mongo, _id):
 
 def find_form_metas(mongo, condition=None):
     if condition is None:
-        condition['using'] = True
         return mongo.db.form_meta.find(), None
     if '_id' in condition:
         condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
@@ -56,12 +64,15 @@ def delete_form_meta(mongo, condition=None):
 
 def request_to_class(json_request):
     form_meta = FormMeta()
-    identify = json_request.get('identify', None)
-    meta = json_request.get('meta', {})
+    meta = json_request.get('meta', dict())
+    meta.update({"create_by": current_user.username,
+                 "create_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    name = json_request.get('name', None)
+    version = json_request.get('version', None)
+    form_meta.name = name
+    form_meta.version = version
+    form_meta.meta = meta
     item_datas = json_request.get('items', {})
-    form_meta.identify = identify
-    if meta is not None:
-        form_meta.meta = meta
     if item_datas is not None:
         for item_data in item_datas:
             item = Item()

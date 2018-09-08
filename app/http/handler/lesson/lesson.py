@@ -33,7 +33,7 @@ def get_lessons():
     return jsonify({
         'code': 200,
         'message': '',
-        'lessons': [dict_serializable(lesson) for lesson in lessons],
+        'lessons': [lesson for lesson in lessons],
         'total': num,
     }), 200
 

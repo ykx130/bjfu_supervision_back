@@ -1,7 +1,29 @@
 import pymysql
 from app import db
+from datetime import datetime, timedelta
+import time
 import json
 from app.core.models.lesson import Lesson, LessonCase, Term
+
+
+def lesson_week_list(lesson_week):
+    lesson_weeks = list()
+    lesson_week_blocks = lesson_week.replace(' ', '').split(',')
+    for lesson_week_block in lesson_week_blocks:
+        weeks = lesson_week_block.replace(' ', '').split('-')
+        if len(weeks) == 2:
+            week_begin = int(weeks[0])
+            week_end = int(weeks[1])
+            [lesson_weeks.append(str(week)) for week in range(week_begin, week_end + 1)]
+        else:
+            lesson_weeks.append(weeks[0])
+    return lesson_weeks
+
+
+def week_to_date(term_begin_time, week, weekday):
+    time = term_begin_time
+    date = time + timedelta((int(week) - 1) * 7 + int(weekday) - 1)
+    return date
 
 
 def update_database():
@@ -21,6 +43,11 @@ def update_database():
         data['lesson_teacher_id'] = teacher_ids
         teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
         data['lesson_teacher_unit'] = teacher_units
+        term_name = "-".join([data['lesson_year'], data['lesson_semester']]).replace(" ", "")
+        (term, err) = find_term(term_name)
+        if err is not None:
+            continue
+        term_begin_time = term.begin_time
         for index in range(len(teachers)):
             lesson = Lesson()
             for k, v in data.items():
@@ -41,26 +68,49 @@ def update_database():
                             ='{}' and lesson_teacher_name='{}'".format(data['lesson_id'], teacher_name))
             lesson_case_datas = cursor.fetchall()
             for lesson_case_data in lesson_case_datas:
-                lesson_case = LessonCase()
-                for k, v in lesson_case_data.items():
-                    try:
-                        v = json.loads(v)
-                    except:
-                        v = v
-                    if v is None or v is '':
-                        continue
-                    if hasattr(lesson_case, k):
-                        setattr(lesson_case, k, v)
-                lesson_case.lesson_id = lesson.id
-                db.session.add(lesson_case)
-                db.session.commit()
+                if lesson_case_data['lesson_week'] == "":
+                    lesson_case = LessonCase()
+                    for k, v in lesson_case_data.items():
+                        try:
+                            v = json.loads(v)
+                        except:
+                            v = v
+                        if v is None or v is '':
+                            continue
+                        if hasattr(lesson_case, k):
+                            setattr(lesson_case, k, v)
+                    lesson_case.lesson_id = lesson.id
+                    db.session.add(lesson_case)
+                    db.session.commit()
+                else:
+                    weeks = lesson_week_list(lesson_case_data['lesson_week'])
+                    for week in weeks:
+                        lesson_case = LessonCase()
+                        for k, v in lesson_case_data.items():
+                            try:
+                                v = json.loads(v)
+                            except:
+                                v = v
+                            if v is None or v is '':
+                                continue
+                            if k == 'lesson_week':
+                                lesson_case.lesson_week = week
+                                continue
+                            if hasattr(lesson_case, k):
+                                setattr(lesson_case, k, v)
+                        date = week_to_date(term_begin_time, week, lesson_case.lesson_weekday)
+                        lesson_case.lesson_date = date
+                        lesson_case.lesson_id = lesson.id
+                        db.session.add(lesson_case)
+                        db.session.commit()
 
 
 def lesson_to_model(lesson):
     lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
-                     "lesson_weekday": lesson_case.lesson_weekday, "lesson_room": lesson_case.lesson_weekday} for
+                     "lesson_date": lesson_case.lesson_date.strftime("%Y-%m-%d"), "lesson_weekday": lesson_case.lesson_weekday,
+                     "lesson_room": lesson_case.lesson_room} for
                     lesson_case in lesson.lesson_cases]
-    lesson_model = {"lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
+    lesson_model = {"id": lesson.id, "lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
                     "lesson_state": lesson.lesson_state, "lesson_teacher_id": lesson.lesson_teacher_id,
                     "lesson_name": lesson.lesson_name, "lesson_teacher_name": lesson.lesson_teacher_name,
                     "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
@@ -74,7 +124,7 @@ def lesson_to_model(lesson):
 
 def find_lesson(id):
     try:
-        lesson = Lesson.query.filter(Lesson.id == int(id)).first()
+        lesson = Lesson.query.filter(Lesson.id == int(id)).filter(Lesson.using == True).first()
     except Exception as e:
         return None, e
     lesson_model = lesson_to_model(lesson)
@@ -107,9 +157,11 @@ def find_lessons(condition):
 
 def change_lesson(id, request_json):
     try:
-        lesson = Lesson.query.filter(Lesson.id == id).first()
+        lesson = Lesson.query.filter(Lesson.id == id).filter(Lesson.using == True).first()
     except Exception as e:
         return False, e
+    if lesson is None:
+        return False, None
     for k, v in request_json.items():
         if hasattr(lesson, k):
             setattr(lesson, k, v)
@@ -132,9 +184,17 @@ def find_terms(condition):
     return pagination.items, pagination.total, None
 
 
+def find_term(term_name):
+    try:
+        term = Term.query.filter(Term.name == term_name).first()
+    except Exception as e:
+        return None, e
+    return term, None
+
+
 def find_now_term():
     try:
-        term = Term.query.order_by(Term.name.desc()).first()
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first()
     except Exception as e:
         return None, e
     return term, None

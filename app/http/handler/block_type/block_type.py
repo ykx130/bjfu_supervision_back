@@ -86,7 +86,7 @@ def del_block_type(_id):
             'block_type': None
         }), 404
     (_, err) = delete_block_type(mongo, {'_id': ObjectId(_id)})
-    if err is None:
+    if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
