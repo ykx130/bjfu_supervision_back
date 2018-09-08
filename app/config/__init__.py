@@ -5,8 +5,6 @@
 # @File    : __init__.py.py
 
 import os
-import json
-import psutil
 
 
 class Config:
