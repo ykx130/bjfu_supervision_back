@@ -34,38 +34,6 @@ def get_supervisors(condition=None):
     return pagination.items, pagination.total, None
 
 
-def insert_supervisor(request_json=None):
-    term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(
-        Term.using == True).first().name
-    school_term = SchoolTerm(term)
-    for i in range(0, 4):
-        supervisor = Supervisor()
-        supervisor.term = school_term.term_name
-        supervisor.username = request_json['username']
-        school_term = school_term + 1
-        db.session.add(supervisor)
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return False, e
-    return True, None
-
-
-def delete_supervisor(username=None, request_json=None):
-    term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(
-        Term.using == True).first().name
-    supervisors = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.term >= term)
-    for supervisor in supervisors:
-        db.session.delete(supervisor)
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return False, e
-    return True, None
-
-
 def get_supervisors_expire(condition=None):
     term = condition['term'] if condition is not None and 'term' in condition else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
