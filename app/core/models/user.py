@@ -1,6 +1,7 @@
 from flask_login import UserMixin, AnonymousUserMixin, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db, login_manager
+from app.utils.mysql import db
+from app import login_manager
 from datetime import datetime
 from flask import jsonify
 from functools import wraps
@@ -130,7 +131,7 @@ class UserRole(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default="")
-    role_name = db.Column(db.string(32), default="")
+    role_name = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 

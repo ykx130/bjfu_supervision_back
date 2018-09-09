@@ -5,7 +5,7 @@ from app.core.models.user import User
 from flask_login import current_user
 from sqlalchemy.sql import or_
 from datetime import datetime
-from app import db
+from app.utils.mysql import db
 
 
 def insert_activity(request_json):
