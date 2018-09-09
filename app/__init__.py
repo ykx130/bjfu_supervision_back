@@ -6,14 +6,18 @@
 
 from flask import Flask
 import os
+from flask_pymongo import PyMongo
 from app.config import config
+from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-from app.utils.mysql import db
 
+db = SQLAlchemy()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
+
+redis_cli = get_redis_con(config['default'].get("REDIS_URL"))
 
 
 def create_app(config_name):
