@@ -10,6 +10,7 @@ class LessonRecord(db.Model):
     to_be_submitted = db.Column(db.Integer, nullable=False, default=0)
     has_submitted = db.Column(db.Integer, nullable=False, default=0)
     total_times = db.Column(db.Integer, nullable=False, default=0)
+    using = db.Column(db.Boolean, nullable=True, default=True)
 
     @staticmethod
     def lesson_records(condition):

@@ -1,4 +1,4 @@
-from app.core.services import user_service
+from app.core.services import user_service, supervisor_service
 
 
 def find_users(condition):
@@ -39,12 +39,12 @@ def update_user(username, request_json):
 
 
 def find_supervisors(condition):
-    (supervisors, num, err) = user_service.get_supervisors(condition)
+    (supervisors, num, err) = supervisor_service.get_supervisors(condition)
     return supervisors, num, err
 
 
 def find_supervisors_expire(condition):
-    (supervisors, num, err) = user_service.get_supervisors_expire(condition)
+    (supervisors, num, err) = supervisor_service.get_supervisors_expire(condition)
     return supervisors, num, err
 
 

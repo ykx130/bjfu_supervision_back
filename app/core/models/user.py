@@ -26,10 +26,10 @@ class User(db.Model, UserMixin):
 
     @staticmethod
     def users(condition: dict):
-        name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole}
-        users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Role,
-                                                                                             UserRole.role_id == Role.id).filter(
-            User.using == True)
+        name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole, 'supervisors': Supervisor}
+        users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Supervisor,
+                                                                                             Supervisor.username == User.username).outerjoin(
+            Role, UserRole.role_id == Role.id).filter(User.using == True)
         for key, value in condition.items():
             if hasattr(User, key):
                 users = users.filter(getattr(User, key) == value)
@@ -40,9 +40,18 @@ class User(db.Model, UserMixin):
         return users
 
     @property
-    def roles(self):
-        return Role.query.join(UserRole, UserRole.role_id == Role.id).filter(UserRole.username == self.username).filter(
-            Role.using == True).filter(UserRole.using == True).filter(User.using == True)
+    def roles(self, term=None):
+        from app.core.models.lesson import Term
+        term = term if term is not None else Term.query.order_by(Term.name.desc()).filter(
+            Term.using == True).first().name
+        role_names = [user_role.role_name for user_role in
+                      UserRole.query.filter(UserRole.username == self.username).filter(UserRole.using == True).filter(
+                          UserRole.term == term)]
+        supervisor = Supervisor.query.filter(Supervisor.term == term).filter(
+            Supervisor.username == self.username).filter(Supervisor.using == True).first()
+        if supervisor is not None:
+            role_names.append("督导")
+        return [Role.query.filter(Role.name.in_(role_names)).filter(Role.using == True)]
 
     @property
     def password(self):
