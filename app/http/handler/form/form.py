@@ -3,7 +3,7 @@ from flask import jsonify, request
 from app.core.controllers.form_controller import to_json_list, find_form, delete_form, insert_form, update_form, \
     request_to_class, find_forms
 from flask_pymongo import ObjectId
-from app.utils.url_condition.url_condition import UrlCondition, Paginate, sort_limit, object_to_str
+from app.utils.url_condition.url_condition_mongodb import UrlCondition, Paginate, sort_limit, object_to_str
 
 
 @form_blueprint.route('/forms', methods=['POST'])

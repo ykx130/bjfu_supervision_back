@@ -130,9 +130,9 @@ def del_user(username):
     }), 200
 
 
-@user_blueprint.route('/supervisiors', methods=['GET'])
+@user_blueprint.route('/supervisors', methods=['GET'])
 def get_supervisiros():
-    (supervisiors, total, err) = user_controller.find_supervisiors(request.args)
+    (supervisors, total, err) = user_controller.find_supervisors(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -143,14 +143,14 @@ def get_supervisiros():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_controller.user_to_dict(user) for user in supervisiors],
+        'users': [user_controller.user_to_dict(user) for user in supervisors],
         'message': ''
     }), 200
 
 
-@user_blueprint.route('/supervisiors_expire', methods=['GET'])
-def find_supervisiors_expire():
-    (supervisiors, total, err) = user_controller.find_supervisiors(request.args)
+@user_blueprint.route('/supervisors_expire', methods=['GET'])
+def find_supervisors_expire():
+    (supervisors, total, err) = user_controller.find_supervisors(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -161,7 +161,7 @@ def find_supervisiors_expire():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_controller.user_to_dict(user) for user in supervisiors],
+        'users': [user_controller.user_to_dict(user) for user in supervisors],
         'message': ''
     }), 200
 

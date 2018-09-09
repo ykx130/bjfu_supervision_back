@@ -3,7 +3,7 @@ from flask import jsonify, request
 from app.utils.misc import convert_datetime_to_string
 from app.core.controllers.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, \
     find_terms, change_lesson
-from app.utils.url_condition.url_condition import dict_serializable
+from app.utils.url_condition.url_condition_mongodb import dict_serializable
 
 
 @lesson_blueprint.route('/lessons', methods=['POST'])
