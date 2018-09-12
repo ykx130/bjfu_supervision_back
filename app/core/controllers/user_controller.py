@@ -32,9 +32,6 @@ def delete_user_roles(username, term):
 
 def update_user(username, request_json):
     (ifSuccess, err) = user_service.update_user(username, request_json)
-    if err is not None:
-        return ifSuccess, err
-    (ifSuccess, err) = user_service.update_user_role(username, request_json)
     return ifSuccess, err
 
 

@@ -114,41 +114,12 @@ def update_user(username, request_json):
     if username is None:
         return False, None
     user = User.query.filter(User.username == username).filter(UserRole.using == True).first()
+    if user is None:
+        return False, 'User not found'
     for key, value in request_json.items():
         if hasattr(user, key):
             setattr(user, key, value)
     db.session.add(user)
-    return True, None
-
-
-def batch_renewal(request_json=None):
-    usernames = request_json['usernames'] if 'usernames' in request_json else None
-    term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(
-        Term.using == True).first().name
-    if usernames is None:
-        return False, None
-    school_term = SchoolTerm(term)
-    for username in usernames:
-        for i in range(4):
-            new_term = school_term + 1
-            user_role = UserRole()
-            user_role.username = username
-            user_role.role_name = "督导"
-            user_role.term = new_term.term_name
-            db.session.add(user_role)
-    try:
-        db.session.commit()
-    except Exception as e:
-        return False, e
-    return True, None
-
-
-def update_user_role(username=None, request_json=None):
-    if username is None:
-        return False, None
-    user = User.query.filter(User.username == username).filter(User.using == True).first()
-    if user is None:
-        return False, 'User not found'
     role_names = request_json["role_names"] if "role_names" in request_json else None
     term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
@@ -176,6 +147,28 @@ def update_user_role(username=None, request_json=None):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
+        return False, e
+    return True, None
+
+
+def batch_renewal(request_json=None):
+    usernames = request_json['usernames'] if 'usernames' in request_json else None
+    term = request_json['term'] if 'term' in request_json else Term.query.order_by(Term.name.desc()).filter(
+        Term.using == True).first().name
+    if usernames is None:
+        return False, None
+    school_term = SchoolTerm(term)
+    for username in usernames:
+        for i in range(4):
+            new_term = school_term + 1
+            user_role = UserRole()
+            user_role.username = username
+            user_role.role_name = "督导"
+            user_role.term = new_term.term_name
+            db.session.add(user_role)
+    try:
+        db.session.commit()
+    except Exception as e:
         return False, e
     return True, None
 

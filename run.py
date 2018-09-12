@@ -17,8 +17,6 @@ from flask_pymongo import PyMongo
 manager = Manager(app)
 migrate = Migrate(app, db)
 
-mongo = PyMongo(app)
-
 
 def create_all():
     db.drop_all()

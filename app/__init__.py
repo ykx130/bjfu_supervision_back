@@ -7,11 +7,10 @@
 from flask import Flask
 import os
 from flask_pymongo import PyMongo
-from app.utils.reids import get_redis_con
 from app.config import config
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
-
+from app.utils.reids import get_redis_con
 
 db = SQLAlchemy()
 basedir = os.path.abspath(os.path.dirname(__file__))

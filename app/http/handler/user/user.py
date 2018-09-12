@@ -2,7 +2,6 @@ from app.core.controllers import user_controller
 from flask import request, jsonify, url_for, json
 from app.utils.misc import convert_datetime_to_string
 from app.http.handler.user import user_blueprint
-from sqlalchemy.exc import IntegrityError
 
 
 @user_blueprint.route('/users')
@@ -148,7 +147,7 @@ def get_supervisiros():
     }), 200
 
 
-@user_blueprint.route('/supervisors_expire', methods=['GET'])
+@user_blueprint.route('/supervisors/expire', methods=['GET'])
 def find_supervisors_expire():
     (supervisors, total, err) = user_controller.find_supervisors(request.args)
     if err is not None:

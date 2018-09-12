@@ -2,8 +2,7 @@ from app.core.models.consult import Consult, ConsultType
 from app.core.models.lesson import Term
 from datetime import datetime
 from flask_login import current_user
-from app import db
-
+from app.utils.mysql import db
 
 def find_consults(condition):
     try:
