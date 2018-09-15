@@ -151,8 +151,6 @@ def find_activity(id):
         activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, e
-    if activity is None:
-        return None, None
     return activity, None
 
 
@@ -269,11 +267,9 @@ def delete_activity_user(id, username):
     return True, None
 
 
-def find_current_user_activities(condition=None):
-    try:
-        username = condition['username'] if 'username' in condition else current_user.username
-    except Exception as e:
-        return None, None, e
+def find_current_user_activities(username, condition=None):
+    if username is None:
+        return None, None, 'username can not be none'
     # activity_users = ActivityUser.query.filter(ActivityUser.using == True)
     # users = User.query.filter(User.using == True)
     activities = Activity.query.filter(Activity.using == True).outerjoin(
@@ -285,10 +281,64 @@ def find_current_user_activities(condition=None):
     if state == 'hasAttended':
         activities = activities.filter(ActivityUser.state == "已报名").filter(
             ActivityUser.username == username)
-    if state == 'canAttend':
+    elif state == 'canAttend':
         activities = activities.filter(Activity.using == True).filter(Activity.apply_state == "报名进行中").filter(
             or_(ActivityUser.state == None, ActivityUser.state == '未报名'))
+    else:
+        return None, None, 'state is wrong'
     page = int(condition['_page']) if '_page' in condition else 1
     per_page = int(condition['_per_page']) if '_per_page' in condition else 20
     pagination = activities.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
+
+
+def has_attended_activity_dict(activity, username):
+    return {
+        'activity': {
+            "id": activity.id,
+            "name": activity.name,
+            "teacher": activity.teacher,
+            "start_time": activity.start_time,
+            "end_time": activity.end_time,
+            "place": activity.place,
+            "state": activity.state,
+            "information": activity.information,
+            "all_num": activity.all_num,
+            "attend_num": activity.attend_num,
+            "remainder_num": activity.remainder_num,
+            "term": activity.term,
+            "apply_start_time": activity.apply_start_time,
+            "apply_end_time": activity.apply_end_time,
+            "apply_state": activity.apply_state
+        },
+        'activity_user': {
+            'state': ActivityUser.activity_user_state(activity.id, username).state,
+            'fin_state': ActivityUser.activity_user_state(activity.id, username).fin_state
+        }
+    }
+
+
+def can_attend_activity_dict(activity):
+    return {
+        'activity': {
+            "id": activity.id,
+            "name": activity.name,
+            "teacher": activity.teacher,
+            "start_time": activity.start_time,
+            "end_time": activity.end_time,
+            "place": activity.place,
+            "state": activity.state,
+            "information": activity.information,
+            "all_num": activity.all_num,
+            "attend_num": activity.attend_num,
+            "remainder_num": activity.remainder_num,
+            "term": activity.term,
+            "apply_start_time": activity.apply_start_time,
+            "apply_end_time": activity.apply_end_time,
+            "apply_state": activity.apply_state
+        },
+        'activity_user': {
+            'state': '未报名',
+            'fin_state': '未报名'
+        }
+    }

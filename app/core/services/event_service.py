@@ -1,5 +1,5 @@
 from app.core.models.user import User, Event
-from app import db
+from app.utils.mysql import db
 
 
 def find_events(condition):

@@ -1,16 +1,12 @@
 from app.http.handler.block_type import block_type_blueprint
 from flask_pymongo import ObjectId
 from flask import jsonify, request
-from app.core.controllers.block_type_controller import insert_block_type, delete_block_type, find_block_type, \
-    update_block_type, request_to_class, request_to_change, find_block_types
-from app.utils.url_condition.url_condition_mongodb import UrlCondition, sort_limit, Paginate, object_to_str
+from app.core.controllers import block_type_controller
 
 
 @block_type_blueprint.route('/block_types')
-def get_block_types():
-    url_condition = UrlCondition(request.args)
-    from run import mongo
-    (block_types, err) = find_block_types(mongo, url_condition.filter_dict)
+def find_block_types():
+    (block_types, total, err) = block_type_controller.find_block_types(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -18,21 +14,17 @@ def get_block_types():
             'total': 0,
             'block_types': []
         }), 500
-    block_types = sort_limit(block_types, url_condition.sort_limit_dict)
-    paginate = Paginate(block_types, url_condition.page_dict)
     return jsonify({
         'code': 200,
         'message': '',
-        'block_types': [object_to_str(block_type) for block_type in block_types],
-        'total': paginate.total,
+        'block_types': block_types,
+        'total': total,
     }), 200
 
 
 @block_type_blueprint.route('/block_types', methods=['POST'])
-def new_block_type():
-    from run import mongo
-    block_type = request_to_class(request.json)
-    (ifSuccess, err) = insert_block_type(mongo, block_type)
+def insert_block_type():
+    (ifSuccess, err) = block_type_controller.insert_block_type(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -47,9 +39,8 @@ def new_block_type():
 
 
 @block_type_blueprint.route('/block_types/<string:_id>')
-def get_block_type(_id):
-    from run import mongo
-    (block_type, err) = find_block_type(mongo, _id)
+def find_block_type(_id):
+    (block_type, err) = block_type_controller.find_block_type(_id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -65,14 +56,13 @@ def get_block_type(_id):
     return jsonify({
         'code': 200,
         'message': '',
-        'block_type': object_to_str(block_type) if block_type is not None else None
+        'block_type': block_type
     }), 200
 
 
 @block_type_blueprint.route('/block_types/<string:_id>', methods=['DELETE'])
 def del_block_type(_id):
-    from run import mongo
-    (block_type, err) = find_block_type(mongo, _id)
+    (block_type, err) = block_type_controller.find_block_type(_id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -85,7 +75,7 @@ def del_block_type(_id):
             'message': 'Not found',
             'block_type': None
         }), 404
-    (_, err) = delete_block_type(mongo, {'_id': ObjectId(_id)})
+    (_, err) = block_type_controller.delete_block_type({'_id': ObjectId(_id)})
     if err is not None:
         return jsonify({
             'code': 500,
@@ -101,28 +91,26 @@ def del_block_type(_id):
 
 @block_type_blueprint.route('/block_types/<string:_id>', methods=['PUT'])
 def change_block_type(_id):
-    from run import mongo
-    (block_type, err) = find_block_type(mongo, _id)
+    (block_type, err) = block_type_controller.find_block_type(_id)
     if err is not None:
         return jsonify({
-            'code':500,
-            'message':str(err),
-            'block_type':None
-        }),500
+            'code': 500,
+            'message': str(err),
+            'block_type': None
+        }), 500
     if block_type is None:
         return jsonify({
             'code': 404,
             'message': 'no this block_type',
             'block_type': None
         }), 404
-    change = request_to_change(request.json)
-    (_, err) = update_block_type(mongo, {'_id': ObjectId(_id)}, change)
+    (_, err) = block_type_controller.update_block_type({'_id': ObjectId(_id)}, request.json)
     if err is not None:
         return jsonify({
-            'code':500,
-            'message':str(err),
-            'block_type':None
-        }),500
+            'code': 500,
+            'message': str(err),
+            'block_type': None
+        }), 500
     return jsonify({
         'code': 200,
         'message': '',

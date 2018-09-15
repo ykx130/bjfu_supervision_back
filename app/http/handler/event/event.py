@@ -1,11 +1,11 @@
 from app.http.handler.event import event_blueprint
 from flask import request, jsonify
-from app.core.controllers.event_controller import *
+from app.core.controllers import event_controller
 
 
 @event_blueprint.route('/events', methods=['POST'])
 def new_event():
-    (ifSuccess, err) = insert_event(request.json)
+    (ifSuccess, err) = event_controller.insert_event(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -21,7 +21,7 @@ def new_event():
 
 @event_blueprint.route('/events')
 def get_events():
-    (events, total, err) = find_events(request.args)
+    (events, total, err) = event_controller.find_events(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -32,13 +32,13 @@ def get_events():
         return jsonify({
             'code': 200,
             'message': '',
-            'events': [event_to_dict(event) for event in events]
+            'events': events
         })
 
 
 @event_blueprint.route('/events/<int:id>')
 def get_user(id):
-    (event, err) = find_event(id)
+    (event, err) = event_controller.find_event(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -54,13 +54,13 @@ def get_user(id):
     return jsonify({
         'code': 200,
         'message': '',
-        'event': event_to_dict(event)
+        'event': event
     })
 
 
 @event_blueprint.route('/events/<int:id>', methods=['DELETE'])
 def del_event(id):
-    (event, err) = find_event(id)
+    (event, err) = event_controller.find_event(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -73,7 +73,7 @@ def del_event(id):
             'message': 'Not Found',
             'event': None
         }), 404
-    (ifSuccess, err) = delete_event(id)
+    (ifSuccess, err) = event_controller.delete_event(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -89,7 +89,7 @@ def del_event(id):
 
 @event_blueprint.route('/events/<int:id>', methods=['PUT'])
 def change_event(id):
-    (event, err) = find_event(id)
+    (event, err) = event_controller.find_event(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -102,7 +102,7 @@ def change_event(id):
             'message': 'Not Found',
             'event': None
         }), 404
-    (ifSuccess, err) = update_event(id, request.json)
+    (ifSuccess, err) = event_controller.update_event(id, request.json)
     if err is not None:
         return jsonify({
             'code': 500,

@@ -3,11 +3,10 @@ from app.core.services import event_service
 
 def find_events(condition):
     (events, num, err) = event_service.find_events(condition)
-    return events, num, err
-
-
-def event_to_dict(event):
-    return event_service.event_to_dict(event)
+    if err is not None:
+        return [], 0, err
+    events_model = [event_service.event_to_dict(event) for event in events]
+    return events_model, num, err
 
 
 def insert_event(request_json):
@@ -17,7 +16,10 @@ def insert_event(request_json):
 
 def find_event(id):
     (event, err) = event_service.find_event(id)
-    return event, err
+    if err is not None:
+        return None, err
+    event_model = event_service.event_to_dict(event)
+    return event_model, err
 
 
 def delete_event(id):

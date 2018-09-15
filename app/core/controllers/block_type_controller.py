@@ -1,48 +1,49 @@
 from app.core.services import block_type_service
+from app.utils.url_condition.url_condition_mongodb import *
 
 
-def insert_block_type(mongo, block_type):
-    (ifSuccess, err) = block_type_service.insert_block_type(mongo, block_type)
+def insert_block_type(request_json):
+    block_type = block_type_service.request_to_class(request_json)
+    (ifSuccess, err) = block_type_service.insert_block_type(block_type)
     return ifSuccess, err
 
 
 # 传入BlockType对象，存入数据库
 
 
-def find_block_type(mongo, _id):
-    (block_type, err) = block_type_service.find_block_type(mongo, _id)
-    return block_type, err
+def find_block_type(_id):
+    (block_type, err) = block_type_service.find_block_type(_id)
+    if err is not None:
+        return None, err
+    if block_type is None:
+        return None, None
+    block_type_model = object_to_str(block_type)
+    return block_type_model, err
 
 
-def find_block_types(mongo, condition=None):
-    (block_types, err) = block_type_service.find_block_types(mongo, condition)
-    return block_types, err
+def find_block_types(condition=None):
+    url_condition = UrlCondition(condition)
+    (block_types, err) = block_type_service.find_block_types(url_condition.filter_dict)
+    if err is not None:
+        return None, None, err
+    block_types = sort_limit(block_types, url_condition.sort_limit_dict)
+    paginate = Paginate(block_types, url_condition.page_dict)
+    block_types_model = [object_to_str(block_type) for block_type in block_types]
+    return block_types_model, paginate.total, err
 
 
 # 传入一个判断的字典，返回查询数据的cursor
 
 
-def delete_block_type(mongo, condition=None):
-    (ifSuccess, err) = block_type_service.delete_block_type(mongo, condition)
+def delete_block_type(condition=None):
+    (ifSuccess, err) = block_type_service.delete_block_type(condition)
     return ifSuccess, err
 
 
-def update_block_type(mongo, condition=None, update_dict=None):
-    (ifSuccess, err) = block_type_service.update_block_type(mongo, condition, update_dict)
+def update_block_type(condition=None, request_json=None):
+    change = block_type_service.request_to_change(request_json)
+    (ifSuccess, err) = block_type_service.update_block_type(condition, change)
     return ifSuccess, err
 
 
 # 传入一个判断字典，将using字段值更改
-
-
-def request_to_class(json_request=None):
-    return block_type_service.request_to_class(json_request)
-
-
-# 传入request.json字典,返回一个BlockType对象
-
-
-def request_to_change(json_request=None):
-    return block_type_service.request_to_change(json_request)
-
-# 将不可序列化的对象可序列化

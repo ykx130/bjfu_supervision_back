@@ -2,7 +2,8 @@ from app.core.models.form import BlockType
 from flask_pymongo import ObjectId
 
 
-def insert_block_type(mongo, block_type):
+def insert_block_type(block_type):
+    from app.utils.mongodb import mongo
     try:
         mongo.db.block_type.insert(block_type.model)
     except Exception as e:
@@ -13,7 +14,8 @@ def insert_block_type(mongo, block_type):
 # 传入BlockType对象，存入数据库
 
 
-def find_block_type(mongo, _id):
+def find_block_type(_id):
+    from app.utils.mongodb import mongo
     try:
         condition = {'using': True, '_id': ObjectId(_id)}
         data = mongo.db.block_type.find_one(condition)
@@ -22,7 +24,8 @@ def find_block_type(mongo, _id):
     return data, None
 
 
-def find_block_types(mongo, condition=None):
+def find_block_types(condition=None):
+    from app.utils.mongodb import mongo
     if condition is None:
         condition['using'] = True
         return mongo.db.block_type.find(), None
@@ -38,7 +41,8 @@ def find_block_types(mongo, condition=None):
 # 传入一个判断的字典，返回查询数据的cursor
 
 
-def delete_block_type(mongo, condition=None):
+def delete_block_type(condition=None):
+    from app.utils.mongodb import mongo
     if condition is None:
         return False, None
     condition['using'] = True
@@ -49,7 +53,8 @@ def delete_block_type(mongo, condition=None):
     return True, None
 
 
-def update_block_type(mongo, condition=None, update_dict=None):
+def update_block_type(condition=None, update_dict=None):
+    from app.utils.mongodb import mongo
     if condition is None:
         condition = dict()
         condition['using'] = True

@@ -1,21 +1,29 @@
-from flask_pymongo import ObjectId
 from app.core.models.form import Form, Value
+from app.utils.url_condition.url_condition_mongodb import *
 
 
-def find_forms(mongo, condition=None):
-    if condition is None:
-        condition['using'] = True
-        return mongo.db.form.find(condition), None
-    if '_id' in condition:
-        condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
+def find_forms(condition=None):
+    from app.utils.mongodb import mongo
+    url_condition = UrlCondition(condition)
+    if url_condition.filter_dict is None:
+        datas = mongo.db.form.find()
+        return datas, datas.count(), None
+    if '_id' in url_condition.filter_dict:
+        url_condition.filter_dict['_id']['$in'] = [ObjectId(item) for item in url_condition.filter_dict['_id']['$in']]
     try:
-        datas = mongo.db.form.find(condition)
+        datas = mongo.db.form.find(url_condition.filter_dict)
     except Exception as e:
         return None, e
-    return datas, None
+    datas = sort_limit(datas, url_condition.sort_limit_dict)
+    paginate = Paginate(datas, url_condition.page_dict)
+    datas = paginate.data_page
+    return datas, paginate.total, None
 
 
-def find_form(mongo, _id):
+def find_form(_id):
+    from app.utils.mongodb import mongo
+    if _id is None:
+        return None, None
     condition = {'using': True, '_id': ObjectId(_id)}
     try:
         data = mongo.db.form.find_one(condition)
@@ -24,7 +32,8 @@ def find_form(mongo, _id):
     return data, None
 
 
-def insert_form(mongo, form):
+def insert_form(form):
+    from app.utils.mongodb import mongo
     form.value_to_dict()
     try:
         mongo.db.form.insert(form.model)
@@ -33,7 +42,8 @@ def insert_form(mongo, form):
     return True, None
 
 
-def delete_form(mongo, condition=None):
+def delete_form(condition=None):
+    from app.utils.mongodb import mongo
     if condition is None:
         return False, None
     try:
@@ -43,7 +53,8 @@ def delete_form(mongo, condition=None):
     return True, None
 
 
-def update_form(mongo, condition=None, change_item=None):
+def update_form(condition=None, change_item=None):
+    from app.utils.mongodb import mongo
     if condition is None:
         condition = dict()
         condition['using'] = True

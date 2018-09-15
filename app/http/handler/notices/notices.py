@@ -10,6 +10,7 @@ from app.core.controllers.lesson_controller import update_database, find_lessons
     find_terms, change_lesson, has_lesson
 from app.core.controllers import notices_controller
 
+
 @notices_blueprint.route('/notices', methods=['POST'])
 def get_notices_num():
     num = notices_controller.get_notices_num(current_user)
@@ -20,7 +21,7 @@ def get_notices_num():
 
 
 @notices_blueprint.route('/notices/newest', methods=['POST'])
-def get_notices_num():
+def get_newest_notice():
     notice = notices_controller.get_newest_notices(current_user)
     return jsonify({
         "code": 200,

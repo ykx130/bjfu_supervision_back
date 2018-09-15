@@ -1,11 +1,13 @@
 from app.core.models.form import FormMeta, Item
-from flask_pymongo import ObjectId
 from flask_login import current_user
-import json
 from datetime import datetime
+from app.utils.url_condition.url_condition_mongodb import *
 
 
-def find_form_meta(mongo, name, version=None):
+def find_form_meta(name, version=None):
+    from app.utils.mongodb import mongo
+    if name is None:
+        return None, 'name can not be null'
     if version is None:
         condition = {'using': True, 'name': name}
         try:
@@ -21,22 +23,29 @@ def find_form_meta(mongo, name, version=None):
     return data, None
 
 
-def find_form_metas(mongo, condition=None):
-    if condition is None:
-        return mongo.db.form_meta.find(), None
-    if '_id' in condition:
-        condition['_id']['$in'] = [ObjectId(item) for item in condition['_id']['$in']]
+def find_form_metas(condition=None):
+    from app.utils.mongodb import mongo
+    url_condition = UrlCondition(condition)
+    if url_condition.filter_dict is None:
+        datas = mongo.db.form_meta.find()
+        return datas, datas.count(), None
+    if '_id' in url_condition.filter_dict:
+        url_condition.filter_dict['_id']['$in'] = [ObjectId(item) for item in url_condition.filter_dict['_id']['$in']]
     try:
-        datas = mongo.db.form_meta.find(condition)
+        datas = mongo.db.form_meta.find(url_condition.filter_dict)
     except Exception as e:
         return None, e
-    return datas, None
+    datas = sort_limit(datas, url_condition.sort_limit_dict)
+    paginate = Paginate(datas, url_condition.page_dict)
+    datas = paginate.data_page
+    return datas, paginate.total, None
 
 
 # 传入字典型返回筛选过的数据的cursor, 遍历cursor得到的是字典
 
 
-def insert_form_meta(mongo, form_meta):
+def insert_form_meta(form_meta):
+    from app.utils.mongodb import mongo
     form_meta.items_to_dict()
     try:
         mongo.db.form_meta.insert(form_meta.model)
@@ -48,7 +57,8 @@ def insert_form_meta(mongo, form_meta):
 # 传入一个FormMeta对象，存入数据库
 
 
-def delete_form_meta(mongo, condition=None):
+def delete_form_meta(condition=None):
+    from app.utils.mongodb import mongo
     if condition is None:
         return False, None
     condition['using'] = True

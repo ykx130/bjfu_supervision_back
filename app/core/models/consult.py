@@ -1,4 +1,4 @@
-from app import db
+from app.utils.mysql import db
 from datetime import datetime
 
 

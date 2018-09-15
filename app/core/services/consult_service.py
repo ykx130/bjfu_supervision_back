@@ -4,6 +4,7 @@ from datetime import datetime
 from flask_login import current_user
 from app.utils.mysql import db
 
+
 def find_consults(condition):
     try:
         consults = Consult.consults(condition)

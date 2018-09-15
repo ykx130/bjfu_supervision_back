@@ -1,11 +1,11 @@
 from app.http.handler.consult import consult_blueprint
 from flask import request, jsonify
-from app.core.controllers.consult_controller import *
+from app.core.controllers import consult_controller
 
 
 @consult_blueprint.route('/consults', methods=['POST'])
 def new_consult():
-    (ifSuccess, err) = insert_consult(request.json)
+    (ifSuccess, err) = consult_controller.insert_consult(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -21,7 +21,7 @@ def new_consult():
 
 @consult_blueprint.route('/consults')
 def get_consults():
-    (consults, total, err) = find_consults(request.args)
+    (consults, total, err) = consult_controller.find_consults(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -32,13 +32,13 @@ def get_consults():
         return jsonify({
             'code': 200,
             'message': '',
-            'consults': [consult_to_dict(consult) for consult in consults]
+            'consults': consults
         })
 
 
 @consult_blueprint.route('/consults/<int:id>')
 def get_consult(id):
-    (consult, err) = find_consult(id)
+    (consult, err) = consult_controller.find_consult(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -54,13 +54,13 @@ def get_consult(id):
     return jsonify({
         'code': 200,
         'message': '',
-        'consult': consult_to_dict(consult)
+        'consult': consult
     })
 
 
 @consult_blueprint.route('/consults/<int:id>', methods=['DELETE'])
 def del_consult(id):
-    (consult, err) = find_consult(id)
+    (consult, err) = consult_controller.find_consult(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -73,7 +73,7 @@ def del_consult(id):
             'message': 'Not Found',
             'consult': None
         }), 404
-    (ifSuccess, err) = delete_consult(id)
+    (ifSuccess, err) = consult_controller.delete_consult(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -89,7 +89,7 @@ def del_consult(id):
 
 @consult_blueprint.route('/consults/<int:id>', methods=['PUT'])
 def change_consult(id):
-    (consult, err) = find_consult(id)
+    (consult, err) = consult_controller.find_consult(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -102,7 +102,7 @@ def change_consult(id):
             'message': 'Not Found',
             'consult': None
         }), 404
-    (ifSuccess, err) = update_consult(id, request.json)
+    (ifSuccess, err) = consult_controller.update_consult(id, request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -118,7 +118,7 @@ def change_consult(id):
 
 @consult_blueprint.route('/consult_types', methods=['POST'])
 def new_consult_type():
-    (ifSuccess, err) = insert_consult_type(request.json)
+    (ifSuccess, err) = consult_controller.insert_consult_type(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -134,7 +134,7 @@ def new_consult_type():
 
 @consult_blueprint.route('/consult_types')
 def get_consult_types():
-    (consult_types, total, err) = find_consult_types(request.args)
+    (consult_types, total, err) = consult_controller.find_consult_types(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -145,13 +145,13 @@ def get_consult_types():
         return jsonify({
             'code': 200,
             'message': '',
-            'consult_types': [consult_type_to_dict(consult_type) for consult_type in consult_types]
+            'consult_types': consult_types
         })
 
 
 @consult_blueprint.route('/consult_types/<int:id>')
 def get_consult_type(id):
-    (consult_type, err) = find_consult_type(id)
+    (consult_type, err) = consult_controller.find_consult_type(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -167,13 +167,13 @@ def get_consult_type(id):
     return jsonify({
         'code': 200,
         'message': '',
-        'consult_type': consult_type_to_dict(consult_type)
+        'consult_type': consult_type
     })
 
 
 @consult_blueprint.route('/consult_types/<int:id>', methods=['DELETE'])
 def del_consult_type(id):
-    (consult_type, err) = find_consult_type(id)
+    (consult_type, err) = consult_controller.find_consult_type(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -186,7 +186,7 @@ def del_consult_type(id):
             'message': 'Not Found',
             'consult_type': None
         }), 404
-    (ifSuccess, err) = delete_consult_type(id)
+    (ifSuccess, err) = consult_controller.delete_consult_type(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -202,7 +202,7 @@ def del_consult_type(id):
 
 @consult_blueprint.route('/consult_types/<int:id>', methods=['PUT'])
 def change_consult_type(id):
-    (consult_type, err) = find_consult_type(id)
+    (consult_type, err) = consult_controller.find_consult_type(id)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -215,7 +215,7 @@ def change_consult_type(id):
             'message': 'Not Found',
             'consult_type': None
         }), 404
-    (ifSuccess, err) = update_consult_type(id, request.json)
+    (ifSuccess, err) = consult_controller.update_consult_type(id, request.json)
     if err is not None:
         return jsonify({
             'code': 500,
