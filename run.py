@@ -7,12 +7,10 @@
 
 from flask_script import Manager, Shell
 from app.core.models.fake import insert_user
-from flask import jsonify
-from app import app, db
+from app import app
+from app.utils.mysql import db
 from flask_migrate import Migrate, MigrateCommand
-import pymysql
-import os
-from flask_pymongo import PyMongo
+from app.utils.mongodb import mongo
 
 manager = Manager(app)
 migrate = Migrate(app, db)

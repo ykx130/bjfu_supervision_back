@@ -1,34 +1,34 @@
 from app.core.services import form_service
 
 
-def insert_form(mongo, form):
-    (ifSuccess, err) = form_service.insert_form(mongo, form)
+def insert_form(form):
+    (ifSuccess, err) = form_service.insert_form(form)
     return ifSuccess, err
 
 
-def find_forms(mongo, condition=None):
-    (forms, err) = form_service.find_forms(mongo, condition)
-    return forms, err
+def find_forms(condition=None):
+    (forms, num, err) = form_service.find_forms(condition)
+    if err is not None:
+        return [], 0, err
+    forms_model = [form_service.to_json_list(form) for form in forms]
+    return forms_model, num, err
 
 
-def find_form(mongo, _id):
-    (form, err) = form_service.find_form(mongo, _id)
-    return form, err
+def find_form(_id):
+    (form, err) = form_service.find_form(_id)
+    if err is not None:
+        return None, err
+    if form is None:
+        return None, err
+    form_model = form_service.to_json_list(form)
+    return form_model, err
 
 
-def delete_form(mongo, condition=None):
-    (ifSuccess, err) = form_service.delete_form(mongo, condition)
+def delete_form(condition=None):
+    (ifSuccess, err) = form_service.delete_form(condition)
     return ifSuccess, err
 
 
-def update_form(mongo, condition=None, change_item=None):
-    (ifSuccess, err) = form_service.update_form(mongo, condition, change_item)
+def update_form(condition=None, change_item=None):
+    (ifSuccess, err) = form_service.update_form(condition, change_item)
     return ifSuccess, err
-
-
-def to_json_list(form):
-    return form_service.to_json_list(form)
-
-
-def request_to_class(json_request):
-    return form_service.request_to_class(json_request)

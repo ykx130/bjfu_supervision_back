@@ -1,7 +1,6 @@
 import pymysql
-from app import db
+from app.utils.mysql import db
 from datetime import datetime, timedelta
-import time
 import json
 from app.core.models.lesson import Lesson, LessonCase, Term
 
@@ -107,7 +106,8 @@ def update_database():
 
 def lesson_to_model(lesson):
     lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
-                     "lesson_date": lesson_case.lesson_date.strftime("%Y-%m-%d"), "lesson_weekday": lesson_case.lesson_weekday,
+                     "lesson_date": lesson_case.lesson_date.strftime("%Y-%m-%d"),
+                     "lesson_weekday": lesson_case.lesson_weekday,
                      "lesson_room": lesson_case.lesson_room} for
                     lesson_case in lesson.lesson_cases]
     lesson_model = {"id": lesson.id, "lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
@@ -116,9 +116,8 @@ def lesson_to_model(lesson):
                     "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
                     "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
                     "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
-                    "lesson_class": lesson.lesson_class, "lesson_attention_reason": lesson.lesson_attention_reason,
-                    "lesson_model": lesson.lesson_model, "lesson_grade": lesson.lesson_grade,
-                    "assign_group": lesson.assgin_group, "lesson_cases": lesson_cases}
+                    "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
+                    "lesson_cases": lesson_cases}
     return lesson_model
 
 

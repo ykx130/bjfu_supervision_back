@@ -1,75 +1,60 @@
 from flask import jsonify, request
 from app.http.handler.form_meta import form_meta_blueprint
-from app.core.controllers.form_meta_controller import find_form_meta, delete_form_meta, insert_form_meta, \
-    request_to_class, \
-    to_json_list, find_form_metas
-from app.utils.url_condition.url_condition_mongodb import UrlCondition, Paginate, sort_limit, object_to_str
+from app.core.controllers import form_meta_controller
 
 
 @form_meta_blueprint.route('/form_metas', methods=['POST'])
-def new_form_meta():
-    from run import mongo
-    print(request.json)
-    if 'name' and 'version' not in request.json:
-        return jsonify({
-            'code': 500,
-            'message': 'name or version can not be null',
-            'form_meta': None
-        }), 200
-    (old_form_meta, err) = find_form_meta(mongo, request.json['name'])
-    if old_form_meta is not None:
-        return jsonify({
-            'code': 500,
-            'message': 'the name has been used',
-            'form_meta': None
-        }), 200
-    form_meta = request_to_class(request.json)
-    (ifSuccess, err) = insert_form_meta(mongo, form_meta)
+def insert_form_meta():
+    name = request.json['name'] if 'name' in request.json else None
+    (old_form_meta, err) = form_meta_controller.find_form_meta(name)
     if err is not None:
         return jsonify({
             'code': 500,
-            'message': str(err),
-            'form_meta': None
+            'message': str(err)
+        })
+    if old_form_meta is not None:
+        return jsonify({
+            'code': 500,
+            'message': 'the name has been used'
+        }), 200
+    (ifSuccess, err) = form_meta_controller.insert_form_meta(request.json)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err)
         }), 500
     return jsonify({
         'code': 200,
-        'message': '',
-        'form_meta': None
+        'message': ''
     }), 200
 
 
 @form_meta_blueprint.route('/form_metas')
-def get_form_metas():
-    url_condition = UrlCondition(request.args)
-    from run import mongo
-    (form_metas, err) = find_form_metas(mongo, url_condition.filter_dict)
+def find_form_metas():
+    (form_metas, total, err) = form_meta_controller.find_form_metas(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
             'form_metas': []
         }), 500
-    form_metas = sort_limit(form_metas, url_condition.sort_limit_dict)
-    paginate = Paginate(form_metas, url_condition.page_dict)
-    form_metas_list = [to_json_list(form_meta) for form_meta in paginate.data_page]
     return jsonify({
         'code': 200,
         'message': '',
-        'form_metas': [object_to_str(form_metas_list_node) for form_metas_list_node in form_metas_list],
-        'total': paginate.total,
+        'form_metas': form_metas,
+        'total': total,
     }), 200
 
 
 @form_meta_blueprint.route('/form_metas/<string:name>')
-def get_form_meta_by_name(name):
+def find_form_meta_name(name):
     if name is None:
         return jsonify({
             'code': 500,
             'message': 'name can not be null',
             'form_meta': None
         })
-    from run import mongo
-    (form_meta, err) = find_form_meta(mongo, name)
+    (form_meta, err) = form_meta_controller.find_form_meta(name)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -85,7 +70,7 @@ def get_form_meta_by_name(name):
     return jsonify({
         'code': 200,
         'message': '',
-        'form_meta': object_to_str(form_meta) if form_meta is not None else None
+        'form_meta': form_meta
     }), 200
 
 
@@ -97,8 +82,7 @@ def get_form_meta(name, version):
             'message': 'name can not be null',
             'form_meta': None
         })
-    from run import mongo
-    (form_meta, err) = find_form_meta(mongo, name, version)
+    (form_meta, err) = form_meta_controller.find_form_meta(name, version)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -114,14 +98,13 @@ def get_form_meta(name, version):
     return jsonify({
         'code': 200,
         'message': '',
-        'form_meta': object_to_str(form_meta) if form_meta is not None else None
+        'form_meta': form_meta
     }), 200
 
 
 @form_meta_blueprint.route('/form_metas/<name>', methods=['DELETE'])
-def delete_from_meta(name):
-    from run import mongo
-    (form_meta, err) = find_form_meta(mongo, name)
+def delete_form_meta(name):
+    (form_meta, err) = form_meta_controller.find_form_meta(name)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -134,7 +117,7 @@ def delete_from_meta(name):
             'message': 'not found',
             'form_meta': None
         }), 404
-    (_, err) = delete_form_meta(mongo, {'name': name})
+    (_, err) = form_meta_controller.delete_form_meta({'name': name})
     if err is not None:
         return jsonify({
             'code': 500,
@@ -150,8 +133,7 @@ def delete_from_meta(name):
 
 @form_meta_blueprint.route('/form_metas/<string:name>', methods=['PUT'])
 def change_form_meta(name):
-    from run import mongo
-    (form_meta, err) = find_form_meta(mongo, name)
+    (form_meta, err) = form_meta_controller.find_form_meta(name)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -164,7 +146,7 @@ def change_form_meta(name):
             'message': 'not found',
             'form_meta': None
         }), 404
-    (_, err) = delete_form_meta(mongo, {'name': name})
+    (_, err) = form_meta_controller.delete_form_meta({'name': name, 'version':form_meta.version})
     if err is not None:
         return jsonify({
             'code': 500,
@@ -172,7 +154,7 @@ def change_form_meta(name):
             'form_meta': None
         }), 500
     form_meta = request_to_class(request.json)
-    (_, err) = insert_form_meta(mongo, form_meta)
+    (_, err) = insert_form_meta(form_meta)
     if err is not None:
         return jsonify({
             'code': 500,

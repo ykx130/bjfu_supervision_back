@@ -1,6 +1,6 @@
 from app.core.models.user import User, UserRole, Supervisor
 from app.core.models.lesson import Term, SchoolTerm
-from app import db
+from app.utils.mysql import db
 
 
 def get_supervisor(username=None, term=None):

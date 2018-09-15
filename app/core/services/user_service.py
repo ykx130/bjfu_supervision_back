@@ -1,5 +1,5 @@
 from sqlalchemy.sql import and_
-from app import db
+from app.utils.mysql import db
 from app.core.models.user import UserRole, User, Role, Group, Supervisor
 from app.core.models.lesson import Term, SchoolTerm
 from app.utils.misc import convert_datetime_to_string

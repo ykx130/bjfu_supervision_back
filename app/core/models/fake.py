@@ -1,7 +1,7 @@
 from app.core.models.user import User, UserRole, Group, Role
 from app.core.models.lesson import Term
 from datetime import datetime
-from app import db
+from app.utils.mysql import db
 
 def insert_user():
     term1 = Term()

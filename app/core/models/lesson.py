@@ -1,4 +1,4 @@
-from app import db
+from app.utils.mysql import db
 from datetime import datetime
 
 
@@ -20,9 +20,6 @@ class Lesson(db.Model):
     lesson_class = db.Column(db.String(255), default="")
     lesson_type = db.Column(db.String(8), default="")
     lesson_grade = db.Column(db.String(64), default="")
-    assgin_group = db.Column(db.String(8), default="")
-    lesson_attention_reason = db.Column(db.String(255), default="")
-    lesson_model = db.Column(db.Boolean, default=False)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -72,7 +69,7 @@ class Term(db.Model):
 
 
 class SchoolTerm():
-    def __init__(self, term_name= None):
+    def __init__(self, term_name=None):
         self.term_name = term_name
 
     def __add__(self, other):
@@ -82,3 +79,48 @@ class SchoolTerm():
         begin_year = (int(term_parts[0]) + years)
         end_year = (int(term_parts[1]) + years)
         return SchoolTerm(term_name="-".join([str(begin_year), str(end_year), str(term_future)]))
+
+
+class NoticeLesson(db.Model):
+    __tablename__ = 'notice_lessons'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_id = db.Column(db.Integer, default=-1)
+    assgin_group = db.Column(db.String(32), default="")
+    term = db.Column(db.String(32), default="")
+    using = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def notice_lessons(condition=None):
+        lessons = Lesson.query.filter(Lesson.using == True)
+        for key, value in condition.items():
+            if hasattr(Lesson, key):
+                lessons = lessons.filter(getattr(Lesson, key) == value)
+        lesson_ids = [lesson.lesson_id for lesson in lessons]
+        notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True).filter(
+            NoticeLesson.lesson_id.in_(lesson_ids))
+        for key, value in condition.items():
+            if hasattr(NoticeLesson, key):
+                notice_lessons = notice_lessons.filter(getattr(NoticeLesson, key) == value)
+        return notice_lessons
+
+
+class ModelLesson(db.Model):
+    __tablename__ = 'model_lessons'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_id = db.Column(db.Integer, default=-1)
+    term = db.Column(db.String(32), default="")
+    using = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def model_lessons(condition=None):
+        lessons = Lesson.query.filter(Lesson.using == True)
+        for key, value in condition.items():
+            if hasattr(Lesson, key):
+                lessons = lessons.filter(getattr(Lesson, key) == value)
+        lesson_ids = [lesson.lesson_id for lesson in lessons]
+        model_lessons = ModelLesson.query.filter(ModelLesson.using == True).filter(
+            ModelLesson.lesson_id.in_(lesson_ids))
+        for key, value in condition.items():
+            if hasattr(ModelLesson, key):
+                model_lessons = model_lessons.filter(getattr(ModelLesson, key) == value)
+        return model_lessons
