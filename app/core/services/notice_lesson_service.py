@@ -101,3 +101,7 @@ def find_notice_lessons(condition):
     per_page = int(condition['_per_page']) if '_per_page' in condition else 20
     pagination = notice_lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
+
+
+def notice_lesson_to_dict(notice_lesson):
+    pass
