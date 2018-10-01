@@ -25,6 +25,7 @@ def get_consults():
     if err is not None:
         return jsonify({
             'code': 500,
+            'total': 0,
             'message': str(err),
             'consults': []
         })
@@ -32,6 +33,7 @@ def get_consults():
         return jsonify({
             'code': 200,
             'message': '',
+            'total': total,
             'consults': consults
         })
 
