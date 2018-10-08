@@ -103,5 +103,12 @@ def find_notice_lessons(condition):
     return pagination.items, pagination.total, None
 
 
-def notice_lesson_to_dict(notice_lesson):
-    pass
+def notice_lesson_to_dict(lesson, notice_lesson):
+    try:
+        notice_lesson_dict = {
+            'id':notice_lesson.id,
+            'lesson_id':notice_lesson.lesson_id,
+            'lesson_attribute':lesson.lesson_attribute
+        }
+    except Exception as e:
+        return e

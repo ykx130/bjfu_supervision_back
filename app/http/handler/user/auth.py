@@ -67,8 +67,6 @@ def get_current():
             'id': user.id,
             'username': user.username,
             'name': user.name,
-            'start_time': convert_datetime_to_string(user.start_time),
-            'end_time': convert_datetime_to_string(user.end_time),
             'sex': user.sex,
             'email': user.email,
             'phone': user.phone,
