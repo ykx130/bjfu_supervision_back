@@ -106,9 +106,14 @@ def find_notice_lessons(condition):
 def notice_lesson_to_dict(lesson, notice_lesson):
     try:
         notice_lesson_dict = {
-            'id':notice_lesson.id,
-            'lesson_id':notice_lesson.lesson_id,
-            'lesson_attribute':lesson.lesson_attribute
+            'id': notice_lesson.id if notice_lesson is not None else None,
+            'lesson_id': notice_lesson.lesson_id if lesson is not None else None,
+            'lesson_attribute': lesson.lesson_attribute if lesson is not None else None,
+            'lesson_state':lesson.lesson_state if lesson is not None else None,
+            'lesson_level':lesson.lesson_level if lesson is not None else None,
+            'lesson_name':lesson.lesson_name,
+            'lesson_teacher_id':lesson.lesson_teacher_id
         }
     except Exception as e:
-        return e
+        return None, e
+    return notice_lesson_dict, None
