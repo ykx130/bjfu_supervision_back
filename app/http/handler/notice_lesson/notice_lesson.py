@@ -3,13 +3,12 @@ from flask import request, jsonify
 from flask_login import login_required
 from app.core.controllers import notice_lesson_controller
 from app.core.controllers import user_controller
-from app.core.models.activity import ActivityUser
 from flask_login import current_user
 
 
 @notice_lesson_blueprint.route('/notice_lessons')
-def find_activities():
-    (activities, total, err) = activity_controller.find_activities(request.args)
+def find_notice_lessons():
+    (notice_lessons, total, err) = notice_lesson_controller.find_notice_lessons(request.args)
     if err is not None:
         return jsonify({
             'code': 500,
@@ -20,37 +19,53 @@ def find_activities():
     return jsonify({
         'code': 200,
         'total': total,
-        'activities': activities,
+        'notice_lessons': notice_lessons,
         'message': ''
     }), 200
 
 
-@notice_lesson_blueprint.route('/activities', methods=['POST'])
-def insert_activity():
-    (ifSuccess, err) = activity_controller.insert_activity(request.json)
+@notice_lesson_blueprint.route('/notice_lessons', methods=['POST'])
+def insert_notice_lesson():
+    (ifSuccess, err) = notice_lesson_controller.insert_notice_lesson(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
-            'activity': None
+            'notice_lesson': None
         }), 200 if type(err) is str else 500
     return jsonify({
         'code': 200,
         'message': '',
-        'activity': None
+        'notice_lesson': None
     })
 
 
-@notice_lesson_blueprint.route('/activities/<int:id>')
-def find_activity(id):
-    (activity, activity_users, err) = activity_controller.find_activity(id)
+@notice_lesson_blueprint.route('/notice_lessons/batch', methods=['POST'])
+def insert_notice_lessons():
+    (ifSuccess, err) = notice_lesson_controller.insert_notice_lessons(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
-            'activity': None
+            'notice_lesson': None
         }), 200 if type(err) is str else 500
-    if activity is None:
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'notice_lesson': None
+    })
+
+
+@notice_lesson_blueprint.route('/notice_lessons/<int:id>')
+def find_notice_lesson(id):
+    (notice_lesson, notice_lesson_users, err) = notice_lesson_controller.find_notice_lesson(id)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err),
+            'notice_lesson': None
+        }), 200 if type(err) is str else 500
+    if notice_lesson is None:
         return jsonify({
             'code': 404,
             'message': 'not found'
@@ -58,178 +73,54 @@ def find_activity(id):
     return jsonify({
         'code': 200,
         'message': '',
-        'activity': activity,
-        'activity_users': activity_users
+        'notice_lesson': notice_lesson,
+        'notice_lesson_users': notice_lesson_users
     })
 
 
-@notice_lesson_blueprint.route('/activities/<int:id>', methods=['DELETE'])
-def delete_activity(id):
-    (ifSuccess, err) = activity_controller.delete_activity(id)
+@notice_lesson_blueprint.route('/notice_lessons/<int:id>', methods=['DELETE'])
+def delete_notice_lesson(id):
+    (ifSuccess, err) = notice_lesson_controller.delete_notice_lesson(id)
     if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
-            'activity': None
+            'notice_lesson': None
         }), 500
     return jsonify({
         'code': 200,
         'message': '',
-        'activity': None
+        'notice_lesson': None
     })
 
 
-@notice_lesson_blueprint.route('/activities/<int:id>', methods=['PUT'])
-def update_activity(id):
-    (ifSuccess, err) = activity_controller.update_activity(id, request.json)
+@notice_lesson_blueprint.route('/notice_lessons', methods=['DELETE'])
+def delete_notice_lesson():
+    (ifSuccess, err) = notice_lesson_controller.delete_notice_lessons(request.json)
     if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
-            'activity': None
-        }), 200 if type(err) is str else 500
-    return jsonify({
-        'code': 200,
-        'message': '',
-        'activity': None
-    })
-
-
-@notice_lesson_blueprint.route('/activities/<int:id>/activity_users')
-def find_activity_users(id):
-    (activity, err) = activity_controller.find_activity(id)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
-        }), 200 if type(err) is str else 500
-    if activity is None:
-        return jsonify({
-            'code': 404,
-            'message': 'not found',
-            'activity': None
-        }), 404
-    (activity_users, total, err) = activity_controller.find_activity_users(id, request.args)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
+            'notice_lesson': None
         }), 500
     return jsonify({
         'code': 200,
         'message': '',
-        'activity': activity,
-        'activity_users': activity_users
+        'notice_lesson': None
     })
 
 
-@login_required
-@notice_lesson_blueprint.route('/activities/<int:id>/activity_users', methods=['POST'])
-def insert_activity_user(id):
-    (ifSuccess, err) = activity_controller.insert_activity_user(id, request.json)
+@notice_lesson_blueprint.route('/notice_lessons/<int:id>', methods=['PUT'])
+def update_notice_lesson(id):
+    (ifSuccess, err) = notice_lesson_controller.update_notice_lesson(id, request.json)
     if err is not None:
         return jsonify({
             'code': 500,
             'message': str(err),
-            'activity': None
+            'notice_lesson': None
         }), 200 if type(err) is str else 500
     return jsonify({
         'code': 200,
         'message': '',
-        'activity': None,
-        'activity_user': None
-    })
-
-
-@notice_lesson_blueprint.route('/activities/<int:id>/activity_users/<string:username>')
-def find_activity_user(id, username):
-    (activity, err) = activity_controller.find_activity(id)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
-        }), 200 if type(err) is str else 500
-    (activity_user, err) = activity_controller.find_activity_user(id, username)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
-        }), 500
-    return jsonify({
-        'code': 200,
-        'message': '',
-        'activity': activity,
-        'activity_user': activity_user
-    })
-
-
-@notice_lesson_blueprint.route('/activities/<int:id>/activity_users/<string:username>', methods=['DELETE'])
-def delete_activity_user(id, username):
-    (ifSuccess, err) = activity_controller.delete_activity_user(id, username)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
-        }), 200 if type(err) is str else 500
-    return jsonify({
-        'code': 200,
-        'message': '',
-        'activity': None,
-        'activity_user': None
-    })
-
-
-@notice_lesson_blueprint.route('/activities/<int:id>/activity_users/<string:username>', methods=['PUT'])
-def update_activity_user(id, username):
-    (ifSuccess, err) = activity_controller.update_activity_user(id, username, request.json)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'activity': None
-        }), 200 if type(err) is str else 500
-    return jsonify({
-        'code': 200,
-        'message': '',
-        'activity': None,
-        'activity_user': None
-    })
-
-
-@notice_lesson_blueprint.route('/current_user/activities')
-def get_current_user_activities():
-    username = request.args['username'] if 'username' in request.args else current_user.username
-    (user, err) = user_controller.find_user(username)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'total': 0,
-            'activities': []
-        }), 500 if type(err) is not str else 200
-    if user is None:
-        return jsonify({
-            'code': 404,
-            'message': 'not found',
-            'total': 0,
-            'activities': []
-        }), 404
-    (activities, total, err) = activity_controller.find_current_user_activities(username, request.args)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'total': 0,
-            'activities': []
-        }), 500 if type(err) is not str else 200
-    return jsonify({
-        'code': 200,
-        'message': '',
-        'total': total,
-        'activities': activities
+        'notice_lesson': None
     })

@@ -38,6 +38,12 @@ def delete_notice_lesson(id):
     (ifSuccess, err) = notice_lesson_service.delete_notice_lesson(id)
     return ifSuccess, err
 
+
+def delete_notice_lessons(request_json):
+    (ifSuccess, err) = notice_lesson_service.delete_notice_lessons(request_json)
+    return ifSuccess, err
+
+
 def update_notice_lesson(id, request_json):
     (ifSuccess, err) = notice_lesson_service.update_notice_lesson(id, request_json)
     return ifSuccess, err

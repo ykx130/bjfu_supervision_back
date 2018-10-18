@@ -4,8 +4,8 @@ from datetime import datetime
 
 class Lesson(db.Model):
     __tablename__ = 'lessons'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    lesson_id = db.Column(db.String(16), default="")
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)  # lesson_notice id 关注课程id
+    lesson_id = db.Column(db.String(16), default="")  # 被关注课程的id
     lesson_attribute = db.Column(db.String(8), default="")
     lesson_state = db.Column(db.String(8), default="")
     lesson_level = db.Column(db.String(8), default="")
@@ -20,7 +20,6 @@ class Lesson(db.Model):
     lesson_class = db.Column(db.String(255), default="")
     lesson_type = db.Column(db.String(8), default="")
     lesson_grade = db.Column(db.String(64), default="")
-    lesson_notice = db.Column(db.Boolean, default=True)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -88,6 +87,7 @@ class NoticeLesson(db.Model):
     lesson_id = db.Column(db.Integer, default=-1)
     assgin_group = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
+    status = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
