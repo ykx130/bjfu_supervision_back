@@ -6,7 +6,7 @@ class LessonRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), nullable=False)
     name = db.Column(db.String(64), nullable=False)
-    group = db.Column(db.Integer, nullable=False, default="")
+    group_name = db.Column(db.String(64), nullable=False, default="")
     to_be_submitted = db.Column(db.Integer, nullable=False, default=0)
     has_submitted = db.Column(db.Integer, nullable=False, default=0)
     total_times = db.Column(db.Integer, nullable=False, default=0)
