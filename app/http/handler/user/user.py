@@ -17,7 +17,7 @@ def get_users():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_controller.user_to_dict(user) for user in users],
+        'users': users,
         'message': ''
     }), 200
 
@@ -38,7 +38,7 @@ def get_user(username):
         }), 404
     return jsonify({
         'code': 200,
-        'user': user_controller.user_to_dict(user),
+        'user': user,
         'message': '',
     }), 200
 
@@ -130,7 +130,7 @@ def del_user(username):
 
 
 @user_blueprint.route('/supervisors', methods=['GET'])
-def get_supervisiros():
+def get_supervisors():
     (supervisors, total, err) = user_controller.find_supervisors(request.args)
     if err is not None:
         return jsonify({

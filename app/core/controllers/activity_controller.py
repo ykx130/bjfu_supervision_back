@@ -38,16 +38,20 @@ def find_activity(id):
         return None, None, err
     if activity is None:
         return None, None, None
-    activity_model = activity_service.activity_dict(activity)
-    activity_users_model = [activity_user_dict(activity.id, activity_user) for activity_user in activity.activity_users]
-    return activity_model, activity_users_model, err
+    (activity_model, err) = activity_service.activity_dict(activity)
+    return activity_model, err
 
 
 def find_activity_users(id, condition):
     (activity_users, num, err) = activity_service.find_activity_users(id, condition)
     if err is not None:
         return None, None, err
-    activity_users_model = [activity_service.activity_user_dict(id, activity_user) for activity_user in activity_users]
+    activity_users_model = list()
+    for activity_user in activity_users:
+        (activity_user_model, err) = activity_service.activity_user_dict(id, activity_user)
+        if err is not None:
+            return None, None, err
+        activity_users_model.append(activity_user_model)
     return activity_users_model, num, err
 
 

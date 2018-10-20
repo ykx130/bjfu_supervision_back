@@ -3,7 +3,13 @@ from app.core.services import user_service, supervisor_service
 
 def find_users(condition):
     (users, num, err) = user_service.find_users(condition)
-    return users, num, err
+    users_model = list()
+    for user in users:
+        (user_model, err) = user_service.user_to_dict(user)
+        if err is not None:
+            return None, 0, err
+        users_model.append(user_model)
+    return users_model, num, err
 
 
 def has_user(username):
@@ -12,12 +18,18 @@ def has_user(username):
 
 
 def user_to_dict(user):
-    return user_service.user_to_dict(user)
+    (user_model, err) = user_service.user_to_dict(user)
+    return user_model, err
 
 
 def find_user(username):
     (user, err) = user_service.find_user(username)
-    return user, err
+    if err is not None:
+        return None, err
+    if user is None:
+        return None, None
+    (user_model, err) = user_service.user_to_dict(user)
+    return user_model, err
 
 
 def insert_user(request_json):

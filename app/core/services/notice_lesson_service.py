@@ -6,6 +6,9 @@ def insert_notice_lesson(request_json):
     lesson_id = request_json['lesson_id'] if 'lesson_id' in request_json else None
     term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
+    assign_group = request_json['assign_group'] if 'assign_group' in request_json else None
+    if assign_group is None:
+        return False, 'assign group can not be none'
     if lesson_id is None:
         return False, 'lesson_id should be give'
     try:

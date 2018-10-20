@@ -95,7 +95,7 @@ def delete_notice_lesson(id):
 
 
 @notice_lesson_blueprint.route('/notice_lessons', methods=['DELETE'])
-def delete_notice_lesson():
+def delete_notice_lessons():
     (ifSuccess, err) = notice_lesson_controller.delete_notice_lessons(request.json)
     if err is not None:
         return jsonify({

@@ -85,7 +85,7 @@ class NoticeLesson(db.Model):
     __tablename__ = 'notice_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.Integer, default=-1)
-    assgin_group = db.Column(db.String(32), default="")
+    assign_group = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
     status = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
@@ -96,7 +96,7 @@ class NoticeLesson(db.Model):
         for key, value in condition.items():
             if hasattr(Lesson, key):
                 lessons = lessons.filter(getattr(Lesson, key) == value)
-        lesson_ids = [lesson.lesson_id for lesson in lessons]
+        lesson_ids = [lesson.id for lesson in lessons]
         notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True).filter(
             NoticeLesson.lesson_id.in_(lesson_ids))
         for key, value in condition.items():
