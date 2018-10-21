@@ -97,7 +97,8 @@ def delete_notice_lessons(request_json):
     notice_lessons = NoticeLesson.query.filter(NoticeLesson.id.in_(notice_lesson_ids)).filter(
         NoticeLesson.using == True)
     try:
-        lessons = Lesson.query.filter(Lesson.lesson_id.in_([notice_lesson.lesson_id for notice_lesson in notice_lessons]))
+        lessons = Lesson.query.filter(
+            Lesson.lesson_id.in_([notice_lesson.lesson_id for notice_lesson in notice_lessons]))
     except Exception as e:
         return False, e
     for lesson in lessons:
@@ -152,7 +153,9 @@ def notice_lesson_to_dict(lesson, notice_lesson):
             'lesson_state': lesson.lesson_state if lesson is not None else None,
             'lesson_level': lesson.lesson_level if lesson is not None else None,
             'lesson_name': lesson.lesson_name,
-            'lesson_teacher_id': lesson.lesson_teacher_id
+            'lesson_teacher_id': lesson.lesson_teacher_id,
+            'notice_reason': notice_lesson.notice_reason,
+            'assign_group': notice_lesson.assign_group
         }
     except Exception as e:
         return None, e

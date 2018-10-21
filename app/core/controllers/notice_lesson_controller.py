@@ -19,7 +19,9 @@ def find_notice_lessons(condition):
         lesson, err = lesson_service.find_lesson(notice_lesson.lesson_id)
         if err is not None:
             return None, None, err
-        notice_lesson_model = notice_lesson_service.notice_lesson_to_dict(lesson, notice_lesson)
+        (notice_lesson_model, err) = notice_lesson_service.notice_lesson_to_dict(lesson, notice_lesson)
+        if err is not None:
+            return None, None, err
         notice_lessons_model.append(notice_lesson_model)
     return notice_lessons_model, num, err
 

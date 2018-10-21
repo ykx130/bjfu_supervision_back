@@ -56,3 +56,21 @@ def delete_model_lesson(id):
     except Exception as e:
         return False, e
     return True, None
+
+
+def model_lesson_dict(lesson, model_lesson):
+    try:
+        model_dict = {
+            'id': model_lesson.id if model_lesson is not None else None,
+            'lesson_id': model_lesson.lesson_id if lesson is not None else None,
+            'lesson_attribute': lesson.lesson_attribute if lesson is not None else None,
+            'lesson_state': lesson.lesson_state if lesson is not None else None,
+            'lesson_level': lesson.lesson_level if lesson is not None else None,
+            'lesson_name': lesson.lesson_name,
+            'lesson_teacher_id': lesson.lesson_teacher_id,
+            'status': model_lesson.status,
+            'votes': model_lesson.votes
+        }
+    except Exception as e:
+        return None, e
+    return model_lesson, None
