@@ -25,6 +25,18 @@ def has_user(username):
     return False, None if user is None else True, None
 
 
+def role_to_dict(role):
+    try:
+        role_dict = {
+            'id': role.id,
+            'name': role.name,
+            'permissions': role.permissions
+        }
+    except Exception as e:
+        return None, e
+    return role_dict, None
+
+
 def user_to_dict(user):
     try:
         user_dict = {

@@ -49,12 +49,24 @@ def update_user(username, request_json):
 
 def find_supervisors(condition):
     (supervisors, num, err) = supervisor_service.get_supervisors(condition)
-    return supervisors, num, err
+    supervisors_model = list()
+    for supervisor in supervisors:
+        (supervisor_model, err) = user_service.user_to_dict(supervisor)
+        if err is not None:
+            return None, None, err
+        supervisors_model.append(supervisor_model)
+    return supervisors_model, num, err
 
 
 def find_supervisors_expire(condition):
     (supervisors, num, err) = supervisor_service.get_supervisors_expire(condition)
-    return supervisors, num, err
+    supervisors_model = list()
+    for supervisor in supervisors:
+        (supervisor_model, err) = user_service.user_to_dict(supervisor)
+        if err is not None:
+            return None, None, err
+        supervisors_model.append(supervisor_model)
+    return supervisors_model, num, err
 
 
 def batch_renewal(request_json):
@@ -74,7 +86,13 @@ def find_role(role_name):
 
 def find_roles(condition):
     (roles, num, err) = user_service.find_roles(condition)
-    return roles, num, err
+    roles_model = list()
+    for role in roles:
+        (role_model, err) = user_service.role_to_dict(role)
+        if err is not None:
+            return None, None, err
+        roles_model.append(role_model)
+    return roles_model, num, err
 
 
 def insert_role(request_json):

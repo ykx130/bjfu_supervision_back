@@ -28,7 +28,12 @@ def find_activities(condition):
     (activities, num, err) = activity_service.find_activities(condition)
     if err is not None:
         return None, None, err
-    activity_models = [activity_service.activity_dict(activity) for activity in activities]
+    activity_models = list()
+    for activity in activities:
+        (activity_model, err) = activity_dict(activity)
+        if err is not None:
+            return None, None, err
+        activity_models.append(activity_model)
     return activity_models, num, err
 
 

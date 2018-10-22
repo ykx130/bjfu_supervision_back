@@ -22,7 +22,7 @@ def has_lesson(id):
 
 def find_lessons(condition):
     (lessons, num, err) = lesson_service.find_lessons(condition)
-    lessons_model = [lesson_service.lesson_to_model(lesson) for lesson in  lessons]
+    lessons_model = [lesson_service.lesson_to_model(lesson) for lesson in lessons]
     return lessons_model, num, err
 
 

@@ -43,7 +43,14 @@ def insert_activity():
 
 @activity_blueprint.route('/activities/<int:id>')
 def find_activity(id):
-    (activity, activity_users, err) = activity_controller.find_activity(id)
+    (activity, err) = activity_controller.find_activity(id)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err),
+            'activity': None
+        }), 200 if type(err) is str else 500
+    (activity_users, num, err) = activity_controller.find_activity_users(id, request.args)
     if err is not None:
         return jsonify({
             'code': 500,

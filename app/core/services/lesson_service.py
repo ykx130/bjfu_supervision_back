@@ -148,11 +148,7 @@ def find_lessons(condition):
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     lesson_page = pagination.items
-    lesson_models = []
-    for lesson in lesson_page:
-        lesson_model = lesson_to_model(lesson)
-        lesson_models.append(lesson_model)
-    return lesson_models, pagination.total, None
+    return lesson_page, pagination.total, None
 
 
 def change_lesson(id, request_json):

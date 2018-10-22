@@ -111,7 +111,7 @@ class ModelLesson(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.Integer, default=-1)
     term = db.Column(db.String(32), default="")
-    status = db.Column(db.String, default="推荐课")  #好评课 推荐课
+    status = db.Column(db.String(32), default="推荐课")  #好评课 推荐课
     votes = db.Column(db.Integer, default=0)
     using = db.Column(db.Boolean, default=True)
 

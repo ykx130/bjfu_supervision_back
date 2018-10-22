@@ -142,7 +142,7 @@ def get_supervisors():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_controller.user_to_dict(user) for user in supervisors],
+        'users': supervisors,
         'message': ''
     }), 200
 
@@ -160,12 +160,12 @@ def find_supervisors_expire():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': [user_controller.user_to_dict(user) for user in supervisors],
+        'users': supervisors,
         'message': ''
     }), 200
 
 
-@user_blueprint.route('/batch_renewal', methods=['POST'])
+@user_blueprint.route('/supervisors/batch_renewal', methods=['POST'])
 def batch_renewal():
     (ifSuccess, err) = user_controller.batch_renewal(request.json)
     if err is not None:
@@ -191,11 +191,7 @@ def get_roles():
         }), 500
     return jsonify({
         'code': 200,
-        'roles': [{
-            'id': role.id,
-            'name': role.name,
-            'permissions': role.permissions
-        } for role in roles],
+        'roles': roles,
         'total': total,
         'message': ''
     }), 200
