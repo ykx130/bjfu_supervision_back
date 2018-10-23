@@ -162,7 +162,7 @@ class Event(db.Model):
     name = db.Column(db.String(255), default="")
     username = db.Column(db.String(64), default="")
     detail = db.Column(db.String(1023), default="")
-    timestamp = db.Column(db.TIMESTAMP, default=datetime.now())
+    timestamp = db.Column(db.TIMESTAMP, default=datetime.now)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
