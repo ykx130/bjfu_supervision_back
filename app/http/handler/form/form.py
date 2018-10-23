@@ -6,7 +6,7 @@ from flask_pymongo import ObjectId
 
 @form_blueprint.route('/forms', methods=['POST'])
 def new_form():
-    (_, err) = form_controller.insert_form(request)
+    (_, err) = form_controller.insert_form(request.json)
     if err is not None:
         return jsonify({
             'code': 500,

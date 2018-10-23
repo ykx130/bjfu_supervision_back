@@ -75,8 +75,8 @@ def delete_form_meta(condition=None):
 def request_to_class(json_request):
     form_meta = FormMeta()
     meta = json_request.get('meta', dict())
-    meta.update({"create_by": current_user.username,
-                 "create_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    meta.update({"created_by": current_user.username,
+                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
     name = json_request.get('name', None)
     version = json_request.get('version', None)
     form_meta.name = name
