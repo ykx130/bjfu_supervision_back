@@ -72,7 +72,7 @@ def to_json_list(form):
     bind_meta_name = form.get('bind_meta_name', None)
     bind_meta_version = form.get('bind_meta_version', None)
     json_list = {
-        '_id': _id,
+        '_id': str(_id),
         'meta': meta,
         'bind_meta_id': bind_meta_id,
         'bind_meta_name': bind_meta_name,

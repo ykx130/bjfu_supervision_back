@@ -101,7 +101,7 @@ def to_json_list(form_meta):
     version = form_meta.get('version', None)
     meta = form_meta.get('meta', {})
     json_list = {
-        '_id': _id,
+        '_id': str(_id),
         'meta': meta,
         'name': name,
         'version': version,
