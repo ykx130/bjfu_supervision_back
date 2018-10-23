@@ -133,28 +133,7 @@ def delete_form_meta(name):
 
 @form_meta_blueprint.route('/form_metas/<string:name>', methods=['PUT'])
 def change_form_meta(name):
-    (form_meta, err) = form_meta_controller.find_form_meta(name)
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'form_meta': None
-        }), 500
-    if form_meta is None:
-        return jsonify({
-            'code': 404,
-            'message': 'not found',
-            'form_meta': None
-        }), 404
-    (_, err) = form_meta_controller.delete_form_meta({'name': name, 'version':form_meta.version})
-    if err is not None:
-        return jsonify({
-            'code': 500,
-            'message': str(err),
-            'form_meta': None
-        }), 500
-    form_meta = request_to_class(request.json)
-    (_, err) = insert_form_meta(form_meta)
+    (ifSuccessful, err) = form_meta_controller.update_form_meta(name, request.json)
     if err is not None:
         return jsonify({
             'code': 500,

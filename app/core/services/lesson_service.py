@@ -119,7 +119,7 @@ def lesson_to_model(lesson):
                     "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
                     "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
                     "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
-                    "lesson_cases": lesson_cases}
+                    "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model}
     return lesson_model
 
 

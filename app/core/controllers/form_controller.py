@@ -1,7 +1,9 @@
 from app.core.services import form_service
+from app.core.services import form_meta_service
 
 
-def insert_form(form):
+def insert_form(request):
+    form = form_service.request_to_class(request)
     (ifSuccess, err) = form_service.insert_form(form)
     return ifSuccess, err
 

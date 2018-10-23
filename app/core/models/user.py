@@ -5,6 +5,7 @@ from app import login_manager
 from datetime import datetime
 from flask import jsonify
 from functools import wraps
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
 
 
 class User(db.Model, UserMixin):
@@ -28,17 +29,12 @@ class User(db.Model, UserMixin):
     @staticmethod
     def users(condition: dict):
         name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole, 'supervisors': Supervisor}
-        users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Supervisor,
+        query = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Supervisor,
                                                                                              Supervisor.username == User.username).outerjoin(
             Role, UserRole.role_name == Role.name).filter(User.using == True)
-        for key, value in condition.items():
-            if hasattr(User, key):
-                users = users.filter(getattr(User, key) == value)
-            elif '.' in key:
-                items = key.split('.')
-                table = name_map[items[0]]
-                users = users.filter(getattr(table, items[1]) == value)
-        return users
+        url_condition = UrlCondition(condition)
+        query = process_query(query, url_condition, name_map, User)
+        return query
 
     @property
     def roles(self, term=None):
@@ -94,11 +90,11 @@ class Group(db.Model):
 
     @staticmethod
     def groups(condition):
-        groups = Group.query.filter(Group.using == True)
-        for key, value in condition.items():
-            if hasattr(Group, key):
-                groups = groups.filter(getattr(Group, key) == value)
-        return groups
+        name_map = {'groups': Group}
+        url_condition = UrlCondition(condition)
+        query = Group.query.filter(Group.using == True)
+        query = process_query(query, url_condition, name_map, Group)
+        return query
 
     @property
     def leader(self):
@@ -115,11 +111,11 @@ class Supervisor(db.Model):
 
     @staticmethod
     def supervisors(condition):
-        users = User.query.filter(User.using == True)
-        for key, value in condition:
-            if hasattr(User, key):
-                users = users.filter(getattr(User, key) == value)
-        supervisors = Supervisor.query.filter(Supervisor.username.in_([user.username for user in users])).filter(
+        name_map = {"supervisors": Supervisor}
+        url_condition = UrlCondition(condition)
+        user_query = User.query.filter(User.using == True)
+        user_query = process_query(user_query, url_condition, name_map, User)
+        supervisors = Supervisor.query.filter(Supervisor.username.in_([user.username for user in user_query])).filter(
             Supervisor.using == True)
         for key, value in condition:
             if hasattr(Supervisor, key):
@@ -137,7 +133,11 @@ class UserRole(db.Model):
 
     @staticmethod
     def user_roles(condition):
-        return UserRole.query.filter(UserRole.using == True)
+        name_map = {"user_roles": UserRole}
+        url_condition = UrlCondition(condition)
+        query = UserRole.query.filter(UserRole.using == True)
+        query = process_query(query, url_condition, name_map, UserRole)
+        return query
 
 
 class Role(db.Model):
@@ -149,11 +149,11 @@ class Role(db.Model):
 
     @staticmethod
     def roles(condition):
-        roles = Role.query.filter(Role.using == True)
-        for key, value in condition.items():
-            if hasattr(Role, key):
-                roles = roles.filter(getattr(Role, key) == value)
-        return roles
+        name_map = {"roles": Role}
+        url_condition = UrlCondition(condition)
+        query = Role.query.filter(Role.using == True)
+        query = process_query(query, url_condition, name_map, Role)
+        return query
 
 
 class Event(db.Model):
@@ -167,11 +167,11 @@ class Event(db.Model):
 
     @staticmethod
     def events(condition):
-        event_data = Event.query.filter(Event.using == True)
-        for key, value in condition.items():
-            if hasattr(Event, key):
-                event_data = event_data.filter(getattr(Event, key) == value)
-        return event_data
+        name_map = {"events": Event}
+        url_condition = UrlCondition(condition)
+        query = Event.query.filter(Event.using == True)
+        query = process_query(query, url_condition, name_map, Event)
+        return query
 
 
 def permission_required(permission):

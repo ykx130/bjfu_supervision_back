@@ -1,6 +1,7 @@
 from app.utils.mysql import db
 from datetime import datetime
 from app.core.models.user import User
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
 
 
 class Activity(db.Model):
@@ -24,13 +25,13 @@ class Activity(db.Model):
 
     @staticmethod
     def activities(condition):
-        activity_datas = Activity.query.outerjoin(ActivityUser, ActivityUser.activity_id == Activity.id).outerjoin(User,
-                                                                                                                   User.username == ActivityUser.username).filter(
+        name_map = {'activities': Activity, 'activity_users': ActivityUser, 'users': User}
+        url_condition = UrlCondition(condition)
+        query = Activity.query.outerjoin(ActivityUser, ActivityUser.activity_id == Activity.id).outerjoin(User,
+                                                                                                          User.username == ActivityUser.username).filter(
             Activity.using == True)
-        for key, value in condition.items():
-            if hasattr(Activity, key):
-                activity_datas = activity_datas.filter(getattr(Activity, key) == value)
-        return activity_datas
+        query = process_query(query, url_condition, name_map, Activity)
+        return query
 
     @property
     def activity_users(self):
