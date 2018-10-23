@@ -20,7 +20,7 @@ def get_lesson_records():
         }), 200
 
 
-@lesson_records_blueprint.route('/lessons_records/<int:id>')
+@lesson_records_blueprint.route('/lesson_records/<int:id>')
 def get_lesson_record(id):
     (lesson_record, err) = lesson_record_controller.find_lesson_record(id)
     if err is not None:

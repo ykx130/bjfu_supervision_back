@@ -59,6 +59,10 @@ def create_app(config_name):
     from app.http.handler.notice_lesson import notice_lesson_blueprint
     app.register_blueprint(notice_lesson_blueprint)
 
+    from app.http.handler.record import lesson_records_blueprint
+    app.register_blueprint(lesson_records_blueprint)
+
+
     return app
 
 
