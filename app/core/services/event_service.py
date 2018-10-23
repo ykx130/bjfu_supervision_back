@@ -18,7 +18,7 @@ def event_to_dict(event):
         'id': event.id,
         'username': event.username,
         'detail': event.detail,
-        'timestamp': event.timestamp,
+        'timestamp': str(event.timestamp),
         'using': event.using
     }
 

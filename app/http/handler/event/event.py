@@ -32,7 +32,26 @@ def get_events():
         return jsonify({
             'code': 200,
             'message': '',
-            'events': events
+            'events': events,
+            'total':total
+        })
+
+
+@event_blueprint.route('/users/<string:username>/events')
+def get_user_events(username):
+    (events, total, err) = event_controller.find_user_events(username, request.args)
+    if err is not None:
+        return jsonify({
+            'code': 500,
+            'message': str(err),
+            'events': []
+        })
+    else:
+        return jsonify({
+            'code': 200,
+            'message': '',
+            'events': events,
+            'total': total
         })
 
 

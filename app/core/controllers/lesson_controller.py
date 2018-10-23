@@ -11,7 +11,8 @@ def lesson_to_model(lesson):
 
 def find_lesson(id):
     (lesson, err) = lesson_service.find_lesson(id)
-    return lesson, err
+    lesson_model = lesson_service.lesson_to_model(lesson)
+    return lesson_model, err
 
 
 def has_lesson(id):
@@ -21,7 +22,8 @@ def has_lesson(id):
 
 def find_lessons(condition):
     (lessons, num, err) = lesson_service.find_lessons(condition)
-    return lessons, num, err
+    lessons_model = [lesson_service.lesson_to_model(lesson) for lesson in lessons]
+    return lessons_model, num, err
 
 
 def change_lesson(id, request_json):

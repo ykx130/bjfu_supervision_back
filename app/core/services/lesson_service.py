@@ -46,6 +46,8 @@ def update_database():
         (term, err) = find_term(term_name)
         if err is not None:
             continue
+        if term is None:
+            continue
         term_begin_time = term.begin_time
         for index in range(len(teachers)):
             lesson = Lesson()
@@ -126,8 +128,7 @@ def find_lesson(id):
         lesson = Lesson.query.filter(Lesson.id == int(id)).filter(Lesson.using == True).first()
     except Exception as e:
         return None, e
-    lesson_model = lesson_to_model(lesson)
-    return lesson_model, None
+    return lesson, None
 
 
 def has_lesson(id):
@@ -147,11 +148,7 @@ def find_lessons(condition):
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     lesson_page = pagination.items
-    lesson_models = []
-    for lesson in lesson_page:
-        lesson_model = lesson_to_model(lesson)
-        lesson_models.append(lesson_model)
-    return lesson_models, pagination.total, None
+    return lesson_page, pagination.total, None
 
 
 def change_lesson(id, request_json):

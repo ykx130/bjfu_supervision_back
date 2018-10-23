@@ -1,6 +1,18 @@
 from app.core.services import event_service
 
 
+def find_user_events(username, condition):
+    filter_dict = dict()
+    for key, value in condition.items():
+        filter_dict[key] = value
+    filter_dict['username'] = username
+    (events, num, err) = event_service.find_events(filter_dict)
+    if err is not None:
+        return [], 0, err
+    events_model = [event_service.event_to_dict(event) for event in events]
+    return events_model, num, err
+
+
 def find_events(condition):
     (events, num, err) = event_service.find_events(condition)
     if err is not None:

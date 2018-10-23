@@ -108,31 +108,42 @@ def delete_activity(id):
 
 
 def activity_dict(activity):
-    return {
-        "id": activity.id,
-        "name": activity.name,
-        "teacher": activity.teacher,
-        "start_time": activity.start_time,
-        "end_time": activity.end_time,
-        "place": activity.place,
-        "state": activity.state,
-        "information": activity.information,
-        "all_num": activity.all_num,
-        "attend_num": activity.attend_num,
-        "remainder_num": activity.remainder_num,
-        "term": activity.term,
-        "apply_start_time": activity.apply_start_time,
-        "apply_end_time": activity.apply_end_time,
-        "apply_state": activity.apply_state
-    }
+    try:
+        activity_dict = {
+            "id": activity.id,
+            "name": activity.name,
+            "teacher": activity.teacher,
+            "start_time": str(activity.start_time),
+            "end_time": str(activity.end_time),
+            "place": activity.place,
+            "state": activity.state,
+            "information": activity.information,
+            "all_num": activity.all_num,
+            "attend_num": activity.attend_num,
+            "remainder_num": activity.remainder_num,
+            "term": activity.term,
+            "apply_start_time": str(activity.apply_start_time),
+            "apply_end_time": str(activity.apply_end_time),
+            "apply_state": activity.apply_state
+        }
+    except Exception as e:
+        return None, e
+    return activity_dict, None
 
 
 def activity_user_dict(id, user):
-    return {
-        "user": user_to_dict(user),
-        "state": ActivityUser.activity_user_state(id, user.username).state,
-        "fin_state": ActivityUser.activity_user_state(id, user.username).fin_state
-    }
+    (user_model, err) = user_to_dict(user)
+    if err is not None:
+        return None, err
+    try:
+        act_user_dict = {
+            "user": user_model,
+            "state": ActivityUser.activity_user_state(id, user.username).state,
+            "fin_state": ActivityUser.activity_user_state(id, user.username).fin_state
+        }
+    except Exception as e:
+        return None, e
+    return act_user_dict, None
 
 
 def find_activities(condition):

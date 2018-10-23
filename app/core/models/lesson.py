@@ -4,8 +4,8 @@ from datetime import datetime
 
 class Lesson(db.Model):
     __tablename__ = 'lessons'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    lesson_id = db.Column(db.String(16), default="")
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)  # lesson_notice id 关注课程id
+    lesson_id = db.Column(db.String(16), default="")  # 被关注课程的id
     lesson_attribute = db.Column(db.String(8), default="")
     lesson_state = db.Column(db.String(8), default="")
     lesson_level = db.Column(db.String(8), default="")
@@ -20,7 +20,6 @@ class Lesson(db.Model):
     lesson_class = db.Column(db.String(255), default="")
     lesson_type = db.Column(db.String(8), default="")
     lesson_grade = db.Column(db.String(64), default="")
-    lesson_notice = db.Column(db.Boolean, default=True)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -86,8 +85,10 @@ class NoticeLesson(db.Model):
     __tablename__ = 'notice_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.Integer, default=-1)
-    assgin_group = db.Column(db.String(32), default="")
+    assign_group = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
+    status = db.Column(db.String(32), default="")
+    notice_reason = db.Column(db.String(128), default="")
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -96,7 +97,7 @@ class NoticeLesson(db.Model):
         for key, value in condition.items():
             if hasattr(Lesson, key):
                 lessons = lessons.filter(getattr(Lesson, key) == value)
-        lesson_ids = [lesson.lesson_id for lesson in lessons]
+        lesson_ids = [lesson.id for lesson in lessons]
         notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True).filter(
             NoticeLesson.lesson_id.in_(lesson_ids))
         for key, value in condition.items():
@@ -110,6 +111,8 @@ class ModelLesson(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.Integer, default=-1)
     term = db.Column(db.String(32), default="")
+    status = db.Column(db.String(32), default="推荐课")  #好评课 推荐课
+    votes = db.Column(db.Integer, default=0)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod

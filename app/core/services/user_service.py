@@ -25,26 +25,39 @@ def has_user(username):
     return False, None if user is None else True, None
 
 
+def role_to_dict(role):
+    try:
+        role_dict = {
+            'id': role.id,
+            'name': role.name,
+            'permissions': role.permissions
+        }
+    except Exception as e:
+        return None, e
+    return role_dict, None
+
+
 def user_to_dict(user):
-    user_dict = {
-        'id': user.id,
-        'username': user.username,
-        'name': user.name,
-        'start_time': convert_datetime_to_string(user.start_time),
-        'end_time': convert_datetime_to_string(user.end_time),
-        'sex': user.sex,
-        'email': user.email,
-        'phone': user.phone,
-        'state': user.state,
-        'unit': user.unit,
-        'status': user.status,
-        'work_state': user.work_state,
-        'prorank': user.prorank,
-        'skill': user.skill,
-        'group': user.group,
-        'role_names': [role.name for role in user.roles]
-    }
-    return user_dict
+    try:
+        user_dict = {
+            'id': user.id,
+            'username': user.username,
+            'name': user.name,
+            'sex': user.sex,
+            'email': user.email,
+            'phone': user.phone,
+            'state': user.state,
+            'unit': user.unit,
+            'status': user.status,
+            'work_state': user.work_state,
+            'prorank': user.prorank,
+            'skill': user.skill,
+            'group': user.group,
+            'role_names': [role.name for role in user.roles]
+        }
+    except Exception as e:
+        return None, e
+    return user_dict, None
 
 
 def find_user(username):
@@ -120,7 +133,7 @@ def update_user(username, request_json):
         if hasattr(user, key):
             setattr(user, key, value)
     db.session.add(user)
-    role_names = request_json["role_names"] if "role_names" in request_json else None
+    role_names = request_json["role_names"] if "role_names" in request_json else []
     term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
     old_role_names = [role.name for role in user.roles]

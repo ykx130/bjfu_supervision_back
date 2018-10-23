@@ -30,7 +30,7 @@ class User(db.Model, UserMixin):
         name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole, 'supervisors': Supervisor}
         users = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Supervisor,
                                                                                              Supervisor.username == User.username).outerjoin(
-            Role, UserRole.role_id == Role.id).filter(User.using == True)
+            Role, UserRole.role_name == Role.name).filter(User.using == True)
         for key, value in condition.items():
             if hasattr(User, key):
                 users = users.filter(getattr(User, key) == value)
@@ -52,7 +52,7 @@ class User(db.Model, UserMixin):
             Supervisor.username == self.username).filter(Supervisor.using == True).first()
         if supervisor is not None:
             role_names.append("督导")
-        return [Role.query.filter(Role.name.in_(role_names)).filter(Role.using == True)]
+        return Role.query.filter(Role.name.in_(role_names)).filter(Role.using == True)
 
     @property
     def password(self):
