@@ -34,3 +34,18 @@ def delete_form_meta(condition=None):
     (ifSuccess, err) = form_meta_service.delete_form_meta(condition)
     return ifSuccess, err
 
+
+def update_form_meta(name, request_json=None):
+    (form_meta, err) = form_meta_service.find_form_meta(name)
+    if err is not None:
+        return False, err
+    if form_meta is None:
+        return False, 'Not found'
+    (ifSuccess, err) = form_meta_service.delete_form_meta({'name': name, 'version': form_meta.version})
+    if err is not None:
+        return False, err
+    form_meta = form_meta_service.request_to_class(request_json)
+    (ifSuccess, err) = form_meta_service.insert_form_meta(form_meta)
+    if err is not None:
+        return False, err
+    return True, None

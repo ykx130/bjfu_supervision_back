@@ -1,5 +1,6 @@
 from app.utils.mysql import db
 from datetime import datetime
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
 
 
 class ConsultType(db.Model):
@@ -9,12 +10,12 @@ class ConsultType(db.Model):
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
-    def consult_types(condition: dict):
-        consult_type_data = ConsultType.query.filter(ConsultType.using == True)
-        for key, value in condition.items():
-            if hasattr(ConsultType, key):
-                consult_type_data = consult_type_data.filter(getattr(ConsultType, key) == value)
-        return consult_type_data
+    def consult_types(condition):
+        url_condition = UrlCondition(condition)
+        query = ConsultType.query.filter(ConsultType.using == True)
+        name_map = {'consult_types': ConsultType}
+        query = process_query(query, url_condition, name_map, ConsultType)
+        return query
 
 
 class Consult(db.Model):
@@ -22,8 +23,8 @@ class Consult(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     type = db.Column(db.String(16), nullable=False, default="")
     requester_username = db.Column(db.String(16), nullable=False, default="")
-    submit_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
-    answer_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    submit_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
+    answer_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
     term = db.Column(db.String(16), default="")
     state = db.Column(db.String(16), default="")
     meta_description = db.Column(db.String(255), default="")
@@ -34,8 +35,8 @@ class Consult(db.Model):
 
     @staticmethod
     def consults(condition: dict):
-        consult_data = Consult.query.filter(Consult.using == True)
-        for key, value in condition.items():
-            if hasattr(Consult, key):
-                consult_data = consult_data.filter(getattr(Consult, key) == value)
-        return consult_data
+        url_condition = UrlCondition(condition)
+        query = Consult.query.filter(Consult.using == True)
+        name_map = {'consults': Consult}
+        query = process_query(query, url_condition, name_map, Consult)
+        return query

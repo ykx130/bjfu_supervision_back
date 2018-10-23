@@ -1,4 +1,4 @@
-from app.core.models.lesson_record import LessonRecord
+from app.core.models.lesson import LessonRecord
 
 
 def find_lesson_records(condition):

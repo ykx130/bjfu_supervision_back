@@ -31,3 +31,16 @@ def find_model_lessons(condition):
     return models, num, None
 
 
+def insert_model_lesson(request_json):
+    (ifSuccess, err) = model_lesson_service.insert_model_lesson(request_json)
+    return ifSuccess, err
+
+
+def delete_model_lesson(id):
+    (ifSuccess, err) = model_lesson_service.delete_model_lesson(id)
+    return ifSuccess, err
+
+
+def update_model_lesson(id, request_json):
+    (ifSuccess, err) = model_lesson_service.update_model_lesson(id, request_json)
+    return ifSuccess, err

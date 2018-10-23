@@ -22,6 +22,8 @@ def has_lesson(id):
 
 def find_lessons(condition):
     (lessons, num, err) = lesson_service.find_lessons(condition)
+    if err is not None:
+        return None, None, err
     lessons_model = [lesson_service.lesson_to_model(lesson) for lesson in lessons]
     return lessons_model, num, err
 
