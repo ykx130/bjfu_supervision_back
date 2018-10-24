@@ -45,9 +45,9 @@ class UrlCondition(object):
                             break
                     if is_equal:
                         if k not in self.filter_dict:
-                            self.filter_dict[k] = [v]
+                            self.filter_dict[k] = {'_eq':[v]}
                         else:
-                            self.filter_dict[k].append(v)
+                            self.filter_dict[k]['_eq'].append(v)
         if len(order_list) == len(sort_list):
             self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, order_list))
         else:
@@ -75,7 +75,8 @@ def filter_query(query, filter_map, name_map, base_table):
             elif key == '_gte':
                 query = query.filter(getattr(table, column_name) >= value)
             elif key == '_eq':
-                query = query.filter(getattr(table, column_name) == value)
+                for eq in value:
+                    query = query.filter(getattr(table, column_name) == eq)
             elif key == '_like':
                 query = query.filter(getattr(table, column_name).like(value+"%"))
     return query

@@ -97,3 +97,17 @@ def model_lesson_dict(lesson, model_lesson):
     except Exception as e:
         return None, e
     return model_dict, None
+
+
+def add_model_lesson_vote(id):
+    model_lesson = ModelLesson.query.filter(ModelLesson.id == id).filter(ModelLesson.using == True)
+    if model_lesson is None:
+        return False, 'not found'
+    model_lesson.votes = model_lesson.votes + 1
+    db.session.add(model_lesson)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.roll_back()
+        return False, e
+    return True, None

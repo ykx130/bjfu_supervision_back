@@ -90,6 +90,7 @@ class NoticeLesson(db.Model):
     assign_group = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
     status = db.Column(db.String(32), default="")
+    votes = db.Column(db.Integer, default=0)
     notice_reason = db.Column(db.String(128), default="")
     using = db.Column(db.Boolean, default=True)
 

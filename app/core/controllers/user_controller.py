@@ -3,6 +3,8 @@ from app.core.services import user_service, supervisor_service
 
 def find_users(condition):
     (users, num, err) = user_service.find_users(condition)
+    if err is not None:
+        return None, None, err
     users_model = list()
     for user in users:
         (user_model, err) = user_service.user_to_dict(user)
