@@ -65,18 +65,20 @@ def update_form(condition=None, change_item=None):
     return True, None
 
 
-def to_json_list(form):
+def to_json_dict(form):
     _id = form.get('_id', None)
     meta = form.get('meta', {})
     bind_meta_id = form.get('bind_meta_id', None)
     bind_meta_name = form.get('bind_meta_name', None)
     bind_meta_version = form.get('bind_meta_version', None)
+    values = form.get('values', [])
     json_list = {
         '_id': str(_id),
         'meta': meta,
         'bind_meta_id': bind_meta_id,
         'bind_meta_name': bind_meta_name,
-        'bind_meta_version': bind_meta_version
+        'bind_meta_version': bind_meta_version,
+        'values': values
     }
     return json_list
 

@@ -12,7 +12,7 @@ def find_forms(condition=None):
     (forms, num, err) = form_service.find_forms(condition)
     if err is not None:
         return [], 0, err
-    forms_model = [form_service.to_json_list(form) for form in forms]
+    forms_model = [form_service.to_json_dict(form) for form in forms]
     return forms_model, num, err
 
 
@@ -22,7 +22,7 @@ def find_form(_id):
         return None, err
     if form is None:
         return None, err
-    form_model = form_service.to_json_list(form)
+    form_model = form_service.to_json_dict(form)
     return form_model, err
 
 
