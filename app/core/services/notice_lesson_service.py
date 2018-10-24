@@ -155,8 +155,23 @@ def notice_lesson_to_dict(lesson, notice_lesson):
             'lesson_name': lesson.lesson_name,
             'lesson_teacher_id': lesson.lesson_teacher_id,
             'notice_reason': notice_lesson.notice_reason,
+            'votes': notice_lesson.votes,
             'assign_group': notice_lesson.assign_group
         }
     except Exception as e:
         return None, e
     return notice_lesson_dict, None
+
+
+def add_notice_lesson_vote(id):
+    notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True)
+    if notice_lesson is None:
+        return False, 'not found'
+    notice_lesson.votes = notice_lesson.votes + 1
+    db.session.add(notice_lesson)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.roll_back()
+        return False, e
+    return True, None
