@@ -51,6 +51,7 @@ def update_database():
         term_begin_time = term.begin_time
         for index in range(len(teachers)):
             lesson = Lesson()
+            lesson.term = term_name
             for k, v in data.items():
                 try:
                     v = json.loads(v)
