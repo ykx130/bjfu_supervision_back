@@ -112,6 +112,8 @@ class ModelLesson(db.Model):
     term = db.Column(db.String(32), default="")
     status = db.Column(db.String(32), default="推荐课")  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
+    notices = db.Column(db.Integer, default=0)
+    assign_group = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod

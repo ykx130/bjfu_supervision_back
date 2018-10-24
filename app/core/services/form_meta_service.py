@@ -2,24 +2,29 @@ from app.core.models.form import FormMeta, Item
 from flask_login import current_user
 from datetime import datetime
 from app.utils.url_condition.url_condition_mongodb import *
+from app.utils.Error import CustomError
 
 
 def find_form_meta(name, version=None):
     from app.utils.mongodb import mongo
     if name is None:
-        return None, 'name can not be null'
+        return None, CustomError(500, 200, 'name must be given')
     if version is None:
         condition = {'using': True, 'name': name}
         try:
             data = mongo.db.form_meta.find_one(condition)
         except Exception as e:
-            return None, e
+            return None, CustomError(500, 500, str(e))
+        if data is None:
+            return None, CustomError(404, 404, 'form meta not found')
         return data, None
     condition = {'name': name, 'version': version}
     try:
         data = mongo.db.form_meta.find_one(condition)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
+    if data is None:
+        return None, CustomError(404, 404, 'form meta not found')
     return data, None
 
 
@@ -34,7 +39,7 @@ def find_form_metas(condition=None):
     try:
         datas = mongo.db.form_meta.find(url_condition.filter_dict)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
     datas = sort_limit(datas, url_condition.sort_limit_dict)
     paginate = Paginate(datas, url_condition.page_dict)
     datas = paginate.data_page
@@ -50,7 +55,7 @@ def insert_form_meta(form_meta):
     try:
         mongo.db.form_meta.insert(form_meta.model)
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -60,12 +65,12 @@ def insert_form_meta(form_meta):
 def delete_form_meta(condition=None):
     from app.utils.mongodb import mongo
     if condition is None:
-        return False, None
+        return False, CustomError(500, 500, 'condition can not be empty')
     condition['using'] = True
     try:
         mongo.db.form_meta.update(condition, {"$set": {"using": False}})
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -95,15 +100,14 @@ def request_to_class(json_request):
 # 传入request.json字典,返回一个FormMeta对象
 
 
-def to_json_list(form_meta):
-    _id = form_meta.get('_id', None)
-    name = form_meta.get('name', None)
-    version = form_meta.get('version', None)
-    meta = form_meta.get('meta', {})
-    json_list = {
-        '_id': str(_id),
-        'meta': meta,
-        'name': name,
-        'version': version,
-    }
-    return json_list
+def to_json_dict(form_meta):
+    try:
+        json_dict = {
+            '_id': str(form_meta.get('_id', None)),
+            'meta': form_meta.get('name', None),
+            'name': form_meta.get('version', None),
+            'version': form_meta.get('meta', {}),
+        }
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return json_dict, None

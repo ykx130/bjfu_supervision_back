@@ -33,14 +33,31 @@ def find_model_lessons(condition):
 
 def insert_model_lesson(request_json):
     (ifSuccess, err) = model_lesson_service.insert_model_lesson(request_json)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
+def insert_model_lessons(request_json):
+    (ifSuccess, err) = model_lesson_service.insert_model_lessons(request_json)
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 def delete_model_lesson(id):
     (ifSuccess, err) = model_lesson_service.delete_model_lesson(id)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
+
+def delete_model_lessons(request_json):
+    (ifSuccess, err) = model_lesson_service.delete_model_lessons(request_json)
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def update_model_lesson(id, request_json):
     (ifSuccess, err) = model_lesson_service.update_model_lesson(id, request_json)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None

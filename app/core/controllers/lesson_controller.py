@@ -5,44 +5,71 @@ def update_database():
     lesson_service.update_database()
 
 
-def lesson_to_model(lesson):
-    return lesson_service.lesson_to_model(lesson)
-
-
 def find_lesson(id):
     (lesson, err) = lesson_service.find_lesson(id)
-    lesson_model = lesson_service.lesson_to_model(lesson)
+    if err is not None:
+        return None, err
+    (lesson_model, err) = lesson_service.lesson_to_model(lesson)
+    if err is not None:
+        return None, err
     return lesson_model, err
 
 
 def has_lesson(id):
     (ifSuccess, err) = lesson_service.has_lesson(id)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def find_lessons(condition):
     (lessons, num, err) = lesson_service.find_lessons(condition)
     if err is not None:
         return None, None, err
-    lessons_model = [lesson_service.lesson_to_model(lesson) for lesson in lessons]
-    return lessons_model, num, err
+    lessons_model = list()
+    for lesson in lessons:
+        (lesson_model, err) = lesson_service.lesson_to_model(lesson)
+        if err is not None:
+            return None, None, err
+        lessons_model.append(lesson_model)
+    return lessons_model, num, None
 
 
 def change_lesson(id, request_json):
     (ifSuccess, err) = lesson_service.change_lesson(id, request_json)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def find_terms(condition):
     (terms, num, err) = lesson_service.find_terms(condition)
-    return terms, num, err
+    if err is not None:
+        return None, None, err
+    terms_model = list()
+    for term in terms:
+        (term_model, err) = lesson_service.term_to_dict(term)
+        if err is not None:
+            return None, None, err
+        terms_model.append(term_model)
+    return terms_model, num, None
 
 
 def find_term(term_name):
     (term, err) = lesson_service.find_term(term_name)
-    return term, err
+    if err is not None:
+        return None, err
+    (term_model, err) = lesson_service.term_to_dict(term)
+    if err is not None:
+        return None, err
+    return term_model, None
 
 
 def find_now_term():
     (term, err) = lesson_service.find_now_term()
-    return term, err
+    if err is not None:
+        return None, err
+    (term_model, err) = lesson_service.term_to_dict(term)
+    if err is not None:
+        return None, err
+    return term_model, err

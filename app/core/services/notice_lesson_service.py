@@ -122,7 +122,7 @@ def update_notice_lesson(id, request_json):
             setattr(notice_lesson, key, value)
     db.session.add(notice_lesson)
     try:
-        db.session.commit(notice_lesson)
+        db.session.commit()
     except Exception as e:
         db.session.rollback()
         return False, e
@@ -172,6 +172,6 @@ def add_notice_lesson_vote(id):
     try:
         db.session.commit()
     except Exception as e:
-        db.session.roll_back()
+        db.session.rollback()
         return False, e
     return True, None

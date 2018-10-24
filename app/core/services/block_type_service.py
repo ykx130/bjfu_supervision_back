@@ -1,5 +1,6 @@
 from app.core.models.form import BlockType
 from flask_pymongo import ObjectId
+from app.utils.Error import CustomError
 
 
 def insert_block_type(block_type):
@@ -7,7 +8,7 @@ def insert_block_type(block_type):
     try:
         mongo.db.block_type.insert(block_type.model)
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -20,7 +21,9 @@ def find_block_type(_id):
         condition = {'using': True, '_id': ObjectId(_id)}
         data = mongo.db.block_type.find_one(condition)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
+    if data is None:
+        return None, CustomError(404, 404, 'block type not found')
     return data, None
 
 
@@ -34,7 +37,7 @@ def find_block_types(condition=None):
     try:
         datas = mongo.db.block_type.find(condition)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
     return datas, None
 
 
@@ -44,12 +47,12 @@ def find_block_types(condition=None):
 def delete_block_type(condition=None):
     from app.utils.mongodb import mongo
     if condition is None:
-        return False, None
+        return False, CustomError(500, 500, 'condition can not be None')
     condition['using'] = True
     try:
         mongo.db.block_type.update(condition, {"$set": {"using": False}})
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -61,7 +64,7 @@ def update_block_type(condition=None, update_dict=None):
     try:
         mongo.db.block_type.update(condition, {"$set": update_dict})
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 

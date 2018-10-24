@@ -1,5 +1,6 @@
 from app.core.models.form import Form, Value
 from app.utils.url_condition.url_condition_mongodb import *
+from app.utils.Error import CustomError
 
 
 def find_forms(condition=None):
@@ -13,7 +14,7 @@ def find_forms(condition=None):
     try:
         datas = mongo.db.form.find(url_condition.filter_dict)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
     datas = sort_limit(datas, url_condition.sort_limit_dict)
     paginate = Paginate(datas, url_condition.page_dict)
     datas = paginate.data_page
@@ -23,12 +24,14 @@ def find_forms(condition=None):
 def find_form(_id):
     from app.utils.mongodb import mongo
     if _id is None:
-        return None, None
+        return None, CustomError(500, 500, '_id must be given')
     condition = {'using': True, '_id': ObjectId(_id)}
     try:
         data = mongo.db.form.find_one(condition)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
+    if data is None:
+        return None, CustomError(404, 404, 'form not found')
     return data, None
 
 
@@ -38,18 +41,18 @@ def insert_form(form):
     try:
         mongo.db.form.insert(form.model)
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
 def delete_form(condition=None):
     from app.utils.mongodb import mongo
     if condition is None:
-        return False, None
+        return False, CustomError(500, 500, 'condition can not be None')
     try:
         mongo.db.form.update(condition, {"$set": {"using": False}})
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -61,26 +64,23 @@ def update_form(condition=None, change_item=None):
     try:
         mongo.db.form.update(condition, {"$set": change_item})
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
 def to_json_dict(form):
-    _id = form.get('_id', None)
-    meta = form.get('meta', {})
-    bind_meta_id = form.get('bind_meta_id', None)
-    bind_meta_name = form.get('bind_meta_name', None)
-    bind_meta_version = form.get('bind_meta_version', None)
-    values = form.get('values', [])
-    json_list = {
-        '_id': str(_id),
-        'meta': meta,
-        'bind_meta_id': bind_meta_id,
-        'bind_meta_name': bind_meta_name,
-        'bind_meta_version': bind_meta_version,
-        'values': values
-    }
-    return json_list
+    try:
+        json_dict = {
+            '_id': str(form.get('_id', None)),
+            'meta': form.get('meta', {}),
+            'bind_meta_id': form.get('bind_meta_id', None),
+            'bind_meta_name': form.get('bind_meta_name', None),
+            'bind_meta_version': form.get('bind_meta_version', None)
+        }
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return json_dict, None
+
 
 
 def request_to_class(json_request):

@@ -9,109 +9,141 @@ def find_users(condition):
     for user in users:
         (user_model, err) = user_service.user_to_dict(user)
         if err is not None:
-            return None, 0, err
+            return None, None, err
         users_model.append(user_model)
-    return users_model, num, err
+    return users_model, num, None
 
 
 def has_user(username):
     (ifSuccess, err) = user_service.has_user(username)
-    return ifSuccess, err
-
-
-def user_to_dict(user):
-    (user_model, err) = user_service.user_to_dict(user)
-    return user_model, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def find_user(username):
     (user, err) = user_service.find_user(username)
     if err is not None:
         return None, err
-    if user is None:
-        return None, None
     (user_model, err) = user_service.user_to_dict(user)
-    return user_model, err
+    if err is not None:
+        return None, err
+    return user_model, None
 
 
 def insert_user(request_json):
     (ifSuccess, err) = user_service.insert_user(request_json)
-    return ifSuccess, err
+    if err is not None:
+        return None, err
+    return ifSuccess, None
 
 
 def delete_user_roles(username, term):
     (ifSuccess, err) = user_service.delete_user_roles(username, term)
-    return ifSuccess, err
+    if err is not None:
+        return None, err
+    return ifSuccess, None
 
 
 def update_user(username, request_json):
     (ifSuccess, err) = user_service.update_user(username, request_json)
-    return ifSuccess, err
+    if err is not None:
+        return None, err
+    return ifSuccess, None
 
 
 def find_supervisors(condition):
     (supervisors, num, err) = supervisor_service.get_supervisors(condition)
+    if err is not None:
+        return None, None, err
     supervisors_model = list()
     for supervisor in supervisors:
-        (supervisor_model, err) = user_service.user_to_dict(supervisor)
+        (user, err) = user_service.find_user(supervisor.username)
+        if err is not None:
+            return None, None, err
+        (supervisor_model, err) = supervisor_service.supervisor_to_dict(user, supervisor)
         if err is not None:
             return None, None, err
         supervisors_model.append(supervisor_model)
-    return supervisors_model, num, err
+    return supervisors_model, num, None
 
 
 def find_supervisors_expire(condition):
     (supervisors, num, err) = supervisor_service.get_supervisors_expire(condition)
+    if err is not None:
+        return None, None, err
     supervisors_model = list()
     for supervisor in supervisors:
         (supervisor_model, err) = user_service.user_to_dict(supervisor)
         if err is not None:
             return None, None, err
         supervisors_model.append(supervisor_model)
-    return supervisors_model, num, err
+    return supervisors_model, num, None
 
 
 def batch_renewal(request_json):
     (ifSuccess, err) = user_service.batch_renewal(request_json)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def delete_user(username):
     (ifSuccess, err) = user_service.delete_user(username)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def find_role(role_name):
     (role, err) = user_service.find_users(role_name)
-    return role, err
+    if err is not None:
+        return None, err
+    return role, None
 
 
 def find_roles(condition):
     (roles, num, err) = user_service.find_roles(condition)
+    if err is not None:
+        return None, None, err
     roles_model = list()
     for role in roles:
         (role_model, err) = user_service.role_to_dict(role)
         if err is not None:
             return None, None, err
         roles_model.append(role_model)
-    return roles_model, num, err
+    return roles_model, num, None
 
 
 def insert_role(request_json):
     (ifSuccess, err) = user_service.insert_role(request_json)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def update_role(role_name, request_json):
     (ifSuccess, err) = user_service.update_role(role_name, request_json)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def delete_role(role_name):
     (ifSuccess, err) = user_service.delete_role(role_name)
-    return ifSuccess, err
+    if err is not None:
+        return False, err
+    return ifSuccess, None
 
 
 def find_groups(condition):
     (groups, num, err) = user_service.find_groups(condition)
-    return groups, num, err
+    if err is not None:
+        return None, None, err
+    groups_model = list()
+    for group in groups:
+        (group_model, err) = user_service.group_to_dict(group)
+        if err is not None:
+            return None, None, err
+        groups_model.append(group_model)
+    return groups_model, num, None
