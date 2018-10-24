@@ -22,6 +22,7 @@ class Lesson(db.Model):
     lesson_type = db.Column(db.String(8), default="")
     lesson_grade = db.Column(db.String(64), default="")
     lesson_model = db.Column(db.String(32), default="")
+    term = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
