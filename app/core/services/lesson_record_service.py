@@ -1,4 +1,5 @@
 from app.core.models.lesson import LessonRecord
+from app.utils.mysql import db
 
 
 def find_lesson_records(condition):
@@ -12,12 +13,25 @@ def find_lesson_records(condition):
     return pagination.items, pagination.total, None
 
 
-def find_lesson_record(id):
+def find_lesson_record(username):
     try:
-        lesson_record = LessonRecord.query.filter(LessonRecord.id == int(id)).filter(LessonRecord.using == True).first()
+        lesson_record = LessonRecord.query.filter(LessonRecord.username == username).filter(
+            LessonRecord.using == True).first()
     except Exception as e:
         return None, e
     return lesson_record, None
+
+
+def insert_lesson_record(request_json):
+    lesson_record = LessonRecord()
+    for key, value in request_json.items():
+        if hasattr(lesson_record, key):
+            setattr(lesson_record, key, value)
+    try:
+        db.session.add(lesson_record)
+    except Exception as e:
+        return False, e
+    return True, None
 
 
 def lesson_record_to_dict(lesson_record):

@@ -26,12 +26,33 @@ def get_supervisors(condition=None):
     term = condition['term'] if condition is not None and 'term' in condition else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
     supervisors = Supervisor.query.filter(Supervisor.term == term).filter(Supervisor.using == True)
-    users = User.query.filter(User.username.in_([supervisor.username for supervisor in supervisors])).filter(
-        User.using == True)
     page = int(condition['_page']) if '_page' in condition else 1
     per_page = int(condition['_per_page']) if '_per_page' in condition else 20
-    pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
+    pagination = supervisors.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
+
+
+def supervisor_to_dict(user, supervisor):
+    try:
+        supervisor_dict = {
+            'id': user.id,
+            'username': user.username,
+            'name': user.name,
+            'sex': user.sex,
+            'email': user.email,
+            'phone': user.phone,
+            'state': user.state,
+            'unit': user.unit,
+            'status': user.status,
+            'prorank': user.prorank,
+            'skill': user.skill,
+            'group': supervisor.group,
+            'work_state': supervisor.work_state,
+            'role_names': [role.name for role in user.roles]
+        }
+    except Exception as e:
+        return None, e
+    return supervisor_dict, None
 
 
 def get_supervisors_expire(condition=None):

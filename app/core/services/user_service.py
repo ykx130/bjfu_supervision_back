@@ -49,10 +49,8 @@ def user_to_dict(user):
             'state': user.state,
             'unit': user.unit,
             'status': user.status,
-            'work_state': user.work_state,
             'prorank': user.prorank,
             'skill': user.skill,
-            'group': user.group,
             'role_names': [role.name for role in user.roles]
         }
     except Exception as e:

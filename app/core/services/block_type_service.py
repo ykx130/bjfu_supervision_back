@@ -1,5 +1,6 @@
 from app.core.models.form import BlockType
 from flask_pymongo import ObjectId
+from app.utils.Error import CustomError
 
 
 def insert_block_type(block_type):
@@ -7,7 +8,7 @@ def insert_block_type(block_type):
     try:
         mongo.db.block_type.insert(block_type.model)
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -20,7 +21,7 @@ def find_block_type(_id):
         condition = {'using': True, '_id': ObjectId(_id)}
         data = mongo.db.block_type.find_one(condition)
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
     return data, None
 
 

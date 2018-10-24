@@ -53,7 +53,10 @@ def find_supervisors(condition):
     (supervisors, num, err) = supervisor_service.get_supervisors(condition)
     supervisors_model = list()
     for supervisor in supervisors:
-        (supervisor_model, err) = user_service.user_to_dict(supervisor)
+        (user, err) = user_service.find_user(supervisor.username)
+        if err is not None:
+            return None, None, err
+        (supervisor_model, err) = supervisor_service.supervisor_to_dict(user, supervisor)
         if err is not None:
             return None, None, err
         supervisors_model.append(supervisor_model)

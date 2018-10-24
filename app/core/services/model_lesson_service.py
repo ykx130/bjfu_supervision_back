@@ -91,19 +91,24 @@ def model_lesson_dict(lesson, model_lesson):
             'lesson_model': lesson.lesson_model if lesson is not None else None,
             'lesson_name': lesson.lesson_name,
             'lesson_teacher_id': lesson.lesson_teacher_id,
+            'assign_group': model_lesson.assign_group,
             'status': model_lesson.status,
-            'votes': model_lesson.votes
+            'votes': model_lesson.votes,
+            'notices': model_lesson.notices,
+            'term': lesson.term if lesson is not None else None
         }
     except Exception as e:
         return None, e
     return model_dict, None
 
 
-def add_model_lesson_vote(id):
+def change_model_lesson_notice(id, vote=True):
     model_lesson = ModelLesson.query.filter(ModelLesson.id == id).filter(ModelLesson.using == True)
     if model_lesson is None:
         return False, 'not found'
-    model_lesson.votes = model_lesson.votes + 1
+    if vote:
+        model_lesson.votes = model_lesson.votes + 1
+    model_lesson.notices = model_lesson.notices + 1
     db.session.add(model_lesson)
     try:
         db.session.commit()

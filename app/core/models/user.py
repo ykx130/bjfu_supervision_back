@@ -20,10 +20,8 @@ class User(db.Model, UserMixin):
     state = db.Column(db.String(8), default="")
     unit = db.Column(db.String(8), default="")
     status = db.Column(db.String(8), default="")
-    work_state = db.Column(db.String(8), default="")
     prorank = db.Column(db.String(8), default="")
     skill = db.Column(db.String(16), default="")
-    group = db.Column(db.String(16), default="")
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -106,6 +104,8 @@ class Supervisor(db.Model):
     __tablename__ = 'supervisors'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default="")
+    group = db.Column(db.String(16), default="")
+    work_state = db.Column(db.String(8), default="")
     term = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 

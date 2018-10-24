@@ -17,7 +17,7 @@ def delete_activity(id):
 
 
 def activity_dict(activity):
-    return activity_service.activity_dict(activity)
+    return activity_service.activity_to_dict(activity)
 
 
 def activity_user_dict(id, user):
@@ -43,7 +43,7 @@ def find_activity(id):
         return None, None, err
     if activity is None:
         return None, None, None
-    (activity_model, err) = activity_service.activity_dict(activity)
+    (activity_model, err) = activity_service.activity_to_dict(activity)
     return activity_model, err
 
 
