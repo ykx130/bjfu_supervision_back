@@ -3,6 +3,7 @@ from app.utils.mysql import db
 from datetime import datetime, timedelta
 import json
 from app.core.models.lesson import Lesson, LessonCase, Term
+from app.utils.Error import CustomError
 
 
 def lesson_week_list(lesson_week):
@@ -108,27 +109,44 @@ def update_database():
 
 
 def lesson_to_model(lesson):
-    lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
-                     "lesson_date": lesson_case.lesson_date.strftime("%Y-%m-%d"),
-                     "lesson_weekday": lesson_case.lesson_weekday,
-                     "lesson_room": lesson_case.lesson_room} for
-                    lesson_case in lesson.lesson_cases]
-    lesson_model = {"id": lesson.id, "lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
-                    "lesson_state": lesson.lesson_state, "lesson_teacher_id": lesson.lesson_teacher_id,
-                    "lesson_name": lesson.lesson_name, "lesson_teacher_name": lesson.lesson_teacher_name,
-                    "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
-                    "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
-                    "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
-                    "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
-                    "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model}
-    return lesson_model
+    try:
+        lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
+                         "lesson_date": lesson_case.lesson_date.strftime("%Y-%m-%d"),
+                         "lesson_weekday": lesson_case.lesson_weekday,
+                         "lesson_room": lesson_case.lesson_room} for
+                        lesson_case in lesson.lesson_cases]
+        lesson_model = {"id": lesson.id, "lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
+                        "lesson_state": lesson.lesson_state, "lesson_teacher_id": lesson.lesson_teacher_id,
+                        "lesson_name": lesson.lesson_name, "lesson_teacher_name": lesson.lesson_teacher_name,
+                        "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
+                        "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
+                        "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
+                        "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
+                        "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model}
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return lesson_model, None
+
+
+def term_to_dict(term):
+    try:
+        term_dict = {
+            'term_name': term.name,
+            'begin_time': term.begin_time,
+            'end_time': term.end_time
+        }
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return term_dict, None
 
 
 def find_lesson(id):
     try:
         lesson = Lesson.query.filter(Lesson.id == int(id)).filter(Lesson.using == True).first()
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
+    if lesson is None:
+        return None, CustomError(404, 404, 'lesson not found')
     return lesson, None
 
 
@@ -136,7 +154,7 @@ def has_lesson(id):
     try:
         lesson = Lesson.query.filter(Lesson.id == id).first()
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
     return False, None if lesson is None else True, None
 
 
@@ -144,7 +162,7 @@ def find_lessons(condition):
     try:
         lessons = Lesson.lessons(condition)
     except Exception as e:
-        return None, None, e
+        return None, None, CustomError(500, 500, str(e))
     page = condition['_page'] if '_page' in condition else 1
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
@@ -156,9 +174,9 @@ def change_lesson(id, request_json):
     try:
         lesson = Lesson.query.filter(Lesson.id == id).filter(Lesson.using == True).first()
     except Exception as e:
-        return False, e
+        return False, CustomError(500, 500, str(e))
     if lesson is None:
-        return False, None
+        return False, CustomError(404, 404, 'lesson not found')
     for k, v in request_json.items():
         if hasattr(lesson, k):
             setattr(lesson, k, v)
@@ -166,7 +184,8 @@ def change_lesson(id, request_json):
     try:
         db.session.commit()
     except Exception as e:
-        return False, e
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
     return True, None
 
 
@@ -174,7 +193,7 @@ def find_terms(condition):
     try:
         terms = Term.terms(condition)
     except Exception as e:
-        return None, None, e
+        return None, None, CustomError(500, 500, str(e))
     page = condition['_page'] if '_page' in condition else 1
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = terms.paginate(page=page, per_page=per_page, error_out=False)
@@ -185,7 +204,9 @@ def find_term(term_name):
     try:
         term = Term.query.filter(Term.name == term_name).first()
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
+    if term is None:
+        return None, CustomError(404, 404, 'term not found')
     return term, None
 
 
@@ -193,5 +214,7 @@ def find_now_term():
     try:
         term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first()
     except Exception as e:
-        return None, e
+        return None, CustomError(500, 500, str(e))
+    if term is None:
+        return None, CustomError(404, 404, 'term not found')
     return term, None

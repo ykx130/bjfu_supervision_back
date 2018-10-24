@@ -1,5 +1,5 @@
 from app.core.models.activity import Activity, ActivityUser
-from app.core.controllers.user_controller import user_to_dict
+from app.core.services import user_service
 from app.core.models.lesson import Term
 from app.core.models.user import User
 from flask_login import current_user
@@ -133,7 +133,7 @@ def activity_to_dict(activity):
 
 
 def activity_user_dict(id, user):
-    (user_model, err) = user_to_dict(user)
+    (user_model, err) = user_service.user_to_dict(user)
     if err is not None:
         return None, err
     try:
@@ -163,6 +163,8 @@ def find_activity(id):
         activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
+    if activity is None:
+        return None, CustomError(404, 404, 'activity not found')
     return activity, None
 
 
@@ -190,6 +192,8 @@ def find_activity_user(id, username):
         user = activity.activity_users.filter(User.username == username).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
+    if user is None:
+        return None, CustomError(404, 404, 'user not found')
     return user, None
 
 
@@ -249,7 +253,7 @@ def update_activity_user(id, username, request_json):
     try:
         db.session.commit()
     except Exception as e:
-        db.session.roll_back()
+        db.session.rollback()
         return False, CustomError(500, 500, str(e))
     return True, None
 
