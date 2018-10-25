@@ -5,7 +5,6 @@ from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
 
 
-
 def find_forms(condition=None):
     from app.utils.mongodb import mongo
     url_condition = UrlCondition(condition)
@@ -85,15 +84,14 @@ def to_json_dict(form):
     return json_dict, None
 
 
-
 def request_to_class(json_request):
     form = Form()
     bind_meta_id = json_request.get('bind_meta_id', None)
     bind_meta_name = json_request.get('bind_meta_name', None)
     bind_meta_version = json_request.get('bind_meta_version', None)
     meta = json_request.get('meta', {"created_by": current_user.username,
-                            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+                                     "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                     "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
     status = json_request.get("status")
     values = json_request.get('values', [])
     using = json_request.get('using', True)
