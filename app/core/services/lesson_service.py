@@ -131,7 +131,7 @@ def lesson_to_model(lesson):
 def term_to_dict(term):
     try:
         term_dict = {
-            'term_name': term.name,
+            'name': term.name,
             'begin_time': str(term.begin_time),
             'end_time': str(term.end_time)
         }
