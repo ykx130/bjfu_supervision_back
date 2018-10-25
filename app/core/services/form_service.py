@@ -1,6 +1,9 @@
+from flask_login import current_user
+from datetime import datetime
 from app.core.models.form import Form, Value
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
+
 
 
 def find_forms(condition=None):
@@ -88,7 +91,8 @@ def request_to_class(json_request):
     bind_meta_id = json_request.get('bind_meta_id', None)
     bind_meta_name = json_request.get('bind_meta_name', None)
     bind_meta_version = json_request.get('bind_meta_version', None)
-    meta = json_request.get('meta', {})
+    meta = json_request.get('meta', {"created_by": current_user.username,
+                            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
     values = json_request.get('values', [])
     using = json_request.get('using', True)
     form.using = using
