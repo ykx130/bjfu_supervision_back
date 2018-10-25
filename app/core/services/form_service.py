@@ -89,10 +89,11 @@ def request_to_class(json_request):
     bind_meta_id = json_request.get('bind_meta_id', None)
     bind_meta_name = json_request.get('bind_meta_name', None)
     bind_meta_version = json_request.get('bind_meta_version', None)
-    meta = json_request.get('meta', {"created_by": current_user.username,
-                                     "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                     "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
-    status = json_request.get("status")
+    meta = json_request.get('meta', {})
+    meta.update({"created_by": current_user.username,
+                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                 "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    status = json_request.get("status", '待提交')
     values = json_request.get('values', [])
     using = json_request.get('using', True)
     form.using = using
