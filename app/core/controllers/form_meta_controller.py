@@ -13,9 +13,13 @@ def find_form_metas(condition=None):
     (form_metas, total, err) = form_meta_service.find_form_metas(condition)
     if err is not None:
         return None, None, err
-    form_metas_list = [form_meta_service.to_json_dict(form_meta) for form_meta in form_metas]
-    form_metas_model = [form_meta_service.object_to_str(form_meta) for form_meta in form_metas_list]
-    return form_metas_model, total, None
+    form_metas_models = list()
+    for form_meta in form_metas:
+        (form_meta_model, err) = form_meta_service.to_json_dict(form_meta)
+        if err is not None:
+            return None, None, err
+        form_metas_models.append(form_meta_model)
+    return form_metas_models, total, None
 
 
 # 传入字典型返回筛选过的数据的cursor, 遍历cursor得到的是字典

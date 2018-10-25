@@ -110,8 +110,8 @@ def update_database():
 
 def lesson_to_model(lesson):
     try:
-        lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": lesson_case.lesson_time,
-                         "lesson_date": lesson_case.lesson_date.strftime("%Y-%m-%d"),
+        lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": str(lesson_case.lesson_time),
+                         "lesson_date": str(lesson_case.lesson_date.strftime("%Y-%m-%d")),
                          "lesson_weekday": lesson_case.lesson_weekday,
                          "lesson_room": lesson_case.lesson_room} for
                         lesson_case in lesson.lesson_cases]
@@ -132,8 +132,8 @@ def term_to_dict(term):
     try:
         term_dict = {
             'term_name': term.name,
-            'begin_time': term.begin_time,
-            'end_time': term.end_time
+            'begin_time': str(term.begin_time),
+            'end_time': str(term.end_time)
         }
     except Exception as e:
         return None, CustomError(500, 500, str(e))
