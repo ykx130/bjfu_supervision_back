@@ -104,9 +104,9 @@ def to_json_dict(form_meta):
     try:
         json_dict = {
             '_id': str(form_meta.get('_id', None)),
-            'meta': form_meta.get('name', None),
-            'name': form_meta.get('version', None),
-            'version': form_meta.get('meta', {}),
+            'version': form_meta.get('version', None),
+            'name': form_meta.get('name', None),
+            'meta': form_meta.get('meta', {}),
         }
     except Exception as e:
         return None, CustomError(500, 500, str(e))
