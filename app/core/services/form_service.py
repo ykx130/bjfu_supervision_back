@@ -75,6 +75,7 @@ def to_json_dict(form):
         json_dict = {
             '_id': str(form.get('_id', None)),
             'meta': form.get('meta', {}),
+            'status': form.get('status'),
             'bind_meta_id': form.get('bind_meta_id', None),
             'bind_meta_name': form.get('bind_meta_name', None),
             'bind_meta_version': form.get('bind_meta_version', None)
