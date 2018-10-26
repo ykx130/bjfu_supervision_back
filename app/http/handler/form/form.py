@@ -103,7 +103,7 @@ def change_form(_id):
 
 
 @login_required
-@form_blueprint.route('/forms')
+@form_blueprint.route('/my/forms')
 def get_my_forms():
     (forms, total, err) = form_controller.find_forms({**request.args, 'guider': current_user.username})
     if err is not None:
