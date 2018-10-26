@@ -67,6 +67,7 @@ def insert_model_lessons(request_json):
         for key, value in request_json.items():
             if hasattr(model_lesson, key):
                 setattr(model_lesson, key, value)
+        model_lesson.lesson_id = lesson.lesson_id
         status = request_json['status'] if 'status' in request_json else '推荐课'
         lesson.lesson_model = status
         db.session.add(model_lesson)

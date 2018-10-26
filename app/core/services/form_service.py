@@ -82,7 +82,6 @@ def to_json_dict(form):
     return json_dict, None
 
 
-
 def request_to_class(json_request):
     form = Form()
     bind_meta_id = json_request.get('bind_meta_id', None)
