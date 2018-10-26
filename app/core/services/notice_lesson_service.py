@@ -54,11 +54,16 @@ def insert_notice_lessons(request_json):
     assign_group = request_json['assign_group'] if 'assign_group' in request_json else None
     if assign_group is None:
         return False, CustomError(500,200, 'assign group should be given')
+    notice_reason = request_json.get('notice_reason',None)
+    if not notice_reason:
+        return False, CustomError(500,200, '关注原因不可为空')
+
     for lesson_id in lesson_ids:
         notice_lesson = NoticeLesson()
         notice_lesson.term = term
         notice_lesson.lesson_id = lesson_id
         notice_lesson.assign_group = assign_group
+        notice_lesson.notice_reason = notice_reason
         db.session.add(notice_lesson)
     try:
         db.session.commit()
