@@ -122,7 +122,8 @@ def lesson_to_model(lesson):
                         "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
                         "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
                         "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
-                        "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model}
+                        "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model,
+                        "term": lesson.term}
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return lesson_model, None
