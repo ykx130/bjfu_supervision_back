@@ -1,6 +1,7 @@
 from app.http.handler.form import form_blueprint
 from flask import jsonify, request
-from flask_login import  current_user, login_required
+from werkzeug.datastructures import ImmutableMultiDict
+from flask_login import current_user, login_required
 from app.core.controllers import form_controller
 from flask_pymongo import ObjectId
 
@@ -105,7 +106,8 @@ def change_form(_id):
 @login_required
 @form_blueprint.route('/my/forms')
 def get_my_forms():
-    (forms, total, err) = form_controller.find_forms({**request.args, 'guider': current_user.username})
+    (forms, total, err) = form_controller.find_forms(
+        ImmutableMultiDict({**request.args, 'meta.guider': [current_user.username]}))
     if err is not None:
         return jsonify({
             'code': err.code,
