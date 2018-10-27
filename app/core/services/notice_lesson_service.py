@@ -41,7 +41,7 @@ def insert_notice_lesson(request_json):
 def insert_notice_lessons(request_json):
     term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
-    lesson_ids = request_json('lesson_ids', None)
+    lesson_ids = request_json.get('lesson_ids', None)
     if lesson_ids is None:
         return False, CustomError(500, 200, 'lesson_ids should be given')
     try:

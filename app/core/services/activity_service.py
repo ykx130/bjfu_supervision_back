@@ -198,8 +198,7 @@ def find_activity_user(id, username):
 
 
 def insert_activity_user(id, request_json):
-    username = request_json['user']['username'] if 'user' in request_json and 'username' in request_json[
-        'user'] else current_user.username
+    username = request_json.get('username',current_user.username)
     user = User.query.filter(User.username == username).filter(User.using == True).first()
     if user is None:
         return False, CustomError(404, 404, "user not found")
