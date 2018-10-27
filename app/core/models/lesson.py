@@ -129,6 +129,7 @@ class ModelLesson(db.Model):
 class LessonRecord(db.Model):
     __tablename__ = 'lesson_records'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    term = db.Column(db.String(32), default="")
     username = db.Column(db.String(64), nullable=False)
     name = db.Column(db.String(64), nullable=False)
     group_name = db.Column(db.String(64), nullable=False, default="")

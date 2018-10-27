@@ -141,9 +141,9 @@ def term_to_dict(term):
     return term_dict, None
 
 
-def find_lesson(id):
+def find_lesson(lesson_id):
     try:
-        lesson = Lesson.query.filter(Lesson.id == int(id)).filter(Lesson.using == True).first()
+        lesson = Lesson.query.filter(Lesson.lesson_id == lesson_id).filter(Lesson.using == True).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     if lesson is None:
@@ -151,9 +151,9 @@ def find_lesson(id):
     return lesson, None
 
 
-def has_lesson(id):
+def has_lesson(lesson_id):
     try:
-        lesson = Lesson.query.filter(Lesson.id == id).first()
+        lesson = Lesson.query.filter(Lesson.lesson_id == lesson_id).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return False, None if lesson is None else True, None

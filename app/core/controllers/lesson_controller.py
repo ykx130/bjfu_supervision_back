@@ -5,8 +5,8 @@ def update_database():
     lesson_service.update_database()
 
 
-def find_lesson(id):
-    (lesson, err) = lesson_service.find_lesson(id)
+def find_lesson(lesson_id):
+    (lesson, err) = lesson_service.find_lesson(lesson_id)
     if err is not None:
         return None, err
     (lesson_model, err) = lesson_service.lesson_to_model(lesson)
@@ -15,8 +15,8 @@ def find_lesson(id):
     return lesson_model, err
 
 
-def has_lesson(id):
-    (ifSuccess, err) = lesson_service.has_lesson(id)
+def has_lesson(lesson_id):
+    (ifSuccess, err) = lesson_service.has_lesson(lesson_id)
     if err is not None:
         return False, err
     return ifSuccess, None

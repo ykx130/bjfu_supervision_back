@@ -38,7 +38,7 @@ def insert_notice_lesson(request_json):
 def insert_notice_lessons(request_json):
     term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
         Term.name.desc()).filter(Term.using == True).first().name
-    lesson_ids = request_json['lesson_ids'] if 'lesson_ids' in request_json else None
+    lesson_ids = request_json('lesson_ids', None)
     if lesson_ids is None:
         return False, CustomError(500,200, 'lesson_ids should be given')
     try:
@@ -51,7 +51,7 @@ def insert_notice_lessons(request_json):
         if notice_lesson_record is not None:
             return False, CustomError(500,200, "lesson has been noticed")
         lesson.lesson_level = "关注课程"
-    assign_group = request_json['assign_group'] if 'assign_group' in request_json else None
+    assign_group = request_json('assign_group',None)
     if assign_group is None:
         return False, CustomError(500,200, 'assign group should be given')
     notice_reason = request_json.get('notice_reason',None)
