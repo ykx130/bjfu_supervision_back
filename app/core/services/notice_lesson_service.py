@@ -54,7 +54,7 @@ def insert_notice_lessons(request_json):
         if notice_lesson_record is not None:
             return False, CustomError(500,200, "lesson has been noticed")
         lesson.lesson_level = "关注课程"
-    assign_group = request_json('assign_group',None)
+    assign_group = request_json.get('assign_group',None)
     if assign_group is None:
         return False, CustomError(500,200, 'assign group should be given')
     notice_reason = request_json.get('notice_reason',None)
