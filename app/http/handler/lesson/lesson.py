@@ -33,9 +33,9 @@ def get_lessons():
     }), 200
 
 
-@lesson_blueprint.route('/lessons/<int:id>')
-def get_lesson(id):
-    (lesson, err) = lesson_controller.find_lesson(id)
+@lesson_blueprint.route('/lessons/<string:lesson_id>')
+def get_lesson(lesson_id):
+    (lesson, err) = lesson_controller.find_lesson(lesson_id)
     if err is not None:
         return jsonify({
             'code': err.code,

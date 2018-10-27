@@ -122,7 +122,8 @@ def lesson_to_model(lesson):
                         "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
                         "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
                         "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
-                        "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model}
+                        "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model,
+                        "term": lesson.term}
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return lesson_model, None
@@ -131,7 +132,7 @@ def lesson_to_model(lesson):
 def term_to_dict(term):
     try:
         term_dict = {
-            'term_name': term.name,
+            'name': term.name,
             'begin_time': str(term.begin_time),
             'end_time': str(term.end_time)
         }
@@ -140,9 +141,9 @@ def term_to_dict(term):
     return term_dict, None
 
 
-def find_lesson(id):
+def find_lesson(lesson_id):
     try:
-        lesson = Lesson.query.filter(Lesson.id == int(id)).filter(Lesson.using == True).first()
+        lesson = Lesson.query.filter(Lesson.lesson_id == lesson_id).filter(Lesson.using == True).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     if lesson is None:
@@ -150,9 +151,9 @@ def find_lesson(id):
     return lesson, None
 
 
-def has_lesson(id):
+def has_lesson(lesson_id):
     try:
-        lesson = Lesson.query.filter(Lesson.id == id).first()
+        lesson = Lesson.query.filter(Lesson.lesson_id == lesson_id).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return False, None if lesson is None else True, None

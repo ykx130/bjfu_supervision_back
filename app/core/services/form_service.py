@@ -1,3 +1,5 @@
+from flask_login import current_user
+from datetime import datetime
 from app.core.models.form import Form, Value
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
@@ -73,6 +75,7 @@ def to_json_dict(form):
         json_dict = {
             '_id': str(form.get('_id', None)),
             'meta': form.get('meta', {}),
+            'status': form.get('status'),
             'bind_meta_id': form.get('bind_meta_id', None),
             'bind_meta_name': form.get('bind_meta_name', None),
             'bind_meta_version': form.get('bind_meta_version', None)
@@ -88,6 +91,10 @@ def request_to_class(json_request):
     bind_meta_name = json_request.get('bind_meta_name', None)
     bind_meta_version = json_request.get('bind_meta_version', None)
     meta = json_request.get('meta', {})
+    meta.update({"created_by": current_user.username,
+                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                 "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    status = json_request.get("status", '待提交')
     values = json_request.get('values', [])
     using = json_request.get('using', True)
     form.using = using
@@ -95,6 +102,7 @@ def request_to_class(json_request):
     form.bind_meta_name = bind_meta_name
     form.bind_meta_version = bind_meta_version
     form.meta = meta
+    form.status = status
     for value_item in values:
         value = Value()
         for k, v in value_item.items():

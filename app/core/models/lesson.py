@@ -90,7 +90,6 @@ class NoticeLesson(db.Model):
     lesson_id = db.Column(db.String(32), default=-1)
     assign_group = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
-    status = db.Column(db.String(32), default="")
     votes = db.Column(db.Integer, default=0)
     notice_reason = db.Column(db.String(128), default="")
     notices = db.Column(db.Integer, default=0)
@@ -130,6 +129,7 @@ class ModelLesson(db.Model):
 class LessonRecord(db.Model):
     __tablename__ = 'lesson_records'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    term = db.Column(db.String(32), default="")
     username = db.Column(db.String(64), nullable=False)
     name = db.Column(db.String(64), nullable=False)
     group_name = db.Column(db.String(64), nullable=False, default="")

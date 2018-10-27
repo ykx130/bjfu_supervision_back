@@ -1,4 +1,5 @@
 from app.utils.mysql import db
+from sqlalchemy import text
 from datetime import datetime
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
 
@@ -24,7 +25,7 @@ class Consult(db.Model):
     type = db.Column(db.String(16), nullable=False, default="")
     requester_username = db.Column(db.String(16), nullable=False, default="")
     submit_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
-    answer_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
+    answer_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now, server_default=text('NOW()'))
     term = db.Column(db.String(16), default="")
     state = db.Column(db.String(16), default="")
     meta_description = db.Column(db.String(255), default="")

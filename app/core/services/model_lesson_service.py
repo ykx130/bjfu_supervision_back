@@ -1,4 +1,4 @@
-from app.core.models.lesson import ModelLesson, Lesson
+from app.core.models.lesson import ModelLesson, Lesson, Term
 from app.utils.mysql import db
 from app.utils.Error import CustomError
 
@@ -54,6 +54,10 @@ def insert_model_lessons(request_json):
     lesson_ids = request_json.get('lesson_ids', None)
     if lesson_ids is None:
         return False, CustomError(500, 200, 'lesson_ids should be given')
+    term = request_json.get('term', None)
+    if not term :
+        term = Term.query.order_by(
+        Term.name.desc()).filter(Term.using == True).first().name
     for lesson_id in lesson_ids:
         model_lesson = ModelLesson()
         try:
@@ -67,9 +71,10 @@ def insert_model_lessons(request_json):
         for key, value in request_json.items():
             if hasattr(model_lesson, key):
                 setattr(model_lesson, key, value)
-        model_lesson.lesson_id = lesson.lesson_id
-        status = request_json['status'] if 'status' in request_json else '推荐课'
+        model_lesson.lesson_id = lesson_id
+        status = request_json.get('status', '推荐课')
         lesson.lesson_model = status
+        model_lesson.term = term
         db.session.add(model_lesson)
         db.session.add(lesson)
     try:
