@@ -9,6 +9,19 @@ def find_form_meta(name, version=None):
     return form_meta_model, None
 
 
+def find_history_form_meta(condition):
+    (form_metas, total, err) = form_meta_service.find_form_metas(condition)
+    if err is not None:
+        return None, None, err
+    form_metas_models = list()
+    for form_meta in form_metas:
+        (form_meta_model, err) = form_meta_service.to_json_dict(form_meta)
+        if err is not None:
+            return None, None, err
+        form_metas_models.append(form_meta_model)
+    return form_metas_models, total, None
+
+
 def find_form_metas(condition=None):
     (form_metas, total, err) = form_meta_service.find_form_metas(condition)
     if err is not None:

@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from app.http.handler.form_meta import form_meta_blueprint
 from app.core.controllers import form_meta_controller
+from werkzeug.datastructures import ImmutableMultiDict
 
 
 @form_meta_blueprint.route('/form_metas', methods=['POST'])
@@ -47,7 +48,7 @@ def find_form_metas():
 
 @form_meta_blueprint.route('/form_metas/<string:name>')
 def find_form_meta_name(name):
-    (form_meta, err) = form_meta_controller.find_form_meta(name)
+    (form_meta, err) = form_meta_controller.find_form_metas()
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -61,7 +62,27 @@ def find_form_meta_name(name):
     }), 200
 
 
-@form_meta_blueprint.route('/form_metas/<string:name>/<string:version>')
+@form_meta_blueprint.route('/form_metas/<string:name>/history')
+def find_history_form_meta_by_name(name):
+    (form_metas, total, err) = form_meta_controller.find_history_form_meta(ImmutableMultiDict(
+        {"name": name}
+    ))
+    if err is not None:
+        return jsonify({
+            'code': err.code,
+            'message': err.err_info,
+            'form_metas': None,
+            'total': None
+        }), err.status_code
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'form_metas': form_metas,
+        'total': total,
+    }), 200
+
+
+@form_meta_blueprint.route('/form_metas/<string:name>/version/<string:version>')
 def get_form_meta(name, version):
     (form_meta, err) = form_meta_controller.find_form_meta(name, version)
     if err is not None:

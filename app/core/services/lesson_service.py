@@ -151,9 +151,9 @@ def find_lesson(lesson_id):
     return lesson, None
 
 
-def has_lesson(lesson_id):
+def has_lesson(id):
     try:
-        lesson = Lesson.query.filter(Lesson.lesson_id == lesson_id).first()
+        lesson = Lesson.query.filter(Lesson.lesson_id == id).first()
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return False, None if lesson is None else True, None
