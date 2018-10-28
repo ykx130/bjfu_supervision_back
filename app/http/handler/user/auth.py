@@ -14,14 +14,14 @@ def login():
             return jsonify({
                 "code": 500,
                 "message": "username or password can not be null"
-            }), 200
+            }), 401
         try:
             user = User.query.filter(User.username == username).filter(User.using == True).first()
             if user is None or not user.verify_password(password=password):
                 return jsonify({
                     "code": 500,
                     "message": "username or password may be wrong"
-                }), 200
+                }), 401
             login_user(user, remember=False)
         except Exception as e:
             return jsonify({
@@ -59,7 +59,7 @@ def get_current():
         return jsonify({
             "code": 500,
             "message": str(e)
-        }), 500
+        }), 401
     return jsonify({
         "code": 200,
         "message": "",
