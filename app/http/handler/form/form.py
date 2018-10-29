@@ -1,3 +1,4 @@
+import json
 from app.http.handler.form import form_blueprint
 from flask import jsonify, request
 from werkzeug.datastructures import ImmutableMultiDict
@@ -121,3 +122,8 @@ def get_my_forms():
         'forms': forms,
         'total': total,
     }), 200
+
+
+@form_blueprint.route('/graph/form/<string:name>/map')
+def get_form_map(name):
+    return jsonify(form_controller.get_form_map(name))

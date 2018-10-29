@@ -1,8 +1,11 @@
+import json
 from flask_login import current_user
 from datetime import datetime
 from app.core.models.form import Form, Value
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
+from app.streaming import sub_kafka
+from app import redis_cli
 
 
 def find_forms(condition=None):
@@ -109,3 +112,39 @@ def request_to_class(json_request):
             value.model[k] = v
         form.values.append(value)
     return form
+
+
+def calculate_map(meta_name):
+    item_map = {}
+    from app.utils.mongodb import mongo
+    forms = mongo.db.form.find({"bind_meta_name": meta_name})
+
+    for form in forms:
+        for v in form.get("values"):
+            if v.get('item_type') not in ["radio_option"]:
+                # 分布只计算单选和多选
+                continue
+            if not item_map.get(v['item_name']):
+                # 初始化
+                point = {o['value']: {"option": o, "num": 0} for o in v.get("payload", {}).get("options", [])}
+                point[v['value']]['num'] = point[v['value']]['num'] + 1
+                item_map[v['item_name']] = {
+                    "item_name": v['item_name'],
+                    "point": list(point.values())
+                }
+            else:
+                # 存在直接+1
+                point = item_map[v['item_name']]["point"]
+                for p in point:
+                    if p['option']['value'] == v['value']:
+                        p['num'] = p['num'] + 1
+    redis_cli.set("form_service:{}:map".format(meta_name), json.dumps({'item_map': list(item_map.values())}))
+
+
+@sub_kafka('form_service')
+def form_service_receiver(message):
+    method = message.get("method")
+    if not method:
+        return
+    if method == 'add_form':
+        calculate_map(message.get("args", {}).get("form", {}).get("bind_meta_name"))
