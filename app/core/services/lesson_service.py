@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import json
 from app.core.models.lesson import Lesson, LessonCase, Term
 from app.utils.Error import CustomError
+from app.streaming import sub_kafka
 
 
 def lesson_week_list(lesson_week):
@@ -219,3 +220,8 @@ def find_now_term():
     if term is None:
         return None, CustomError(404, 404, 'term not found')
     return term, None
+
+
+@sub_kafka('form_service')
+def change_lesson_status(message):
+    print(message)

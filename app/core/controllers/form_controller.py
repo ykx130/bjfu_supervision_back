@@ -1,5 +1,6 @@
 from app.core.services import form_service
 from app.core.services import form_meta_service
+from app.streaming import send_kafka_message
 
 
 def insert_form(request):
@@ -7,6 +8,12 @@ def insert_form(request):
     (ifSuccess, err) = form_service.insert_form(form)
     if err is not None:
         return False, err
+    form_model, err = form_service.to_json_dict(form.model)
+    if err is not None:
+        return False, err
+    send_kafka_message(topic='form_service',
+                       method='add_form',
+                       form=form_model)
     return ifSuccess, None
 
 
