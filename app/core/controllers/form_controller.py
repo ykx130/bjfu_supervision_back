@@ -1,6 +1,8 @@
 from app.core.services import form_service
 from app.core.services import form_meta_service
 from app.streaming import send_kafka_message
+from app import redis_cli
+import json
 
 
 def insert_form(request):
@@ -50,3 +52,12 @@ def update_form(condition=None, change_item=None):
     if err is not None:
         return False, err
     return ifSuccess, None
+
+
+def get_form_map(meta_name):
+    if redis_cli.exists("form_service:{}:map".format(meta_name)):
+        return json.loads(redis_cli.get("form_service:{}:map".format(meta_name)))
+    else:
+        return {
+            "item_map":[]
+        }
