@@ -115,5 +115,5 @@ def find_current_user_activities(username, condition=None):
             (current_user_activity_model, err) = activity_service.can_attend_activity_dict(current_user_activity)
             if err is not None:
                 return None, None, err
-            current_user_activities_model.append(current_user_activities_model)
+            current_user_activities_model.append(current_user_activity_model)
     return current_user_activities_model, num, None

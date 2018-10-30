@@ -152,7 +152,7 @@ def find_activity_user(id, username):
             'code': err.code,
             'message': err.err_info,
             'activity': None,
-            'activity_users':None
+            'activity_users': None
         }), err.status_code
     (activity_user, err) = activity_controller.find_activity_user(id, username)
     if err is not None:
@@ -178,7 +178,7 @@ def delete_activity_user(id, username):
             'code': err.code,
             'message': err.err_info,
             'activity': None,
-            'activity_users':None
+            'activity_users': None
         }), err.status_code
     return jsonify({
         'code': 200,
@@ -206,7 +206,9 @@ def update_activity_user(id, username):
     }), 200
 
 
+
 @activity_blueprint.route('/current_user/activities')
+@login_required
 def get_current_user_activities():
     username = request.args['username'] if 'username' in request.args else current_user.username
     (user, err) = user_controller.find_user(username)

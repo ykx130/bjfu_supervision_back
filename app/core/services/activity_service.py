@@ -299,7 +299,7 @@ def find_current_user_activities(username, condition=None):
             ActivityUser.username == username)
     elif state == 'canAttend':
         activities = activities.filter(Activity.using == True).filter(Activity.apply_state == "报名进行中").filter(
-            or_(ActivityUser.state == None, ActivityUser.state == '未报名'))
+            or_(ActivityUser.state == None, ActivityUser.state == '未报名')).filter(Activity.remainder_num > 0)
     else:
         return None, None, CustomError(500, 200, "state is wrong")
     page = int(condition['_page']) if '_page' in condition else 1
