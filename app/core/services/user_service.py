@@ -87,7 +87,7 @@ def insert_user(request_json):
     if username is None:
         return False, CustomError(500, 200, 'username should be given')
     try:
-        old_user = User.filter(User.username == username).filter(User.using == True).first()
+        old_user = User.query.filter(User.username == username).filter(User.using == True).first()
     except Exception as e:
         return False, CustomError(500, 500, str(e))
     if old_user is not None:
