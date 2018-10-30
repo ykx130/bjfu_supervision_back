@@ -111,7 +111,7 @@ def insert_user(request_json):
         user_role = UserRole()
         role = Role.query.filter(Role.name == role_name).filter(Term.using == True).first()
         user_role.username = user.username
-        user_role.role_id = role.id
+        user_role.role_name = role.name
         user_role.term = term
         db.session.add(user_role)
     try:

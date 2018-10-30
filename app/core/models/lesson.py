@@ -79,8 +79,8 @@ class SchoolTerm():
         term_parts = self.term_name.split("-")
         term_future = 2 if (int(term_parts[2]) + other) % 2 == 0 else 1
         years = other / 2 if (int(term_parts[2]) == 1) else other / 2 + 1
-        begin_year = (int(term_parts[0]) + years)
-        end_year = (int(term_parts[1]) + years)
+        begin_year = int(int(term_parts[0]) + years)
+        end_year = int(int(term_parts[1]) + years)
         return SchoolTerm(term_name="-".join([str(begin_year), str(end_year), str(term_future)]))
 
 
