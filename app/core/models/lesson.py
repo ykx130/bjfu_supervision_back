@@ -92,7 +92,6 @@ class NoticeLesson(db.Model):
     term = db.Column(db.String(32), default="")
     votes = db.Column(db.Integer, default=0)
     notice_reason = db.Column(db.String(128), default="")
-    notices = db.Column(db.Integer, default=0)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod

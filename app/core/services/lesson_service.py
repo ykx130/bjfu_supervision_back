@@ -44,6 +44,8 @@ def update_database():
         data['lesson_teacher_id'] = teacher_ids
         teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
         data['lesson_teacher_unit'] = teacher_units
+        lesson_id = data['lesson_id']
+        data['lesson_id'] = [lesson_id + teacher_id for teacher_id in teacher_ids]
         term_name = "-".join([data['lesson_year'], data['lesson_semester']]).replace(" ", "")
         (term, err) = find_term(term_name)
         if err is not None:
@@ -69,7 +71,7 @@ def update_database():
             db.session.add(lesson)
             db.session.commit()
             cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
-                            ='{}' and lesson_teacher_name='{}'".format(data['lesson_id'], teacher_name))
+                            ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
             lesson_case_datas = cursor.fetchall()
             for lesson_case_data in lesson_case_datas:
                 if lesson_case_data['lesson_week'] == "":
@@ -89,6 +91,7 @@ def update_database():
                 else:
                     weeks = lesson_week_list(lesson_case_data['lesson_week'])
                     for week in weeks:
+                        lesson_time = lesson_case_data['lesson_time']
                         lesson_case = LessonCase()
                         for k, v in lesson_case_data.items():
                             try:

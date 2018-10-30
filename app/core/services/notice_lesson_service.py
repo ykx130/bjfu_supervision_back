@@ -52,14 +52,14 @@ def insert_notice_lessons(request_json):
         notice_lesson_record = NoticeLesson.query.filter(NoticeLesson.lesson_id == lesson.lesson_id).filter(
             NoticeLesson.term == term).filter(NoticeLesson.using == True).first()
         if notice_lesson_record is not None:
-            return False, CustomError(500,200, "lesson has been noticed")
+            return False, CustomError(500, 200, "lesson has been noticed")
         lesson.lesson_level = "关注课程"
-    assign_group = request_json.get('assign_group',None)
+    assign_group = request_json.get('assign_group', None)
     if assign_group is None:
-        return False, CustomError(500,200, 'assign group should be given')
-    notice_reason = request_json.get('notice_reason',None)
+        return False, CustomError(500, 200, 'assign group should be given')
+    notice_reason = request_json.get('notice_reason', None)
     if not notice_reason:
-        return False, CustomError(500,200, '关注原因不可为空')
+        return False, CustomError(500, 200, '关注原因不可为空')
 
     for lesson_id in lesson_ids:
         notice_lesson = NoticeLesson()
@@ -177,7 +177,6 @@ def change_notice_lesson_notice(id, vote=True):
         return False, CustomError(404, 404, 'notice lesson not found')
     if vote:
         notice_lesson.votes = notice_lesson.votes + 1
-    notice_lesson.notices = notice_lesson.notices + 1
     db.session.add(notice_lesson)
     try:
         db.session.commit()
@@ -195,8 +194,9 @@ def get_lesson_from_excel(request_json):
         return False, CustomError(500, 200, 'file must be given')
     column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                    '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                   '指定小组': 'assign_group'}
-    filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute', 'lesson_grade']
+                   '指定小组': 'assign_group', '关注原因': 'notice_lesson', '关注次数': 'votes'}
+    filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute',
+                   'lesson_grade']
     row_num = df.shape[0]
     for i in range(0, row_num):
         lessons = Lesson.query
@@ -206,11 +206,10 @@ def get_lesson_from_excel(request_json):
         lesson = lessons.first()
         if lesson is None:
             return False, CustomError(404, 404, 'lesson not found')
-        assign_group = df.iloc[i]['指定小组']
         notice_lesson = NoticeLesson()
-        notice_lesson.term = lesson.term
-        notice_lesson.lesson_id = lesson.lesson_id
-        notice_lesson.assign_group = assign_group
+        for col_name_c, col_name_e in column_dict.items():
+            if hasattr(notice_lesson, col_name_e):
+                setattr(notice_lesson, col_name_e, df.iloc[i][col_name_c])
         db.session.add(notice_lesson)
     try:
         db.session.commit()
@@ -222,4 +221,13 @@ def get_lesson_from_excel(request_json):
 
 def export_lesson_to_excel(request_json):
     if 'notice_lesson_ids' not in request_json:
-        return False,
+        return False, CustomError(500, 200, 'notice lesson ids must be given')
+    notice_lesson_ids = request_json['notice_lesson_ids']
+    column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
+                   '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
+                   '指定小组': 'assign_group', '关注原因': 'notice_lesson', '关注次数': 'votes'}
+    for notice_lesson_id in notice_lesson_ids:
+        notice_lesson = NoticeLesson.query.filter(NoticeLesson.lesson_id == notice_lesson_id).first()
+        if notice_lesson is None:
+            return False, CustomError(404, 404, 'notice lesson not found')
+        lesson = Lesson.query.filter(Lesson.lesson_id == notice_lesson.lesson_id).first()
