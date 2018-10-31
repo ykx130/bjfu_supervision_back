@@ -171,7 +171,7 @@ def notice_lesson_to_dict(lesson, notice_lesson):
     return notice_lesson_dict, None
 
 
-def change_notice_lesson_notice(id, vote=True):
+def notice_lesson_vote(id, vote=True):
     notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True)
     if notice_lesson is None:
         return False, CustomError(404, 404, 'notice lesson not found')

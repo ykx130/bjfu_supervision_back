@@ -182,7 +182,7 @@ def model_lesson_dict(lesson, model_lesson):
     return model_dict, None
 
 
-def change_model_lesson_notice(id, vote=True):
+def model_lesson_vote(id, vote=True):
     try:
         model_lesson = ModelLesson.query.filter(ModelLesson.id == id).filter(ModelLesson.using == True)
     except Exception as e:

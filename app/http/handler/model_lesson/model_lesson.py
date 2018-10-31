@@ -115,3 +115,19 @@ def update_model_lesson(id):
         'message': '',
         'model_lesson': None
     }), 200
+
+
+@model_lesson_blueprint.route('/model_lessons/<int:id>/vote', methods=['post'])
+def model_lesson_vote(id):
+    (ifSuccess, err) = model_lesson_controller.model_lesson_vote(id, request.json.get('vote', True))
+    if err is not None:
+        return jsonify({
+            'code': err.code,
+            'message': err.err_info,
+            'model_lesson': None,
+        }), err.status_code
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'model_lesson': None
+    }), 200

@@ -5,6 +5,7 @@ import json
 from app.core.models.lesson import Lesson, LessonCase, Term
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
+import re
 
 
 def lesson_week_list(lesson_week):
@@ -73,6 +74,10 @@ def update_database():
             cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
                             ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
             lesson_case_datas = cursor.fetchall()
+            lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
+                               '06': '0607',
+                               '07': '0607', '08': '0809', '09': '0809', '10': '1011', '11': '1011',
+                               '12': '12'}
             for lesson_case_data in lesson_case_datas:
                 if lesson_case_data['lesson_week'] == "":
                     lesson_case = LessonCase()
@@ -92,24 +97,32 @@ def update_database():
                     weeks = lesson_week_list(lesson_case_data['lesson_week'])
                     for week in weeks:
                         lesson_time = lesson_case_data['lesson_time']
-                        lesson_case = LessonCase()
-                        for k, v in lesson_case_data.items():
-                            try:
-                                v = json.loads(v)
-                            except:
-                                v = v
-                            if v is None or v is '':
-                                continue
-                            if k == 'lesson_week':
-                                lesson_case.lesson_week = week
-                                continue
-                            if hasattr(lesson_case, k):
-                                setattr(lesson_case, k, v)
-                        date = week_to_date(term_begin_time, week, lesson_case.lesson_weekday)
-                        lesson_case.lesson_date = date
-                        lesson_case.lesson_id = lesson.id
-                        db.session.add(lesson_case)
-                        db.session.commit()
+                        lesson_time_set = set()
+                        lesson_times_beg = re.findall(r'.{2}', lesson_time)
+                        for lesson_time_beg in lesson_times_beg:
+                            lesson_time_set.add(lesson_time_map[lesson_time_beg])
+                        for lesson_time in lesson_time_set:
+                            lesson_case = LessonCase()
+                            for k, v in lesson_case_data.items():
+                                try:
+                                    v = json.loads(v)
+                                except:
+                                    v = v
+                                if v is None or v is '':
+                                    continue
+                                if k == 'lesson_week':
+                                    lesson_case.lesson_week = week
+                                    continue
+                                if k == 'lesson_time':
+                                    lesson_case.lesson_time = lesson_time
+                                    continue
+                                if hasattr(lesson_case, k):
+                                    setattr(lesson_case, k, v)
+                            date = week_to_date(term_begin_time, week, lesson_case.lesson_weekday)
+                            lesson_case.lesson_date = date
+                            lesson_case.lesson_id = lesson.id
+                            db.session.add(lesson_case)
+                            db.session.commit()
 
 
 def lesson_to_model(lesson):

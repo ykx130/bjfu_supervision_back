@@ -23,7 +23,14 @@ def find_history_form_meta(condition):
 
 
 def find_form_metas(condition=None):
-    (form_metas, total, err) = form_meta_service.find_form_metas(condition)
+    condition_fin = dict()
+    if condition is None:
+        condition_fin['using'] = True
+    else:
+        for key, value in condition:
+            condition_fin[key] = value
+        condition_fin['using'] = True
+    (form_metas, total, err) = form_meta_service.find_form_metas(condition_fin)
     if err is not None:
         return None, None, err
     form_metas_models = list()
@@ -33,6 +40,19 @@ def find_form_metas(condition=None):
             return None, None, err
         form_metas_models.append(form_meta_model)
     return form_metas_models, total, None
+
+
+def find_form_meta_history(condition):
+    (form_metas, num, err) = form_meta_service.find_form_metas(condition)
+    if err is not None:
+        return None, None, err
+    form_metas_models = list()
+    for form_meta in form_metas:
+        (form_meta_model, err) = form_meta_service.to_json_dict(form_meta)
+        if err is not None:
+            return None, None, err
+        form_metas_models.append(form_meta_model)
+    return form_metas_models, num, None
 
 
 # 传入字典型返回筛选过的数据的cursor, 遍历cursor得到的是字典
