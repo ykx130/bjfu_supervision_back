@@ -64,3 +64,10 @@ def update_model_lesson(id, request_json):
     if err is not None:
         return False, err
     return ifSuccess, None
+
+
+def model_lesson_vote(id, vote=True):
+    (ifSuccess, err) = model_lesson_service.model_lesson_vote(id, vote)
+    if err is not None:
+        return False, err
+    return ifSuccess, None

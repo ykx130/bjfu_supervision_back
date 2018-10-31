@@ -70,3 +70,6 @@ def get_notice_lesson_excel(request_json):
     return True, None
 
 
+def notice_lesson_vote(id, vote=True):
+    (ifSuccess, err) = notice_lesson_service.notice_lesson_vote(id, vote)
+    return ifSuccess, err

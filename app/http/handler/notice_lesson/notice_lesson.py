@@ -134,3 +134,19 @@ def get_notice_lesson_excel():
         'message': '',
         'notice_lesson': None
     }), 200
+
+
+@notice_lesson_blueprint.route('/notice_lesson/<int:id>/vote', methods=['POST'])
+def notice_lesson_vote(id):
+    (ifSuccess, err) = notice_lesson_controller.notice_lesson_vote(id, request.json.get('vote', True))
+    if err is not None:
+        return jsonify({
+            'code': err.code,
+            'message': err.err_info,
+            'notice_lesson': None
+        }), err.status_code
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'notice_lesson': None
+    }), 200
