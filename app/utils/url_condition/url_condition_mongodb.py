@@ -27,35 +27,35 @@ class UrlCondition(object):
         order_list = []
         sort_list = []
         filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne']
-        for k in url_args:
-            for v in url_args.getlist(k):
+        for key, value in url_args.items():
+            for v in value:
                 try:
                     v = json.loads(v)
                 except:
                     v = v
-                if k == '_per_page' or k == '_page':
-                    self.page_dict[k] = v
-                elif k == '_sort':
+                if key == '_per_page' or key == '_page':
+                    self.page_dict[key] = v
+                elif key == '_sort':
                     v = v.replace(' ', '')
                     sort_list = v.split(',')
-                elif k == '_order':
+                elif key == '_order':
                     v = v.replace(' ', '')
                     order_list = [int(item_order) for item_order in v.split(',')]
-                elif k == '_limit':
-                    self.sort_limit_dict[k] = v
+                elif key == '_limit':
+                    self.sort_limit_dict[key] = v
                 else:
                     isEqual = True  # 筛选是相等的标志
                     for item in filter_list:
-                        if item in k and k.endswith(item):
+                        if item in key and key.endswith(item):
                             isEqual = False
-                            k = k[:len(k) - len(item)]
-                            self.filter_dict[k] = {'${}'.format(item[1:]): v}
+                            key = key[:len(key) - len(item)]
+                            self.filter_dict[key] = {'${}'.format(item[1:]): v}
                             break
                     if isEqual:
-                        if k not in self.filter_dict:
-                            self.filter_dict[k] = {'$in': [v]}
+                        if key not in self.filter_dict:
+                            self.filter_dict[key] = {'$in': [v]}
                         else:
-                            self.filter_dict[k]['$in'].append(v)
+                            self.filter_dict[key]['$in'].append(v)
         if len(order_list) == len(sort_list):
             self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, order_list))
         elif len(order_list) == 0:

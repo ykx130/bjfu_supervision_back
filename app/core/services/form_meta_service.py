@@ -29,6 +29,7 @@ def find_form_meta(name, version=None):
 
 
 def find_form_metas(condition=None):
+
     if condition is None:
         raise CustomError(500, 500, str('条件不可为空'))
     from app.utils.mongodb import mongo

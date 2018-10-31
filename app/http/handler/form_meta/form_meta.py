@@ -6,14 +6,6 @@ from werkzeug.datastructures import ImmutableMultiDict
 
 @form_meta_blueprint.route('/form_metas', methods=['POST'])
 def insert_form_meta():
-    name = request.json['name'] if 'name' in request.json else None
-    (old_form_meta, err) = form_meta_controller.find_form_meta(name)
-    if err is not None:
-        return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'form_meta': None,
-        }), err.status_code
     (ifSuccess, err) = form_meta_controller.insert_form_meta(request.json)
     if err is not None:
         return jsonify({

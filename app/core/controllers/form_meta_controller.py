@@ -25,11 +25,15 @@ def find_history_form_meta(condition):
 def find_form_metas(condition=None):
     condition_fin = dict()
     if condition is None:
-        condition_fin['using'] = True
+        condition_fin['using'] = [True]
     else:
-        for key, value in condition:
-            condition_fin[key] = value
-        condition_fin['using'] = True
+        for key in condition:
+            for value in condition.getlist(key):
+                if key not in condition_fin:
+                    condition_fin[key] = [value]
+                else:
+                    condition_fin[key].append(value)
+        condition_fin['using'] = [True]
     (form_metas, total, err) = form_meta_service.find_form_metas(condition_fin)
     if err is not None:
         return None, None, err
