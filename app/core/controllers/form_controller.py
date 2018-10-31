@@ -55,9 +55,14 @@ def update_form(condition=None, change_item=None):
 
 
 def get_form_map(meta_name):
+    item_map = []
+    word_cloud = []
     if redis_cli.exists("form_service:{}:map".format(meta_name)):
-        return json.loads(redis_cli.get("form_service:{}:map".format(meta_name)))
-    else:
-        return {
-            "item_map":[]
+        item_map = json.loads(redis_cli.get("form_service:{}:map".format(meta_name)))
+    if redis_cli.exists("form_service:{}:word_cloud".format(meta_name)):
+        word_cloud = json.loads(redis_cli.get("form_service:{}:word_cloud".format(meta_name)))
+
+    return {
+            "item_map": item_map,
+            "word_cloud": word_cloud
         }

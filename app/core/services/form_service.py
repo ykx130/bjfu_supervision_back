@@ -1,4 +1,6 @@
 import json
+import jieba
+from collections import Counter
 from flask_login import current_user
 from datetime import datetime
 from app.core.models.form import Form, Value
@@ -153,7 +155,32 @@ def calculate_map(meta_name):
                     for p in point:
                         if p['option']['value'] in v['value']:
                             p['num'] = p['num'] + 1
-    redis_cli.set("form_service:{}:map".format(meta_name), json.dumps({'item_map': list(item_map.values())}))
+            if v.get("item_type") == "raw_text":
+                # 处理文本分词
+                if not word_cloud.get(v['item_name']):
+                    # 首次
+                    value = v['value']
+                    if value:
+                        res = jieba.cut(value)
+                        word_cloud[v['item_name']] = list(res)
+                else:
+                    value = v['value']
+                    if value:
+                        res = jieba.cut(value)
+                        word_cloud[v['item_name']] = word_cloud[v['item_name']] + list(res)
+
+    # word_cloud 转成数组新式
+    word_cloud = [{"item_name": k,
+                   "value":
+                       [
+                           {"word": i[0],
+                            "num": i[1]}
+                           for i in Counter(v).items()]} for k, v in
+                  word_cloud.items()
+                  ]
+
+    redis_cli.set("form_service:{}:word_cloud".format(meta_name), json.dumps(word_cloud))
+    redis_cli.set("form_service:{}:map".format(meta_name), json.dumps(list(item_map.values())))
 
 
 @sub_kafka('form_service')
