@@ -13,7 +13,7 @@ from app.core.controllers import notices_controller
 
 @notices_blueprint.route('/notices')
 def get_notices_num():
-    num = notices_controller.get_notices_num(current_user)
+    num = notices_controller.get_notices_num(current_user.username)
     return jsonify({
         "code": 200,
         "total": num
@@ -22,7 +22,7 @@ def get_notices_num():
 
 @notices_blueprint.route('/notices/newest')
 def get_newest_notice():
-    notice = notices_controller.get_newest_notices(current_user)
+    notice = notices_controller.get_newest_notices(current_user.username)
     return jsonify({
         "code": 200,
         "notice": notice
