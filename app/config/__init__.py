@@ -15,7 +15,7 @@ class Config:
     MONGO_USERNAME = 'superversion'
     MONGO_DBNAME = 'supervision'
     MONGO_PASSWORD = 'bjfupj2018'
-    #SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = True
     MONGO_PORT = 27017
     MAIL_DEBUG = True
     SQLALCHEMY_DATABASE_URI = \

@@ -96,7 +96,7 @@ def find_current_user_activities(username, condition=None):
     (current_user_activities, num, err) = activity_service.find_current_user_activities(username, condition)
     if err is not None:
         return None, None, err
-    state = condition.get('state','canAttend' )
+    state = condition.get('state', 'canAttend')
     if state is None:
         return None, None, CustomError(500, 200, 'state must be given')
     state_list = ['hasAttended', 'canAttend']

@@ -6,7 +6,7 @@ from app.utils.url_condition.url_condition_mysql import UrlCondition, process_qu
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)  # lesson_notice id 关注课程id
-    lesson_id = db.Column(db.String(16), default="")  # 被关注课程的id
+    lesson_id = db.Column(db.String(32), default="")  # 被关注课程的id
     lesson_attribute = db.Column(db.String(8), default="")
     lesson_state = db.Column(db.String(8), default="")
     lesson_level = db.Column(db.String(8), default="")
