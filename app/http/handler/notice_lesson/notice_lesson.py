@@ -120,9 +120,9 @@ def update_notice_lesson(id):
     }), 200
 
 
-@notice_lesson_blueprint.route('/notice_lesson_excel', methods=['POST'])
-def get_notice_lesson_excel():
-    (ifSuccess, err) = notice_lesson_controller.get_notice_lesson_excel(request)
+@notice_lesson_blueprint.route('/notice_lessons/excel/import', methods=['POST'])
+def import_lesson_excel():
+    (ifSuccess, err) = notice_lesson_controller.import_lesson_excel(request)
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -136,7 +136,23 @@ def get_notice_lesson_excel():
     }), 200
 
 
-@notice_lesson_blueprint.route('/notice_lesson/<int:id>/vote', methods=['POST'])
+@notice_lesson_blueprint.route('/notice_lessons/excel/export', methods=['POST'])
+def export_lesson_excel():
+    (ifSuccess, err) = notice_lesson_controller.export_lesson_excel(request.json)
+    if err is not None:
+        return jsonify({
+            'code': err.code,
+            'message': err.err_info,
+            'notice_lesson': None
+        }), err.status_code
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'notice_lesson': None
+    }), 200
+
+
+@notice_lesson_blueprint.route('/notice_lessons/<int:id>/vote', methods=['POST'])
 def notice_lesson_vote(id):
     (ifSuccess, err) = notice_lesson_controller.notice_lesson_vote(id, request.json.get('vote', True))
     if err is not None:

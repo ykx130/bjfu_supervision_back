@@ -63,8 +63,8 @@ def update_notice_lesson(id, request_json):
     return ifSuccess, None
 
 
-def get_notice_lesson_excel(request_json):
-    (ifSuccess, err) = notice_lesson_service.get_lesson_from_excel(request_json)
+def import_lesson_excel(request_json):
+    (ifSuccess, err) = notice_lesson_service.import_lesson_excel(request_json)
     if err is not None:
         return False, err
     return True, None
@@ -73,3 +73,10 @@ def get_notice_lesson_excel(request_json):
 def notice_lesson_vote(id, vote=True):
     (ifSuccess, err) = notice_lesson_service.notice_lesson_vote(id, vote)
     return ifSuccess, err
+
+
+def export_lesson_excel(request_json):
+    (ifSuccess, err) = notice_lesson_service.export_lesson_excel(request_json)
+    if err is not None:
+        return False, err
+    return True, None
