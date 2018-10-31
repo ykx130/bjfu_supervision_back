@@ -116,6 +116,7 @@ def request_to_class(json_request):
 
 def calculate_map(meta_name):
     item_map = {}
+    word_cloud = {}
     from app.utils.mongodb import mongo
     forms = mongo.db.form.find({"bind_meta_name": meta_name})
 
