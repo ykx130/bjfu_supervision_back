@@ -190,7 +190,7 @@ def notice_lesson_vote(id, vote=True):
 def import_lesson_excel(request_json):
     if 'filename' in request_json.files:
         from app import basedir
-        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S')+'.xlsx'
+        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
         file = request_json.files['filename']
         file.save(filename)
         df = pandas.read_excel(filename)
@@ -227,21 +227,20 @@ def import_lesson_excel(request_json):
 
 def export_lesson_excel(request_json):
     if 'notice_lesson_ids' not in request_json:
-        return False, CustomError(500, 200, 'notice lesson ids must be given')
-    notice_lesson_ids = request_json['notice_lesson_ids']
+        notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True)
+    else:
+        notice_lesson_ids = request_json['notice_lesson_ids']
+        notice_lessons = NoticeLesson.query.filter(
+            NoticeLesson.lesson_id.in_(notice_lesson_ids).filter(NoticeLesson.using == True))
     column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                    '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                    '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'votes'}
     frame_dict = dict()
-    for notice_lesson_id in notice_lesson_ids:
-        notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == notice_lesson_id).first()
-        if notice_lesson is None:
-            return False, CustomError(404, 404, 'notice lesson not found')
+    for notice_lesson in notice_lessons:
         lesson = Lesson.query.filter(Lesson.lesson_id == notice_lesson.lesson_id).first()
         if lesson is None:
             return False, CustomError(404, 404, 'lesson not found')
         for key, value in column_dict.items():
-
             excel_value = getattr(lesson, value) if hasattr(lesson, value) else getattr(notice_lesson, value)
             if key not in frame_dict:
                 frame_dict[key] = [excel_value]
@@ -250,7 +249,7 @@ def export_lesson_excel(request_json):
     try:
         frame = pandas.DataFrame(frame_dict)
         from app import basedir
-        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S')+'.xlsx'
+        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
         frame.to_excel(filename, sheet_name="123", index=False, header=True)
     except Exception as e:
         return False, CustomError(500, 500, str(e))

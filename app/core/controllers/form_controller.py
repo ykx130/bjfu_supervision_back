@@ -15,6 +15,7 @@ def insert_form(request):
         return False, err
     send_kafka_message(topic='form_service',
                        method='add_form',
+                       username=form.meta.get('guider', None),
                        form=form_model)
     return ifSuccess, None
 
@@ -58,6 +59,11 @@ def update_form(condition=None, change_item=None):
     (ifSuccess, err) = form_service.update_form(condition, change_item)
     if err is not None:
         return False, err
+    if 'status' in change_item:
+        send_kafka_message(topic='form_service',
+                       method='add_form',
+                       username=form.meta.get('guider', None),
+                       form=form_model)
     return ifSuccess, None
 
 

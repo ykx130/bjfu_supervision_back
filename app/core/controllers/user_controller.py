@@ -1,4 +1,5 @@
-from app.core.services import user_service, supervisor_service
+from app.core.services import user_service, supervisor_service, lesson_record_service
+from app.streaming import send_kafka_message
 
 
 def find_users(condition):
@@ -35,6 +36,11 @@ def insert_user(request_json):
     (ifSuccess, err) = user_service.insert_user(request_json)
     if err is not None:
         return None, err
+    role_names = request_json.get('role_names', [])
+    if '督导' in role_names:
+        send_kafka_message(topic='user_service',
+                           method='add_supervisor',
+                           usernames=[request_json.get('username', None)])
     return ifSuccess, None
 
 
@@ -49,6 +55,11 @@ def update_user(username, request_json):
     (ifSuccess, err) = user_service.update_user(username, request_json)
     if err is not None:
         return None, err
+    role_names = request_json.get('role_names', [])
+    if '督导' in role_names:
+        send_kafka_message(topic='user_service',
+                           method='add_supervisor',
+                           usernames=[username])
     return ifSuccess, None
 
 
@@ -85,6 +96,9 @@ def batch_renewal(request_json):
     (ifSuccess, err) = user_service.batch_renewal(request_json)
     if err is not None:
         return False, err
+    send_kafka_message(topic='user_service',
+                       method='add_supervisor',
+                       usernames=[request_json.get('usernames', None)])
     return ifSuccess, None
 
 

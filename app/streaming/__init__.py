@@ -24,10 +24,10 @@ def sub_kafka(topic=''):
 
     return wrapper
 
-producer = KafkaProducer(bootstrap_servers=Config.KAFLKA_HOST,
-                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 def send_kafka_message(topic, method, **args):
+    producer = KafkaProducer(bootstrap_servers=Config.KAFLKA_HOST,
+                             value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     producer.send(topic, value={
         "method": method,

@@ -243,21 +243,20 @@ def import_lesson_excel(request_json):
 
 def export_lesson_excel(request_json):
     if 'model_lesson_ids' not in request_json:
-        return False, CustomError(500, 200, 'notice lesson ids must be given')
-    model_lesson_ids = request_json['model_lesson_ids']
+        model_lessons = ModelLesson.query.filter(ModelLesson.using == True)
+    else:
+        model_lesson_ids = request_json['model_lesson_ids']
+        model_lessons = ModelLesson.query.filter(ModelLesson.lesson_id.in_(model_lesson_ids)).filter(
+            ModelLesson.using == True)
     column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                    '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                    '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
     frame_dict = dict()
-    for model_lesson_id in model_lesson_ids:
-        model_lesson = ModelLesson.query.filter(ModelLesson.id == model_lesson_id).first()
-        if model_lesson is None:
-            return False, CustomError(404, 404, 'notice lesson not found')
+    for model_lesson in model_lessons:
         lesson = Lesson.query.filter(Lesson.lesson_id == model_lesson.lesson_id).first()
         if lesson is None:
             return False, CustomError(404, 404, 'lesson not found')
         for key, value in column_dict.items():
-
             excel_value = getattr(lesson, value) if hasattr(lesson, value) else getattr(model_lesson, value)
             if key not in frame_dict:
                 frame_dict[key] = [excel_value]
