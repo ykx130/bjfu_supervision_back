@@ -72,9 +72,7 @@ def find_history_form_metas():
 
 @form_meta_blueprint.route('/form_metas/<string:name>/history')
 def find_history_form_meta_by_name(name):
-    (form_metas, total, err) = form_meta_controller.find_history_form_meta(ImmutableMultiDict(
-        {"name": name}
-    ))
+    (form_metas, total, err) = form_meta_controller.find_history_form_meta(name, request.args)
     if err is not None:
         return jsonify({
             'code': err.code,

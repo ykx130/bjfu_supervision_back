@@ -9,7 +9,17 @@ def find_form_meta(name, version=None):
     return form_meta_model, None
 
 
-def find_history_form_meta(condition):
+def find_history_form_meta(name, condition):
+    condition_fin = dict()
+    if condition is None:
+        condition_fin['name'] = [name]
+    else:
+        for key in condition:
+            for value in condition.getlist(key):
+                if key not in condition_fin:
+                    condition_fin[key] = [value]
+                else:
+                    condition_fin[key].append(value)
     (form_metas, total, err) = form_meta_service.find_form_metas(condition)
     if err is not None:
         return None, None, err
