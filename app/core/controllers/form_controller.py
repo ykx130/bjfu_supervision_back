@@ -20,7 +20,14 @@ def insert_form(request):
 
 
 def find_forms(condition=None):
-    (forms, num, err) = form_service.find_forms(condition)
+    condition_fin = dict()
+    for key in condition:
+        for value in condition.getlist(key):
+            if key not in condition_fin:
+                condition_fin[key] = [value]
+            else:
+                condition_fin[key].append(value)
+    (forms, num, err) = form_service.find_forms(condition_fin)
     if err is not None:
         return None, None, err
     forms_model = list()
