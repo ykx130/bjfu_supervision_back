@@ -20,6 +20,7 @@ def find_history_form_meta(name, condition):
                     condition_fin[key] = [value]
                 else:
                     condition_fin[key].append(value)
+        condition_fin['name'] = [name]
     (form_metas, total, err) = form_meta_service.find_form_metas(condition)
     if err is not None:
         return None, None, err
