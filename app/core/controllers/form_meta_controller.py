@@ -57,7 +57,14 @@ def find_form_metas(condition=None):
 
 
 def find_form_meta_history(condition):
-    (form_metas, num, err) = form_meta_service.find_form_metas(condition)
+    condition_fin = dict()
+    for key in condition:
+        for value in condition.getlist(key):
+            if key not in condition_fin:
+                condition_fin[key] = [value]
+            else:
+                condition_fin[key].append(value)
+    (form_metas, num, err) = form_meta_service.find_form_metas(condition_fin)
     if err is not None:
         return None, None, err
     form_metas_models = list()
