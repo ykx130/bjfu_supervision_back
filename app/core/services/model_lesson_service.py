@@ -1,6 +1,8 @@
 from app.core.models.lesson import ModelLesson, Lesson, Term
 from app.utils.mysql import db
 from app.utils.Error import CustomError
+import datetime
+import pandas
 
 
 def find_model_lesson(id):
@@ -55,9 +57,9 @@ def insert_model_lessons(request_json):
     if lesson_ids is None:
         return False, CustomError(500, 200, 'lesson_ids should be given')
     term = request_json.get('term', None)
-    if not term :
+    if not term:
         term = Term.query.order_by(
-        Term.name.desc()).filter(Term.using == True).first().name
+            Term.name.desc()).filter(Term.using == True).first().name
     for lesson_id in lesson_ids:
         model_lesson = ModelLesson()
         try:
@@ -197,5 +199,75 @@ def model_lesson_vote(id, vote=True):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True,
+
+
+def import_lesson_excel(request_json):
+    if 'filename' in request_json.files:
+        from app import basedir
+        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+        file = request_json.files['filename']
+        file.save(filename)
+        df = pandas.read_excel(filename)
+    else:
+        return False, CustomError(500, 200, 'file must be given')
+    column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
+                   '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
+                   '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
+    filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute',
+                   'lesson_grade']
+    row_num = df.shape[0]
+    for i in range(0, row_num):
+        lessons = Lesson.query
+        for col_name_c, col_name_e in column_dict.items():
+            if col_name_e in filter_list and hasattr(Lesson, col_name_e):
+                lessons = lessons.filter(getattr(Lesson, col_name_e) == str(df.iloc[i][col_name_c]))
+        lesson = lessons.first()
+        if lesson is None:
+            return False, CustomError(404, 404, 'lesson not found')
+        model_lesson = ModelLesson()
+        for col_name_c, col_name_e in column_dict.items():
+            if hasattr(model_lesson, col_name_e):
+                setattr(model_lesson, col_name_e, str(df.iloc[i][col_name_c]))
+        model_lesson.lesson_id = lesson.lesson_id
+        model_lesson.term = '_'.join([str(df.iloc[i]['开课学年']), str(df.iloc[i]['开课学期'])])
+        db.session.add(model_lesson)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
+
+
+def export_lesson_excel(request_json):
+    if 'model_lesson_ids' not in request_json:
+        return False, CustomError(500, 200, 'notice lesson ids must be given')
+    model_lesson_ids = request_json['model_lesson_ids']
+    column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
+                   '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
+                   '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
+    frame_dict = dict()
+    for model_lesson_id in model_lesson_ids:
+        model_lesson = ModelLesson.query.filter(ModelLesson.id == model_lesson_id).first()
+        if model_lesson is None:
+            return False, CustomError(404, 404, 'notice lesson not found')
+        lesson = Lesson.query.filter(Lesson.lesson_id == model_lesson.lesson_id).first()
+        if lesson is None:
+            return False, CustomError(404, 404, 'lesson not found')
+        for key, value in column_dict.items():
+
+            excel_value = getattr(lesson, value) if hasattr(lesson, value) else getattr(model_lesson, value)
+            if key not in frame_dict:
+                frame_dict[key] = [excel_value]
+            else:
+                frame_dict[key].append(excel_value)
+    try:
+        frame = pandas.DataFrame(frame_dict)
+        from app import basedir
+        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+        frame.to_excel(filename, sheet_name="123", index=False, header=True)
+    except Exception as e:
         return False, CustomError(500, 500, str(e))
     return True, None
