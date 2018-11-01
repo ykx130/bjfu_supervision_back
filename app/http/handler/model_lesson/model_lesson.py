@@ -131,3 +131,35 @@ def model_lesson_vote(id):
         'message': '',
         'model_lesson': None
     }), 200
+
+
+@model_lesson_blueprint.route('/model_lessons/excel/import', methods=['POST'])
+def import_lesson_excel():
+    (ifSuccess, err) = model_lesson_controller.import_lesson_excel(request)
+    if err is not None:
+        return jsonify({
+            'code': err.code,
+            'message': err.err_info,
+            'notice_lesson': None
+        }), err.status_code
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'notice_lesson': None
+    }), 200
+
+
+@model_lesson_blueprint.route('/model_lessons/excel/export', methods=['POST'])
+def export_lesson_excel():
+    (ifSuccess, err) = model_lesson_controller.export_lesson_excel(request.json)
+    if err is not None:
+        return jsonify({
+            'code': err.code,
+            'message': err.err_info,
+            'notice_lesson': None
+        }), err.status_code
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'notice_lesson': None
+    }), 200
