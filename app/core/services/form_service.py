@@ -4,6 +4,7 @@ from collections import Counter
 from flask_login import current_user
 from datetime import datetime
 from app.core.models.form import Form, Value
+from app.core.services import lesson_record_service
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
@@ -183,6 +184,26 @@ def calculate_map(meta_name):
     redis_cli.set("form_service:{}:map".format(meta_name), json.dumps(list(item_map.values())))
 
 
+def user_forms_num(username):
+    from app.utils.mongodb import mongo
+    try:
+        total_datas = mongo.db.form.find(
+            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}})
+    except Exception as e:
+        return None, None, None, CustomError(500, 500, str(e))
+    try:
+        has_submitted_datas = mongo.db.form.find(
+            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'status': {'$in': ['已完成']}})
+    except Exception as e:
+        return None, None, None, CustomError(500, 500, str(e))
+    try:
+        to_be_submitted_data = mongo.db.form.find(
+            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'status': {'$in': ['待提交']}})
+    except Exception as e:
+        return None, None, None, CustomError(500, 500, str(e))
+    return total_datas.count(), has_submitted_datas.count(), to_be_submitted_data.count(), None
+
+
 @sub_kafka('form_service')
 def form_service_receiver(message):
     method = message.get("method")
@@ -190,3 +211,6 @@ def form_service_receiver(message):
         return
     if method == 'add_form':
         calculate_map(message.get("args", {}).get("form", {}).get("bind_meta_name"))
+        lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username"))
+    if method == 'repulse_form':
+        lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username"))

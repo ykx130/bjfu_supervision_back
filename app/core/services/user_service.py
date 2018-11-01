@@ -107,7 +107,7 @@ def insert_user(request_json):
     role_names = request_json['role_names'] if 'role_names' in request_json else []
     for role_name in role_names:
         if role_name == "督导":
-            insert_supervisor(term, username)
+            insert_supervisor(term, request_json)
         user_role = UserRole()
         role = Role.query.filter(Role.name == role_name).filter(Term.using == True).first()
         user_role.username = user.username
@@ -122,12 +122,16 @@ def insert_user(request_json):
     return True, None
 
 
-def insert_supervisor(term, username):
+def insert_supervisor(term, request_json):
     school_term = SchoolTerm(term)
     for i in range(0, 4):
         supervisor = Supervisor()
         supervisor.term = school_term.term_name
-        supervisor.username = username
+        for key, value in request_json:
+            if key == 'term':
+                continue
+            if hasattr(supervisor, key):
+                setattr(supervisor, key, value)
         school_term = school_term + 1
         db.session.add(supervisor)
 
@@ -174,9 +178,18 @@ def update_user(username, request_json):
     if "督导" in del_role_names:
         del_role_names.remove("督导")
         delete_supervisor(term, username)
-    if "督导" in new_role_names:
+    elif "督导" in new_role_names:
         new_role_names.remove("督导")
-        insert_supervisor(term, username)
+        insert_supervisor(term, request_json)
+    else:
+        supervisors = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.term>=term).filter(Supervisor.using == True)
+        for supervisor in supervisors:
+            for key, value in request_json:
+                if key == 'term':
+                    continue
+                if hasattr(supervisor, key):
+                    setattr(supervisor, key, value)
+            db.session.add(supervisor)
     try:
         del_roles = UserRole.query.filter(UserRole.term == term).filter(UserRole.username == username).filter(
             UserRole.role_name.in_(del_role_names)).filter(UserRole.using == True)
