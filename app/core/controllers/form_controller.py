@@ -61,9 +61,7 @@ def update_form(condition=None, change_item=None):
         return False, err
     if 'status' in change_item:
         send_kafka_message(topic='form_service',
-                       method='add_form',
-                       username=form.meta.get('guider', None),
-                       form=form_model)
+                           method='add_form')
     return ifSuccess, None
 
 
@@ -76,6 +74,6 @@ def get_form_map(meta_name):
         word_cloud = json.loads(redis_cli.get("form_service:{}:word_cloud".format(meta_name)))
 
     return {
-            "item_map": item_map,
-            "word_cloud": word_cloud
-        }
+        "item_map": item_map,
+        "word_cloud": word_cloud
+    }

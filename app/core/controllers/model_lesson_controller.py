@@ -74,10 +74,10 @@ def model_lesson_vote(id, vote=True):
 
 
 def export_lesson_excel(request_json):
-    (ifSuccess, err) = model_lesson_service.export_lesson_excel(request_json)
+    (filename, err) = model_lesson_service.export_lesson_excel(request_json)
     if err is not None:
-        return False, err
-    return True, None
+        return None, err
+    return filename, None
 
 
 def import_lesson_excel(request_json):

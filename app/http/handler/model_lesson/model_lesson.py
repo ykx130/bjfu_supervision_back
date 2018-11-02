@@ -151,15 +151,15 @@ def import_lesson_excel():
 
 @model_lesson_blueprint.route('/model_lessons/excel/export', methods=['POST'])
 def export_lesson_excel():
-    (ifSuccess, err) = model_lesson_controller.export_lesson_excel(request.json)
+    (filename, err) = model_lesson_controller.export_lesson_excel(request.json)
     if err is not None:
         return jsonify({
             'code': err.code,
             'message': err.err_info,
-            'notice_lesson': None
+            'filename': None
         }), err.status_code
     return jsonify({
         'code': 200,
         'message': '',
-        'notice_lesson': None
+        'filename': filename
     }), 200
