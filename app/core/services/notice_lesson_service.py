@@ -239,7 +239,7 @@ def export_lesson_excel(request_json):
     for notice_lesson in notice_lessons:
         lesson = Lesson.query.filter(Lesson.lesson_id == notice_lesson.lesson_id).first()
         if lesson is None:
-            return False, CustomError(404, 404, 'lesson not found')
+            return None, CustomError(404, 404, 'lesson not found')
         for key, value in column_dict.items():
             excel_value = getattr(lesson, value) if hasattr(lesson, value) else getattr(notice_lesson, value)
             if key not in frame_dict:
@@ -252,5 +252,5 @@ def export_lesson_excel(request_json):
         filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
         frame.to_excel(filename, sheet_name="123", index=False, header=True)
     except Exception as e:
-        return False, CustomError(500, 500, str(e))
-    return True, None
+        return None, CustomError(500, 500, str(e))
+    return filename, None
