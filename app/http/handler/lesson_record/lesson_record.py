@@ -14,12 +14,12 @@ def find_term_lesson_records():
                 'lesson_records': None,
                 'total': None
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_records': lesson_records,
-            'total': num
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_records': lesson_records,
+        'total': num
+    }), 200
 
 
 @lesson_record_blueprint.route('/lesson_records/history')
@@ -33,12 +33,12 @@ def find_lesson_records_history():
                 'lesson_records': None,
                 'total': None
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_records': lesson_records,
-            'total': num
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_records': lesson_records,
+        'total': num
+    }), 200
 
 
 @lesson_record_blueprint.route('/lesson_records/<string:username>/history')
@@ -52,12 +52,12 @@ def find_lesson_record_history(username):
                 'lesson_records': None,
                 'total': None
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_records': lesson_records,
-            'total': num
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_records': lesson_records,
+        'total': num
+    }), 200
 
 
 @lesson_record_blueprint.route('/lesson_records/<string:username>/term/<string:term>')
@@ -70,11 +70,11 @@ def find_lesson_record(username, term):
                 'message': err.err_info,
                 'lesson_record': None,
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_record': lesson_record,
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_record': lesson_record,
+    }), 200
 
 
 @lesson_record_blueprint.route('/lesson_records', methods=['POST'])
@@ -87,11 +87,11 @@ def insert_lesson_record():
                 'message': err.err_info,
                 'lesson_record': None,
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_record': None,
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_record': None,
+    }), 200
 
 
 @lesson_record_blueprint.route('/lesson_records/<string:username>/term/<string:term>', methods=['DELETE'])
@@ -104,11 +104,11 @@ def delete_lesson_record(username, term):
                 'message': err.err_info,
                 'lesson_record': None,
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_record': None,
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_record': None,
+    }), 200
 
 
 @lesson_record_blueprint.route('/lesson_records/<string:username>/term/<string:term>', methods=['PUT'])
@@ -121,8 +121,8 @@ def update_lesson_record(username, term):
                 'message': err.err_info,
                 'lesson_record': None,
             }), err.status_code
-        return jsonify({
-            'code': 200,
-            'message': '',
-            'lesson_record': None,
-        }), 200
+    return jsonify({
+        'code': 200,
+        'message': '',
+        'lesson_record': None,
+    }), 200
