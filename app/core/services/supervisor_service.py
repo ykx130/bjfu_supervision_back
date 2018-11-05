@@ -1,4 +1,4 @@
-from app.core.models.user import User, UserRole, Supervisor
+from app.core.models.user import User, Supervisor
 from app.core.models.lesson import Term, SchoolTerm
 from app.utils.mysql import db
 from app.utils.Error import CustomError
@@ -37,29 +37,6 @@ def get_supervisors(condition=None):
     per_page = int(condition['_per_page']) if '_per_page' in condition else 20
     pagination = supervisors.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
-
-
-def supervisor_to_dict(user, supervisor):
-    try:
-        supervisor_dict = {
-            'id': user.id,
-            'username': user.username,
-            'name': user.name,
-            'sex': user.sex,
-            'email': user.email,
-            'phone': user.phone,
-            'state': user.state,
-            'unit': user.unit,
-            'status': user.status,
-            'prorank': user.prorank,
-            'skill': user.skill,
-            'group': supervisor.group,
-            'work_state': supervisor.work_state,
-            'role_names': [role.name for role in user.roles]
-        }
-    except Exception as e:
-        return None, CustomError(500, 500, str(e))
-    return supervisor_dict, None
 
 
 def get_supervisors_expire(condition=None):

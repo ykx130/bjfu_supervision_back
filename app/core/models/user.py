@@ -23,42 +23,21 @@ class User(db.Model, UserMixin):
     prorank = db.Column(db.String(8), default="")
     skill = db.Column(db.String(16), default="")
     using = db.Column(db.Boolean, default=True)
+    admin = db.Column(db.Boolean, default=False)
+    leader = db.Column(db.Boolean, default=False)
+    guider = db.Column(db.Boolean, default=False)
 
     @staticmethod
     def users(condition: dict):
-        name_map = {'users': User, 'roles': Role, 'groups': Group, 'user_roles': UserRole, 'supervisors': Supervisor}
-        query = User.query.outerjoin(UserRole, UserRole.username == User.username).outerjoin(Supervisor,
-                                                                                             Supervisor.username == User.username).outerjoin(
-            Role, UserRole.role_name == Role.name).filter(User.using == True)
+        name_map = {'users': User, 'groups': Group, 'supervisors': Supervisor}
+        query = User.query.outerjoin(Supervisor, Supervisor.username == User.username).filter(User.using == True)
         url_condition = UrlCondition(condition)
         query = process_query(query, url_condition, name_map, User)
         return query
 
     @property
-    def roles(self, term=None):
-        from app.core.models.lesson import Term
-        term = term if term is not None else Term.query.order_by(Term.name.desc()).filter(
-            Term.using == True).first().name
-        role_names = [user_role.role_name for user_role in
-                      UserRole.query.filter(UserRole.username == self.username).filter(UserRole.using == True).filter(
-                          UserRole.term == term)]
-        supervisor = Supervisor.query.filter(Supervisor.term == term).filter(
-            Supervisor.username == self.username).filter(Supervisor.using == True).first()
-        if supervisor is not None:
-            role_names.append("督导")
-        return Role.query.filter(Role.name.in_(role_names)).filter(Role.using == True)
-
-    @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
-
-    @property
-    def permissions(self):
-        permissions = list()
-        for role in self.roles:
-            permissions = permissions.extend(role.permissions)
-        permissions = set(permissions)
-        return permissions
 
     @password.setter
     def password(self, password: str):
@@ -67,16 +46,8 @@ class User(db.Model, UserMixin):
     def verify_password(self, password: str):
         return check_password_hash(self.password_hash, password)
 
-    def can(self, perm: str):
-        return perm in self.permissions
 
-
-class AnonymousUser(AnonymousUserMixin):
-    def can(self, permissions):
-        return False
-
-
-login_manager.anonymous_user = AnonymousUser
+login_manager.anonymous_user = AnonymousUserMixin
 
 
 class Group(db.Model):
@@ -108,6 +79,8 @@ class Supervisor(db.Model):
     work_state = db.Column(db.String(8), default="")
     term = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
+    grouper = db.Column(db.Boolean, default=False)
+    main_grouper = db.Column(db.Boolean, default=False)
 
     @staticmethod
     def supervisors(condition):
@@ -121,39 +94,6 @@ class Supervisor(db.Model):
             if hasattr(Supervisor, key):
                 supervisors = supervisors.filter(getattr(Supervisor, key) == value)
         return supervisors
-
-
-class UserRole(db.Model):
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    username = db.Column(db.String(64), default="")
-    role_name = db.Column(db.String(32), default="")
-    term = db.Column(db.String(32), default="")
-    using = db.Column(db.Boolean, default=True)
-
-    @staticmethod
-    def user_roles(condition):
-        name_map = {"user_roles": UserRole}
-        url_condition = UrlCondition(condition)
-        query = UserRole.query.filter(UserRole.using == True)
-        query = process_query(query, url_condition, name_map, UserRole)
-        return query
-
-
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    name = db.Column(db.String(64), unique=True, default="")
-    permissions = db.Column(db.JSON, default=[])
-    using = db.Column(db.Boolean, default=True)
-
-    @staticmethod
-    def roles(condition):
-        name_map = {"roles": Role}
-        url_condition = UrlCondition(condition)
-        query = Role.query.filter(Role.using == True)
-        query = process_query(query, url_condition, name_map, Role)
-        return query
 
 
 class Event(db.Model):
