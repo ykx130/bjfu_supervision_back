@@ -106,7 +106,7 @@ def get_supervisors():
 
 @user_blueprint.route('/supervisors/expire', methods=['GET'])
 def find_supervisors_expire():
-    (supervisors, total, err) = user_controller.find_supervisors(request.args)
+    (supervisors, total, err) = user_controller.find_supervisors_expire(request.args)
     if err is not None:
         return jsonify({
             'code': err.code,
