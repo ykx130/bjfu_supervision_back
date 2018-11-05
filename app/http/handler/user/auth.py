@@ -2,6 +2,7 @@ from app.http.handler.user import user_blueprint
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import request, jsonify
 from app.core.models.user import User
+from app.core.controllers import user_controller
 from app.utils.misc import convert_datetime_to_string
 
 
@@ -53,28 +54,15 @@ def logout():
 @user_blueprint.route("/current_user", methods=["GET"])
 @login_required
 def get_current():
-    try:
-        user = User.query.filter(User.username == current_user.username).filter(User.using == True).first()
-    except Exception as e:
+    (user, err) = user_controller.find_user(current_user.username)
+    if err is not None:
         return jsonify({
-            "code": 500,
-            "message": str(e)
-        }), 401
+            'code': err.code,
+            'message': err.err_info,
+            'current_user': None,
+        }), err.status_code
     return jsonify({
-        "code": 200,
-        "message": "",
-        "user": {
-            'id': user.id,
-            'username': user.username,
-            'name': user.name,
-            'sex': user.sex,
-            'email': user.email,
-            'phone': user.phone,
-            'state': user.state,
-            'unit': user.unit,
-            'status': user.status,
-            'prorank': user.prorank,
-            'skill': user.skill,
-            'role_names': [role.name for role in user.roles]
-        }
+        'code': 200,
+        'message': '',
+        'current_user': user
     }), 200
