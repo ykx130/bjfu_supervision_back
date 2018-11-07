@@ -17,6 +17,8 @@ def insert_form(request):
                        method='add_form',
                        username=form.meta.get('guider', None),
                        form=form_model)
+
+    form_service.push_new_form_message(form_model)
     return ifSuccess, None
 
 
@@ -62,6 +64,14 @@ def update_form(condition=None, change_item=None):
     if 'status' in change_item:
         send_kafka_message(topic='form_service',
                            method='add_form')
+        if change_item.get('status') == '待提交':
+            (form, err) = form_service.find_form(condition.get('_id'))
+            if err is not None:
+                return False, err
+            (form_model, err) = form_service.to_json_dict(form)
+            if err is not None:
+                return False, err
+            form_service.push_put_back_form_message(form_model)
     return ifSuccess, None
 
 

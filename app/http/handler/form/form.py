@@ -26,7 +26,7 @@ def new_form():
 @form_blueprint.route('/forms')
 def get_forms():
     args = request.args
-    if '管理员' not in current_user.role_names:
+    if not  current_user.admin:
         if current_user.is_group == True:
             args = {**request.args, 'meta.guider_group': [current_user.username]}
 

@@ -18,7 +18,7 @@ def find_form_meta(name, version=None):
         if data is None:
             return None, CustomError(404, 404, 'form meta not found')
         return data, None
-    condition = {'name': name, 'version': version}
+    condition = {'name':    name, 'version': version}
     try:
         data = mongo.db.form_meta.find_one(condition)
     except Exception as e:
