@@ -138,21 +138,19 @@ def batch_renewal():
     }), 200
 
 
-@user_blueprint.route('/roles', methods=['GET'])
-def get_roles():
-    (roles, total, err) = user_controller.find_roles(request.args)
+@user_blueprint.route('/supervisors', methods=['POST'])
+def insert_supervisor():
+    (ifSuccess, err) = user_controller.insert_supervisor(request.json)
     if err is not None:
         return jsonify({
             'code': err.code,
             'message': err.err_info,
-            'roles': None,
-            'total': None
+            'user': None,
         }), err.status_code
     return jsonify({
         'code': 200,
-        'roles': roles,
-        'total': total,
-        'message': ''
+        'message': '',
+        'user': None
     }), 200
 
 

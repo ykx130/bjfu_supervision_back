@@ -65,3 +65,19 @@ def get_supervisors_expire(condition=None):
     per_page = int(condition['_per_page']) if '_per_page' in condition else 20
     pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
+
+
+def insert_supervisor(request_json):
+    username = request_json.get('username', None)
+    if username is None:
+        return False, CustomError(500, 200, 'username must be given')
+    supervisor = Supervisor()
+    for key, value in request_json.items():
+        if hasattr(supervisor, key):
+            setattr(supervisor, key, value)
+    db.session.add(supervisor)
+    try:
+        db.session.commit()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    return True, None

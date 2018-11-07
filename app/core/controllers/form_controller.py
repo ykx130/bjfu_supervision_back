@@ -15,6 +15,7 @@ def insert_form(request):
         return False, err
     send_kafka_message(topic='form_service',
                        method='add_form',
+                       term=form.meta.get('term', None),
                        username=form.meta.get('guider', None),
                        form=form_model)
 

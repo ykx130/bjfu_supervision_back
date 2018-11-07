@@ -1,4 +1,5 @@
 from app.core.models.lesson import LessonRecord
+from app.core.models.user import User, Supervisor
 from app.utils.mysql import db
 from app.utils.Error import CustomError
 from app.core.services import form_service, user_service, lesson_service
@@ -79,6 +80,27 @@ def delete_lesson_record(username, term):
     return True, None
 
 
+def insert_lesson_record_term(username, term):
+    try:
+        user = User.query.filter(User.username == username).filter(User.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    if user is None:
+        return False, CustomError(404, 404, 'lesson_record not found')
+    try:
+        supervisor = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.term == term).filter(
+            Supervisor.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    if supervisor is None:
+        return False, CustomError(404, 404, 'supervisor not found')
+    lesson_record = LessonRecord()
+    lesson_record.username = username
+    lesson_record.group_name = supervisor.group
+    lesson_record.term = supervisor.term
+    lesson_record.name = user.name
+
+
 def update_lesson_record(username, term, request_json):
     try:
         lesson_record = LessonRecord.query.filter(LessonRecord.username == username).filter(
@@ -99,7 +121,7 @@ def update_lesson_record(username, term, request_json):
 
 
 def change_user_lesson_record_num(username, term):
-    (total_times, has_submitted_times, to_be_submitted_times, err) = form_service.user_forms_num(username)
+    (total_times, has_submitted_times, to_be_submitted_times, err) = form_service.user_forms_num(username, term)
     if err is not None:
         raise err
     (ifSuccess, err) = update_lesson_record(username, term,

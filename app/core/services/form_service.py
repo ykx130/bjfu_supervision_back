@@ -4,6 +4,7 @@ from collections import Counter
 from flask_login import current_user
 from datetime import datetime
 from app.core.models.form import Form, Value
+from app.core.models.lesson import Term
 from app.core.services import lesson_record_service
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
@@ -184,21 +185,25 @@ def calculate_map(meta_name):
     redis_cli.set("form_service:{}:map".format(meta_name), json.dumps(list(item_map.values())))
 
 
-def user_forms_num(username):
+def user_forms_num(username, term):
     from app.utils.mongodb import mongo
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
     try:
         total_datas = mongo.db.form.find(
-            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}})
+            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'meta.term': {'$in': [term]}})
     except Exception as e:
         return None, None, None, CustomError(500, 500, str(e))
     try:
         has_submitted_datas = mongo.db.form.find(
-            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'status': {'$in': ['已完成']}})
+            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'status': {'$in': ['已完成']},
+             'meta.term': {'$in': [term]}})
     except Exception as e:
         return None, None, None, CustomError(500, 500, str(e))
     try:
         to_be_submitted_data = mongo.db.form.find(
-            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'status': {'$in': ['待提交']}})
+            {'meta.guider': {'$in': [username]}, 'using': {'$in': [True]}, 'status': {'$in': ['待提交']},
+             'meta.term': {'$in': [term]}})
     except Exception as e:
         return None, None, None, CustomError(500, 500, str(e))
     return total_datas.count(), has_submitted_datas.count(), to_be_submitted_data.count(), None
@@ -253,12 +258,21 @@ def push_put_back_form_message(form_model):
                        )
 
 @sub_kafka('form_service')
-def form_service_receiver(message):
+def user_form_service_receiver(message):
     method = message.get("method")
     if not method:
         return
-    if method == 'add_form':
+    if method == 'add_form' or method == 'repulse_form':
         calculate_map(message.get("args", {}).get("form", {}).get("bind_meta_name"))
-        lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username"))
+
+
+@sub_kafka('user_service')
+def user_user_service_receiver(message):
+    method = message.get("method")
+    if not method:
+        return
+    if method == 'add_supervisor' or method == 'delete_supervisor':
+        lesson_record_service.insert_lesson_record_term(message.get("args", {}).get("username", None),
+                                                        message.get("args", {}.get("term", None)))
     if method == 'repulse_form':
         lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username"))
