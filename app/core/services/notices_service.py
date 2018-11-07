@@ -44,33 +44,6 @@ def push_new_message(username, notice):
     return True
 
 
-def push_new_form_message(form):
-    """
-    推送问卷新增的消息
-    :return:
-    """
-    meta = form.get("meta")
-    if not meta:
-        return
-
-    tmpl = "课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被{created_by} 评价， 评价者{guider}, 督导小组{group}."
-    push_new_message('admin', {
-        "title": "问卷新增",
-        "body": tmpl.format(lesson_name=meta.get("lesson", {}).get("lesson_name", ''),
-                            created_at=meta.get("created_at"),
-                            created_by=meta.get("created_by"),
-                            guider=meta.get("guider_name"),
-                            group=meta.get("guider_group"),
-                            lesson_level=meta.get("lesson", {}).get("lesson_level", ''),
-                            lesson_teacher=meta.get("lesson", {}).get("lesson_teacher_name", '')
-                            )
-    })
-
-
-@sub_kafka('form_service')
+@sub_kafka('notice_service')
 def notice_service_receiver(message):
-    method = message.get("method")
-    if not method:
-        return
-    if method == 'add_form':
-        push_new_form_message(message.get("args", {}).get("form", {}))
+    push_new_message(message.get("args", {}).get("username"), message.get("args", {}).get("msg"))
