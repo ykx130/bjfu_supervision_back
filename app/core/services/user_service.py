@@ -4,6 +4,8 @@ from app.core.models.user import User, Group, Supervisor
 from app.core.models.lesson import Term, SchoolTerm
 from app.utils.Error import CustomError
 from flask_login import current_user
+from app.core.services import lesson_record_service
+from app.streaming import sub_kafka
 
 
 def find_users(condition):
@@ -72,7 +74,7 @@ def user_to_dict(user):
             'status': user.status,
             'prorank': user.prorank,
             'skill': user.skill,
-            'guider': user.guider
+            'is_guider': user.guider
         }
         term = Term.query.order_by(
             Term.name.desc()).filter(Term.using == True).first().name
@@ -201,6 +203,20 @@ def update_grouper(term, username, group_name, role_name, add=False):
     return True, None
 
 
+def if_change_supervisor(username, role_names, term=None):
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    try:
+        user = User.query.filter(User.username == username).filter(User.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    (old_role_names, err) = user_role_names(user, term)
+    new_role_names = list(set(role_names) - set(old_role_names))
+    if '督导' in new_role_names:
+        return True, None
+    return False, None
+
+
 def update_user(username, request_json):
     if username is None:
         return False, CustomError(500, 500, 'username should be given')
@@ -210,11 +226,13 @@ def update_user(username, request_json):
         return False, CustomError(500, 500, str(e))
     if user is None:
         return False, CustomError(404, 404, 'user not found')
+    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'uint', 'status', 'prorank', 'skill', 'group', 'work_state', 'term']
     for key, value in request_json.items():
-        if hasattr(user, key):
+        if hasattr(user, key) and key in allow_change_list:
             setattr(user, key, value)
 
-    role_names = request_json["role_names"] if "role_names" in request_json else []
+    role_names = set(request_json["role_names"] if "role_names" in request_json else [])
+    role_names = list(role_names)
     try:
         term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
             Term.name.desc()).filter(Term.using == True).first().name
@@ -277,12 +295,13 @@ def update_user(username, request_json):
         (ifSuccess, err) = update_grouper(term, username, "main_grouper", True)
         if err is not None:
             return False, err
-    supervisors = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.term >= term).filter(Supervisor.using == True)
+    supervisors = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.term >= term).filter(
+        Supervisor.using == True)
     for supervisor in supervisors:
         for key, value in request_json.items():
             if key == 'term':
                 continue
-            if hasattr(supervisor, key):
+            if hasattr(supervisor, key) and key in allow_change_list:
                 setattr(supervisor, key, value)
         db.session.add(supervisor)
     role_dict = {'管理员': 'admin', '领导': 'leader'}
@@ -365,3 +384,13 @@ def find_groups(condition):
     per_page = condition['_per_page'] if '_per_page' in condition else 20
     pagination = groups.paginate(page=page, per_page=per_page, error_out=False)
     return pagination.items, pagination.total, None
+
+
+@sub_kafka('form_service')
+def user_form_service_receiver(message):
+    method = message.get("method")
+    if not method:
+        return
+    if method == 'add_form' or method == 'repulse_form':
+        lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username", None),
+                                                            message.get("args", {}).get("term", None))
