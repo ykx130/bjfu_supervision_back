@@ -4,6 +4,7 @@ from datetime import datetime
 from flask_login import current_user
 from app.utils.mysql import db
 from app.utils.Error import CustomError
+from app.streaming import sub_kafka, send_kafka_message
 
 
 def find_consults(condition):
@@ -182,3 +183,22 @@ def consult_type_to_dict(consult_type):
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return consult_type_dict, None
+
+
+def push_consult_reply_message(consult):
+    """
+    发送咨询回复的消息
+    :param form_model:
+    :return:
+    """
+    tmpl = "咨询 {meta_description} 被回复, 回复内容{content}"
+    send_kafka_message(topic="notice_service", method="send_msg",
+                       username=consult.get("requester_username"),
+                       msg={
+                           "title": "咨询协调",
+                           "body": tmpl.format(
+                               meta_description=consult.get("meta_description"),
+                               content=consult.get("content")
+                           )
+                       }
+                       )

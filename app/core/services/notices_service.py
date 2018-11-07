@@ -3,6 +3,7 @@ import json
 from app.core.models.user import User
 from app.streaming import sub_kafka
 
+
 REDIS_NOTICES_KEY = "bjfu_supervision:notices:{username}:user"
 
 

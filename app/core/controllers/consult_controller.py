@@ -25,6 +25,11 @@ def update_consult(id, request_json):
     (ifSuccess, err) = consult_service.update_consult(id, request_json)
     if err is not None:
         return False, err
+    (consult, err) = consult_service.find_consult(id)
+
+    (consult_model, err) = consult_service.consult_to_dict(consult)
+    consult.push_consult_reply_message(consult_model)
+
     return ifSuccess, None
 
 
@@ -87,3 +92,4 @@ def delete_consult_type(id):
     if err is not None:
         return False, err
     return ifSuccess, None
+
