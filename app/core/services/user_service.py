@@ -1,7 +1,7 @@
 from sqlalchemy.sql import and_
 from app.utils.mysql import db
 from app.core.models.user import User, Group, Supervisor
-from app.core.models.lesson import Term, SchoolTerm
+from app.core.models.lesson import Term, SchoolTerm, LessonRecord
 from app.utils.Error import CustomError
 from flask_login import current_user
 from app.core.services import lesson_record_service
@@ -58,6 +58,20 @@ def user_role_names(user, term=None):
             if hasattr(supervisor, role_name_e) and getattr(supervisor, role_name_e) == True:
                 role_names.append(role_name_c)
     return role_names, None
+
+
+def insert_lesson_record(user, supervisor, term):
+    lesson_record = LessonRecord()
+    lesson_record.username = user.username
+    lesson_record.term = term
+    lesson_record.group_name = supervisor.group
+    lesson_record.name = user.name
+    db.session.add(lesson_record)
+    try:
+        db.session.commit()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    return True, None
 
 
 def user_to_dict(user):
@@ -169,6 +183,9 @@ def insert_supervisor(user, term, request_json):
                 setattr(supervisor, key, value)
         school_term = school_term + 1
         db.session.add(supervisor)
+        (ifSuccess, err) = insert_lesson_record(user, supervisor, school_term.term_name)
+        if err is not None:
+            return False, err
     try:
         db.session.commit()
     except Exception as e:
@@ -218,6 +235,12 @@ def if_change_supervisor(username, role_names, term=None):
 
 
 def update_user(username, request_json):
+    # user lesson_record 查询
+    try:
+        term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
+            Term.name.desc()).filter(Term.using == True).first().name
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
     if username is None:
         return False, CustomError(500, 500, 'username should be given')
     try:
@@ -226,18 +249,22 @@ def update_user(username, request_json):
         return False, CustomError(500, 500, str(e))
     if user is None:
         return False, CustomError(404, 404, 'user not found')
-    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'uint', 'status', 'prorank', 'skill', 'group', 'work_state', 'term']
+    (lesson_record, err) = lesson_record_service.find_lesson_record(username, term)
+    if err is not None:
+        return False, err
+    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'uint', 'status', 'prorank',
+                         'skill', 'group', 'work_state', 'term']
+
+    # user lesson_record 信息更改
     for key, value in request_json.items():
         if hasattr(user, key) and key in allow_change_list:
             setattr(user, key, value)
+        if hasattr(lesson_record, key) and key in allow_change_list:
+            setattr(lesson_record, key, value)
 
+    # supervisor role_name 变更
     role_names = set(request_json["role_names"] if "role_names" in request_json else [])
     role_names = list(role_names)
-    try:
-        term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
-            Term.name.desc()).filter(Term.using == True).first().name
-    except Exception as e:
-        return False, CustomError(500, 500, str(e))
     (old_role_names, err) = user_role_names(user, term)
     if err is not None:
         return False, err
@@ -295,6 +322,8 @@ def update_user(username, request_json):
         (ifSuccess, err) = update_grouper(term, username, "main_grouper", True)
         if err is not None:
             return False, err
+
+    # 督导信息变更
     supervisors = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.term >= term).filter(
         Supervisor.using == True)
     for supervisor in supervisors:
@@ -304,12 +333,15 @@ def update_user(username, request_json):
             if hasattr(supervisor, key) and key in allow_change_list:
                 setattr(supervisor, key, value)
         db.session.add(supervisor)
+
+    # user role_name 变更
     role_dict = {'管理员': 'admin', '领导': 'leader'}
     for role_name_c in role_names:
         if role_name_c in role_dict:
             role_name_e = role_dict[role_name_c]
             setattr(user, role_name_e, True)
     db.session.add(user)
+    db.session.add(lesson_record)
     try:
         db.session.commit()
     except Exception as e:
