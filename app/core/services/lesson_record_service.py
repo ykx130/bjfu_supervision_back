@@ -96,7 +96,7 @@ def insert_lesson_record_term(username, term):
         return False, CustomError(404, 404, 'supervisor not found')
     lesson_record = LessonRecord()
     lesson_record.username = username
-    lesson_record.group_name = supervisor.group
+    lesson_record.group = supervisor.group
     lesson_record.term = supervisor.term
     lesson_record.name = user.name
 
@@ -138,7 +138,7 @@ def lesson_record_to_dict(lesson_record):
             'username': lesson_record.username,
             'name': lesson_record.name,
             'term': lesson_record.term,
-            'group_name': lesson_record.group_name,
+            'group_name': lesson_record.group,
             'to_be_submitted': lesson_record.to_be_submitted,
             'has_submitted': lesson_record.has_submitted,
             'total_times': lesson_record.total_times
