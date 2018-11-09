@@ -45,14 +45,16 @@ def insert_user(request_json):
 
 
 def update_user(username, request_json):
+    term = request_json.get("term", None)
+    role_names = request_json.get("role_names", [])
+    (ifInsert, err) = user_service.if_change_supervisor(username, role_names, term)
     (ifSuccess, err) = user_service.update_user(username, request_json)
     if err is not None:
         return None, err
-    # role_names = request_json.get('role_names', [])
-    # if '督导' in role_names:
-    #     send_kafka_message(topic='user_service',
-    #                        method='add_supervisor',
-    #                        usernames=[username])
+    if '督导' in role_names:
+        send_kafka_message(topic='user_service',
+                           method='add_supervisor',
+                           usernames=[username])
     return ifSuccess, None
 
 
@@ -83,6 +85,16 @@ def find_supervisors_expire(condition):
             return None, None, err
         supervisors_model.append(supervisor_model)
     return supervisors_model, num, None
+
+
+def insert_supervisor(request_json):
+    (ifSuccess, err) = supervisor_service.insert_supervisor(request_json)
+    if err is not None:
+        return False, err
+    send_kafka_message(topic='user_service',
+                       method='add_supervisor',
+                       usernames=[request_json.get('username', None)])
+    return True, None
 
 
 def batch_renewal(request_json):
