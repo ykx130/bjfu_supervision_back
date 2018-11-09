@@ -5,6 +5,7 @@ import json
 from app.core.models.lesson import Lesson, LessonCase, Term
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
+from app.core.services import form_service
 import re
 
 
@@ -238,6 +239,26 @@ def find_now_term():
     return term, None
 
 
+def update_lesson_notices(lesson_id):
+    try:
+        lesson = Lesson.query.filter(Lesson.lesson_id == lesson_id).filter(Lesson.using == True).first()
+    except Exception as e:
+        raise e
+    (notice_num, err) = form_service.lesson_forms_num(lesson_id)
+    if err is not None:
+        raise err
+    lesson.notices = notice_num
+    db.session.add(lesson)
+    try:
+        db.session.commit()
+    except Exception as e:
+        raise e
+
+
 @sub_kafka('form_service')
-def change_lesson_status(message):
-    print(message)
+def lesson_form_service_server(message):
+    method = message.get("method")
+    if not method:
+        return
+    if method == 'add_form' or method == 'repulse_form':
+        update_lesson_notices(message.get("args", {}).get("lesson_id", None))

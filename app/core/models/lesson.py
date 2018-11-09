@@ -23,6 +23,7 @@ class Lesson(db.Model):
     lesson_grade = db.Column(db.String(64), default="")
     lesson_model = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
+    notices = db.Column(db.Integer, default=0)
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -90,7 +91,6 @@ class NoticeLesson(db.Model):
     lesson_id = db.Column(db.String(32), default=-1)
     assign_group = db.Column(db.String(32), default="")
     term = db.Column(db.String(32), default="")
-    votes = db.Column(db.Integer, default=0)
     notice_reason = db.Column(db.String(128), default="")
     using = db.Column(db.Boolean, default=True)
 
@@ -111,7 +111,6 @@ class ModelLesson(db.Model):
     term = db.Column(db.String(32), default="")
     status = db.Column(db.String(32), default="推荐课")  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
-    notices = db.Column(db.Integer, default=0)
     assign_group = db.Column(db.String(32), default="")
     using = db.Column(db.Boolean, default=True)
 
