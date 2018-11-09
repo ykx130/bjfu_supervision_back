@@ -206,7 +206,6 @@ def update_activity_user(id, username):
     }), 200
 
 
-
 @activity_blueprint.route('/current_user/activities')
 @login_required
 def get_current_user_activities():

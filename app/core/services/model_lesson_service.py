@@ -175,7 +175,7 @@ def model_lesson_dict(lesson, model_lesson):
             'lesson_teacher_id': lesson.lesson_teacher_id,
             'assign_group': model_lesson.assign_group,
             'status': model_lesson.status,
-            'votes': model_lesson.votes,
+            'votes': lesson.votes,
             'notices': model_lesson.notices,
             'term': lesson.term if lesson is not None else None
         }
