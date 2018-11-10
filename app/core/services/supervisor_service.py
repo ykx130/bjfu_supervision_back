@@ -81,3 +81,12 @@ def insert_supervisor(request_json):
     except Exception as e:
         return False, CustomError(500, 500, str(e))
     return True, None
+
+
+def get_supervisor_num(term=None):
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    if term is None:
+        return None, CustomError(404, 404, "term not found")
+    supervisors = Supervisor.query.filter(Supervisor.term == term).filter(Supervisor.using == True).all()
+    return len(supervisors), None

@@ -65,6 +65,8 @@ def create_app(config_name):
     from app.http.handler.model_lesson import model_lesson_blueprint
     app.register_blueprint(model_lesson_blueprint)
 
+    from app.http.handler.page_data import page_data_blueprint
+    app.register_blueprint(page_data_blueprint)
 
     return app
 

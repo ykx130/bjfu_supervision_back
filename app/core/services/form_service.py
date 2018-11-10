@@ -209,6 +209,54 @@ def user_forms_num(username, term):
     return total_datas.count(), has_submitted_datas.count(), to_be_submitted_data.count(), None
 
 
+def get_submitted_form_num(term=None):
+    from app.utils.mongodb import mongo
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    try:
+        submitted_forms = mongo.db.form.find(
+            {'using': {'$in': [True]}, 'status': {'$in': ['已完成']}, 'meta.term': {'$in': [term]}})
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return submitted_forms.count(), None
+
+
+def get_wait_submitted_form_num(term=None):
+    from app.utils.mongodb import mongo
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    try:
+        wait_submitted_forms = mongo.db.form.find(
+            {'using': {'$in': [True]}, 'status': {'$in': ['待提交']}, 'meta.term': {'$in': [term]}})
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return wait_submitted_forms.count(), None
+
+
+def find_form_unit_num(unit, term=None):
+    from app.utils.mongodb import mongo
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    try:
+        submitted_forms = mongo.db.form.find(
+            {'using': {'$in': [True]}, 'status': {'$in': ['已完成']}, 'meta.term': {'$in': [term]},
+             'meta.lesson.lesson_teacher_unit': {'$in': [unit]}})
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return submitted_forms.count(), None
+
+
+def update_page_data():
+    (submitted_form_num, err) = get_submitted_form_num()
+    if err is not None:
+        raise err
+    (wait_submitted_form_num, err) = get_wait_submitted_form_num()
+    if err is not None:
+        raise err
+    redis_cli.set("sys:submitted_form", submitted_form_num)
+    redis_cli.set("sys:wait_submitted_form", wait_submitted_form_num)
+
+
 def lesson_forms_num(lesson_id):
     from app.utils.mongodb import mongo
     try:
@@ -276,3 +324,4 @@ def form_service_receiver(message):
         return
     if method == 'add_form' or method == 'repulse_form':
         calculate_map(message.get("args", {}).get("form", {}).get("bind_meta_name"))
+        update_page_data()
