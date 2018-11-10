@@ -77,6 +77,16 @@ def insert_notice_lessons(request_json):
     return True, None
 
 
+def get_notice_lesson_num(term=None):
+    if term is None:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    try:
+        notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True).filter(NoticeLesson.term == term).all()
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return len(notice_lessons), None
+
+
 def delete_notice_lesson(id):
     notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True).first()
     if notice_lesson is None:
