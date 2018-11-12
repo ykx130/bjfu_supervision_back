@@ -70,8 +70,8 @@ def import_lesson_excel(request_json):
     return True, None
 
 
-def notice_lesson_vote(id, vote=True):
-    (ifSuccess, err) = notice_lesson_service.notice_lesson_vote(id, vote)
+def notice_lesson_vote(id):
+    (ifSuccess, err) = notice_lesson_service.notice_lesson_vote(id)
     return ifSuccess, err
 
 
