@@ -335,7 +335,7 @@ def update_user(username, request_json):
         db.session.add(supervisor)
 
     # user role_name 变更
-    role_dict = {'管理员': 'admin', '领导': 'leader'}
+    role_dict = {'管理员': 'admin', '领导': 'leader', '督导': 'guider'}
     for role_name_c in role_names:
         if role_name_c in role_dict:
             role_name_e = role_dict[role_name_c]
