@@ -3,7 +3,9 @@ from app.utils.mysql import db
 from app.utils.Error import CustomError
 from flask import current_app
 import pandas
+from app import redis_cli
 import datetime
+import json
 
 
 def insert_notice_lesson(request_json):
@@ -85,6 +87,13 @@ def get_notice_lesson_num(term=None):
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return len(notice_lessons), None
+
+
+def update_page_data():
+    (num, err) = get_notice_lesson_num()
+    if err is not None:
+        raise err
+    redis_cli.set("sys:notice_lesson_num", json.dumps(num))
 
 
 def delete_notice_lesson(id):

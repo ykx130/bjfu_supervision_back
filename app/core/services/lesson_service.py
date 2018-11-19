@@ -5,7 +5,7 @@ import json
 from app.core.models.lesson import Lesson, LessonCase, Term
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
-from app.core.services import form_service
+from app.core.services import form_service, notice_lesson_service
 import re
 
 
@@ -253,6 +253,15 @@ def update_lesson_notices(lesson_id):
         db.session.commit()
     except Exception as e:
         raise e
+
+
+@sub_kafka('lesson_service')
+def lesson_service_server(message):
+    method = message.get("method")
+    if not method:
+        return
+    if method == 'add_notice_lesson' or method == 'delete_notice_lesson':
+        notice_lesson_service.update_page_data()
 
 
 @sub_kafka('form_service')
