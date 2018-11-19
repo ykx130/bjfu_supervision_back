@@ -419,10 +419,17 @@ def find_groups(condition):
 
 
 @sub_kafka('form_service')
-def user_form_service_receiver(message):
+def user_form_service_server(message):
     method = message.get("method")
     if not method:
         return
     if method == 'add_form' or method == 'repulse_form':
         lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username", None),
                                                             message.get("args", {}).get("term", None))
+
+
+@sub_kafka('user_service')
+def user_service_server(message):
+    method = message.get('method')
+    if not method:
+        return

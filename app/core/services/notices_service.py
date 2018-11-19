@@ -45,5 +45,5 @@ def push_new_message(username, notice):
 
 
 @sub_kafka('notice_service')
-def notice_service_receiver(message):
+def notice_service_server(message):
     push_new_message(message.get("args", {}).get("username"), message.get("args", {}).get("msg"))
