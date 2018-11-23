@@ -235,7 +235,7 @@ def if_change_supervisor(username, role_names, term=None):
 
 
 def update_user(username, request_json):
-    # user lesson_record 查询
+    # user  查询
     try:
         term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
             Term.name.desc()).filter(Term.using == True).first().name
@@ -249,18 +249,13 @@ def update_user(username, request_json):
         return False, CustomError(500, 500, str(e))
     if user is None:
         return False, CustomError(404, 404, 'user not found')
-    (lesson_record, err) = lesson_record_service.find_lesson_record(username, term)
-    if err is not None:
-        return False, err
-    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'uint', 'status', 'prorank',
+    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
                          'skill', 'group', 'work_state', 'term']
 
-    # user lesson_record 信息更改
+    # user  信息更改
     for key, value in request_json.items():
         if hasattr(user, key) and key in allow_change_list:
             setattr(user, key, value)
-        if hasattr(lesson_record, key) and key in allow_change_list:
-            setattr(lesson_record, key, value)
 
     # supervisor role_name 变更
     role_names = set(request_json["role_names"] if "role_names" in request_json else [])
@@ -341,7 +336,6 @@ def update_user(username, request_json):
             role_name_e = role_dict[role_name_c]
             setattr(user, role_name_e, True)
     db.session.add(user)
-    db.session.add(lesson_record)
     try:
         db.session.commit()
     except Exception as e:
@@ -433,3 +427,5 @@ def user_service_server(message):
     method = message.get('method')
     if not method:
         return
+    if method == 'add_supervisor' or method == 'update_user':
+        lesson_record_service.update_lesson_record_service(message.get("args", {}).get("usernames", None))

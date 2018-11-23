@@ -1,4 +1,4 @@
-from app.core.models.lesson import LessonRecord
+from app.core.models.lesson import LessonRecord, Term
 from app.core.models.user import User, Supervisor
 from app.utils.mysql import db
 from app.utils.Error import CustomError
@@ -116,6 +116,35 @@ def update_lesson_record(username, term, request_json):
     try:
         db.session.commit()
     except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    return True, None
+
+
+def update_lesson_record_service(usernames):
+    try:
+        term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    for username in usernames:
+        supervisors = Supervisor.query.filter(Supervisor.username == username).filter(Supervisor.using == True).filter(
+            Supervisor.term >= term)
+        for supervisor in supervisors:
+            user = User.query.filter(User.username == username).filter(User.using == True).first()
+            if user is None:
+                return False, CustomError(404, 404, "user not found")
+            lesson_record = LessonRecord.query.filter(LessonRecord.username == username).filter(
+                LessonRecord.term == supervisor.term).filter(LessonRecord.using == True).first()
+            if lesson_record is None:
+                lesson_record = LessonRecord()
+            lesson_record.term = supervisor.term
+            lesson_record.username = username
+            lesson_record.group_name = supervisor.group
+            lesson_record.name = user.name
+            db.session.add(lesson_record)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
         return False, CustomError(500, 500, str(e))
     return True, None
 
