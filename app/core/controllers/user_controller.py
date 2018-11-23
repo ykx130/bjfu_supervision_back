@@ -48,13 +48,14 @@ def update_user(username, request_json):
     term = request_json.get("term", None)
     role_names = request_json.get("role_names", [])
     (ifInsert, err) = user_service.if_change_supervisor(username, role_names, term)
+    if err is not None:
+        return None, err
     (ifSuccess, err) = user_service.update_user(username, request_json)
     if err is not None:
         return None, err
-    if '督导' in role_names:
-        send_kafka_message(topic='user_service',
-                           method='add_supervisor',
-                           usernames=[username])
+    send_kafka_message(topic='user_service',
+                       method='update_user',
+                       usernames=[username])
     return ifSuccess, None
 
 
