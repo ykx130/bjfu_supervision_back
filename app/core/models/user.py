@@ -28,7 +28,7 @@ class User(db.Model, UserMixin):
     guider = db.Column(db.Boolean, default=False)
 
     @staticmethod
-    def users(condition: dict):
+    def users(condition):
         name_map = {'users': User, 'groups': Group, 'supervisors': Supervisor}
         query = User.query.outerjoin(Supervisor, Supervisor.username == User.username).filter(User.using == True)
         url_condition = UrlCondition(condition)
@@ -40,10 +40,10 @@ class User(db.Model, UserMixin):
         raise AttributeError('password is not a readable attribute')
 
     @password.setter
-    def password(self, password: str):
+    def password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    def verify_password(self, password: str):
+    def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
 
