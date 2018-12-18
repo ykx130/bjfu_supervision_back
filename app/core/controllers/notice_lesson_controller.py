@@ -1,6 +1,7 @@
 from app.core.services import notice_lesson_service
 from app.core.services import lesson_service
 from app.streaming import send_kafka_message
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def find_notice_lesson(id):
@@ -15,7 +16,8 @@ def find_notice_lesson(id):
 
 
 def find_notice_lessons(condition):
-    (notice_lessons, num, err) = notice_lesson_service.find_notice_lessons(condition)
+    condition_fin = args_to_dict(condition)
+    (notice_lessons, num, err) = notice_lesson_service.find_notice_lessons(condition_fin)
     if err is not None:
         return None, None, err
     notice_lessons_model = list()

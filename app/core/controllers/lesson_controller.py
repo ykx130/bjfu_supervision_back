@@ -1,4 +1,5 @@
 from app.core.services import lesson_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def update_database():
@@ -23,7 +24,8 @@ def has_lesson(id):
 
 
 def find_lessons(condition):
-    (lessons, num, err) = lesson_service.find_lessons(condition)
+    condition_fin = args_to_dict(condition)
+    (lessons, num, err) = lesson_service.find_lessons(condition_fin)
     if err is not None:
         return None, None, err
     lessons_model = list()
@@ -43,7 +45,8 @@ def change_lesson(id, request_json):
 
 
 def find_terms(condition):
-    (terms, num, err) = lesson_service.find_terms(condition)
+    condition_fin = args_to_dict(condition)
+    (terms, num, err) = lesson_service.find_terms(condition_fin)
     if err is not None:
         return None, None, err
     terms_model = list()
