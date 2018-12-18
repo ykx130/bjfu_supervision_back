@@ -16,7 +16,7 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 import app.core.models
-
+from flask import _app_ctx_stack
 
 def create_all():
     db.drop_all()

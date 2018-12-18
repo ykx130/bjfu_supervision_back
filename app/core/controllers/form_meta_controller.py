@@ -1,5 +1,5 @@
 from app.core.services import form_meta_service
-
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 def find_form_meta(name, version=None):
     (form_meta, err) = form_meta_service.find_form_meta(name, version)
@@ -14,12 +14,7 @@ def find_history_form_meta(name, condition):
     if condition is None:
         condition_fin['name'] = [name]
     else:
-        for key in condition:
-            for value in condition.getlist(key):
-                if key not in condition_fin:
-                    condition_fin[key] = [value]
-                else:
-                    condition_fin[key].append(value)
+        condition_fin = args_to_dict(condition)
         condition_fin['name'] = [name]
     (form_metas, total, err) = form_meta_service.find_form_metas(condition_fin)
     if err is not None:
@@ -38,12 +33,7 @@ def find_form_metas(condition=None):
     if condition is None:
         condition_fin['using'] = [True]
     else:
-        for key in condition:
-            for value in condition.getlist(key):
-                if key not in condition_fin:
-                    condition_fin[key] = [value]
-                else:
-                    condition_fin[key].append(value)
+        condition_fin = args_to_dict(condition)
         condition_fin['using'] = [True]
     (form_metas, total, err) = form_meta_service.find_form_metas(condition_fin)
     if err is not None:
@@ -58,13 +48,7 @@ def find_form_metas(condition=None):
 
 
 def find_form_meta_history(condition):
-    condition_fin = dict()
-    for key in condition:
-        for value in condition.getlist(key):
-            if key not in condition_fin:
-                condition_fin[key] = [value]
-            else:
-                condition_fin[key].append(value)
+    condition_fin = args_to_dict(condition)
     (form_metas, num, err) = form_meta_service.find_form_metas(condition_fin)
     if err is not None:
         return None, None, err

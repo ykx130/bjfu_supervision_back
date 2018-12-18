@@ -16,8 +16,8 @@ class UrlCondition(object):
         self.sort_limit_dict = dict()
         order_list = []
         sort_list = []
-        for k in url_args:
-            for v in url_args.getlist(k):
+        for k, value in url_args.items():
+            for v in value:
                 try:
                     v = json.loads(v)
                 except:
@@ -45,7 +45,7 @@ class UrlCondition(object):
                             break
                     if is_equal:
                         if k not in self.filter_dict:
-                            self.filter_dict[k] = {'_eq':[v]}
+                            self.filter_dict[k] = {'_eq': [v]}
                         else:
                             self.filter_dict[k]['_eq'].append(v)
         if len(order_list) == len(sort_list):
@@ -78,7 +78,7 @@ def filter_query(query, filter_map, name_map, base_table):
                 for eq in value:
                     query = query.filter(getattr(table, column_name) == eq)
             elif key == '_like':
-                query = query.filter(getattr(table, column_name).like(value+"%"))
+                query = query.filter(getattr(table, column_name).like(value + "%"))
     return query
 
 

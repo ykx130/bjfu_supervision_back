@@ -1,5 +1,6 @@
 from app.core.services import model_lesson_service
 from app.core.services import lesson_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def find_model_lesson(id):
@@ -16,7 +17,8 @@ def find_model_lesson(id):
 
 
 def find_model_lessons(condition):
-    (model_lessons, num, err) = model_lesson_service.find_model_lessons(condition)
+    condition_fin = args_to_dict(condition)
+    (model_lessons, num, err) = model_lesson_service.find_model_lessons(condition_fin)
     if err is not None:
         return None, None, err
     models = list()
