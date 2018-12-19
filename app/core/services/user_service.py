@@ -13,8 +13,8 @@ def find_users(condition):
         users = User.users(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -406,8 +406,8 @@ def find_groups(condition):
         groups = Group.groups(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = condition['_page'] if '_page' in condition else 1
-    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    page = condition['_page'][0] if '_page' in condition else 1
+    per_page = condition['_per_page'][0] if '_per_page' in condition else 20
     pagination = groups.paginate(page=page, per_page=per_page, error_out=False)
     return pagination.items, pagination.total, None
 

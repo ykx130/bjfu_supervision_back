@@ -152,8 +152,8 @@ def find_activities(condition):
         activities = Activity.activities(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = activities.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -177,8 +177,8 @@ def find_activity_users(id, condition):
         users = activity.activity_users
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -302,8 +302,8 @@ def find_current_user_activities(username, condition=None):
             or_(ActivityUser.state == None, ActivityUser.state == '未报名')).filter(Activity.remainder_num > 0)
     else:
         return None, None, CustomError(500, 200, "state is wrong")
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = activities.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
