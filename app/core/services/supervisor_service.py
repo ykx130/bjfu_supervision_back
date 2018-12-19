@@ -33,8 +33,8 @@ def get_supervisors(condition=None):
         supervisors = Supervisor.query.filter(Supervisor.term == term).filter(Supervisor.using == True)
     except Exception as e:
         return None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = supervisors.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -61,8 +61,8 @@ def get_supervisors_expire(condition=None):
                 users = users.filter(getattr(User, key) == value)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 

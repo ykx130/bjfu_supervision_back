@@ -182,8 +182,8 @@ def find_lessons(condition):
         lessons = Lesson.lessons(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = condition['_page'] if '_page' in condition else 1
-    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    page = condition['_page'][0] if '_page' in condition else 1
+    per_page = condition['_per_page'][0] if '_per_page' in condition else 20
     pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     lesson_page = pagination.items
     return lesson_page, pagination.total, None
@@ -213,8 +213,8 @@ def find_terms(condition):
         terms = Term.terms(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = condition['_page'] if '_page' in condition else 1
-    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    page = condition['_page'][0] if '_page' in condition else 1
+    per_page = condition['_per_page'][0] if '_per_page' in condition else 20
     pagination = terms.paginate(page=page, per_page=per_page, error_out=False)
     return pagination.items, pagination.total, None
 

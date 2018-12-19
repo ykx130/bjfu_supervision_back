@@ -166,8 +166,8 @@ def find_notice_lesson(id):
 
 def find_notice_lessons(condition):
     notice_lessons = NoticeLesson.notice_lessons(condition)
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = notice_lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
