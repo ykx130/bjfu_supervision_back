@@ -1,3 +1,6 @@
+from app.utils.mysql import db
+
+
 class FormMeta(object):
 
     def __init__(self):
@@ -258,7 +261,7 @@ class Value(object):
             'item_name': None,
             "type": None,
             'value': None,
-            "pyload":dict()
+            "pyload": dict()
         }
 
     @property
@@ -284,3 +287,11 @@ class Value(object):
     @value.setter
     def value(self, value_data):
         self.model['value'] = value_data
+
+
+class WorkForm(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    term = db.Column(db.String(20))
+    form_meta_name = db.Column(db.String(20))
+    form_meta_version = db.Column(db.String(20))
+    using = db.Column(db.Boolean, default=True)
