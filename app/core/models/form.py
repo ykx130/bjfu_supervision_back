@@ -1,5 +1,5 @@
 from app.utils.mysql import db
-
+from app.utils.url_condition.url_condition_mysql import *
 
 class FormMeta(object):
 
@@ -295,3 +295,11 @@ class WorkForm(db.Model):
     form_meta_name = db.Column(db.String(20))
     form_meta_version = db.Column(db.String(20))
     using = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def work_forms(condition: dict):
+        url_condition = UrlCondition(condition)
+        query = WorkForm.query.filter(WorkForm.using == True)
+        name_map = {'work_forms': WorkForm}
+        query = process_query(query, url_condition, name_map, WorkForm)
+        return query
