@@ -3,6 +3,93 @@ from flask_login import current_user
 from datetime import datetime
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
+from app.core.models.form import WorkForm
+from app.utils.mysql import db
+
+
+def find_work_form(id):
+    try:
+        work_form = WorkForm.query.filter(WorkForm.id == int(id)).filter(WorkForm.using == True).first()
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    if work_form is None:
+        return None, CustomError(404, 404, 'consult not found')
+    return work_form, None
+
+
+def work_form_to_dict(work_form):
+    try:
+        work_form_dict = {
+            'id': work_form.id,
+            'term': work_form.term,
+            'form_meta_name': work_form.form_meta_name,
+            'form_meta_version': work_form.form_meta_version,
+            'using': work_form.using
+        }
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return work_form_dict, None
+
+
+def find_work_forms(condition):
+    try:
+        work_forms = WorkForm.consults(condition)
+    except Exception as e:
+        return None, None, CustomError(500, 500, str(e))
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
+    pagination = work_forms.paginate(page=int(page), per_page=int(per_page), error_out=False)
+    return pagination.items, pagination.total, None
+
+
+def insert_work_form(request_json):
+    work_form = WorkForm()
+    for key, value in request_json.items():
+        if hasattr(work_form, key):
+            setattr(work_form, key, value)
+    db.session.add(work_form)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
+
+
+def delete_work_form(id):
+    try:
+        work_form = WorkForm.query.filter(WorkForm.id == int(id)).filter(WorkForm.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    if work_form is None:
+        return False, CustomError(404, 404, 'consult not found')
+    work_form.using = False
+    db.session.add(work_form)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
+
+
+def update_work_form(id, request_json):
+    try:
+        work_form = WorkForm.query.filter(WorkForm.id == int(id)).filter(WorkForm.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    if work_form is None:
+        return False, CustomError(404, 404, 'event not found')
+    for key, value in request_json.items():
+        if hasattr(work_form, key):
+            setattr(work_form, key, value)
+    db.session.add(work_form)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
 
 
 def find_form_meta(name, version=None):
