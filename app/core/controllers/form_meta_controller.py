@@ -115,7 +115,9 @@ def find_work_plans(condition):
         return None, None, err
     work_plans_model = list()
     for work_plan in work_plans:
-        work_plan_model = form_meta_service.work_plan_to_dict(work_plan)
+        (work_plan_model, err) = form_meta_service.work_plan_to_dict(work_plan)
+        if err is not None:
+            return None, None, err
         work_plans_model.append(work_plan_model)
     return work_plans_model, num, None
 
