@@ -98,29 +98,29 @@ def update_form_meta(name, request_json=None):
     return ifSuccess, None
 
 
-def find_work_form(id):
-    (work_form, err) = form_meta_service.find_work_form(id)
+def find_work_plan(id):
+    (work_plan, err) = form_meta_service.find_work_plan(id)
     if err is not None:
         return None, err
-    (work_form_model, err) = form_meta_service.work_form_to_dict(work_form)
+    (work_plan_model, err) = form_meta_service.work_plan_to_dict(work_plan)
     if err is not None:
         return None, err
-    return work_form_model, None
+    return work_plan_model, None
 
 
-def find_work_forms(condition):
+def find_work_plans(condition):
     condition_fin = args_to_dict(condition)
-    (work_forms, num, err) = form_meta_service.find_work_forms(condition_fin)
+    (work_plans, num, err) = form_meta_service.find_work_plans(condition_fin)
     if err is not None:
         return None, None, err
-    work_forms_model = list()
-    for work_form in work_forms:
-        work_form_model = form_meta_service.work_form_to_dict(work_form)
-        work_forms_model.append(work_form_model)
-    return work_forms_model, num, None
+    work_plans_model = list()
+    for work_plan in work_plans:
+        work_plan_model = form_meta_service.work_plan_to_dict(work_plan)
+        work_plans_model.append(work_plan_model)
+    return work_plans_model, num, None
 
 
-def insert_work_form(request_json):
+def insert_work_plan(request_json):
     form_meta_name = request_json['form_meta_name'] if 'form_meta_name' in request_json else None
     if form_meta_name is None:
         return False, CustomError(500, 200, 'form_meta_name must be given')
@@ -131,21 +131,21 @@ def insert_work_form(request_json):
     (form_meta, num, err) = form_meta_service.find_form_metas(condition)
     if num == 0:
         return False, CustomError(404, 404, 'form_meta not found')
-    (ifSuccess, err) = form_meta_service.insert_work_form(request_json)
+    (ifSuccess, err) = form_meta_service.insert_work_plan(request_json)
     if err is not None:
         return False, err
     return ifSuccess, None
 
 
-def update_work_form(id, request_json):
-    (ifSuccess, err) = form_meta_service.update_work_form(id, request_json)
+def update_work_plan(id, request_json):
+    (ifSuccess, err) = form_meta_service.update_work_plan(id, request_json)
     if err is not None:
         return False, err
     return ifSuccess, None
 
 
-def delete_work_form(id):
-    (ifSuccess, err) = form_meta_service.delete_work_form(id)
+def delete_work_plan(id):
+    (ifSuccess, err) = form_meta_service.delete_work_plan(id)
     if err is not None:
         return False, err
     return True, None
