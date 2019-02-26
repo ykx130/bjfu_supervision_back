@@ -6,6 +6,32 @@ from app.utils.Error import CustomError
 from flask_login import current_user
 from app.core.services import lesson_record_service
 from app.streaming import sub_kafka
+import pymysql
+
+role_dict = {1: 'admin', 2: 'leader', 3: 'main_grouper', 4: 'grouper', 5: 'guider', 6: 'teacher'}
+
+
+# def insert_user_from_mysql():
+#     term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
+#     user_db = pymysql.connect(host="localhost", user="root", passwd="wshwoaini", db="lessons", charset='utf8',
+#                               cursorclass=pymysql.cursors.DictCursor)
+#     cursor = user_db.cursor()
+#     cursor.execute(
+#         "select user_id, name, sex, email, phone, state, unit, status, group, workstate, prorank, skill, alias from users")
+#     datas = cursor.fetchall()
+#     for data in datas:
+#         user = User()
+#         for key, value in data.items():
+#             if hasattr(user, key):
+#                 setattr(user, key, value)
+#         user.password = "123456"
+#         cursor.execute(
+#             "select user_id, role_id, supervise_time, status from role_user where role_user.user_id = {}".format(
+#                 data['user_id']))
+#         old_user_roles = cursor.fetchall()
+#         for old_user_role in old_user_roles:
+#             if hasattr(user, role_dict[int(old_user_role['role_id'])]):
+#                 setattr(user, role_dict[int(old_user_role['role_id'])], True)
 
 
 def find_users(condition):
