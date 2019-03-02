@@ -1,3 +1,7 @@
+from app.utils.mysql import db
+from app.utils.url_condition.url_condition_mysql import *
+
+
 class FormMeta(object):
 
     def __init__(self):
@@ -258,7 +262,7 @@ class Value(object):
             'item_name': None,
             "type": None,
             'value': None,
-            "pyload":dict()
+            "pyload": dict()
         }
 
     @property
@@ -284,3 +288,21 @@ class Value(object):
     @value.setter
     def value(self, value_data):
         self.model['value'] = value_data
+
+
+class WorkPlan(db.Model):
+    __tablename__ = 'work_plans'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    term = db.Column(db.String(20))
+    form_meta_name = db.Column(db.String(20))
+    form_meta_version = db.Column(db.String(20))
+    status = db.Column(db.String(20))
+    using = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def work_plans(condition: dict):
+        url_condition = UrlCondition(condition)
+        query = WorkPlan.query.filter(WorkPlan.using == True)
+        name_map = {'work_plans': WorkPlan}
+        query = process_query(query, url_condition, name_map, WorkPlan)
+        return query

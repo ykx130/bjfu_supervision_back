@@ -5,7 +5,7 @@ import json
 from app.core.models.lesson import Lesson, LessonCase, Term
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
-from app.core.services import form_service
+from app.core.services import form_service, notice_lesson_service
 import re
 
 
@@ -182,8 +182,8 @@ def find_lessons(condition):
         lessons = Lesson.lessons(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = condition['_page'] if '_page' in condition else 1
-    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    page = condition['_page'][0] if '_page' in condition else 1
+    per_page = condition['_per_page'][0] if '_per_page' in condition else 20
     pagination = lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     lesson_page = pagination.items
     return lesson_page, pagination.total, None
@@ -213,8 +213,8 @@ def find_terms(condition):
         terms = Term.terms(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = condition['_page'] if '_page' in condition else 1
-    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    page = condition['_page'][0] if '_page' in condition else 1
+    per_page = condition['_per_page'][0] if '_per_page' in condition else 20
     pagination = terms.paginate(page=page, per_page=per_page, error_out=False)
     return pagination.items, pagination.total, None
 
@@ -253,6 +253,15 @@ def update_lesson_notices(lesson_id):
         db.session.commit()
     except Exception as e:
         raise e
+
+
+@sub_kafka('lesson_service')
+def lesson_service_server(message):
+    method = message.get("method")
+    if not method:
+        return
+    if method == 'add_notice_lesson' or method == 'delete_notice_lesson':
+        notice_lesson_service.update_page_data()
 
 
 @sub_kafka('form_service')

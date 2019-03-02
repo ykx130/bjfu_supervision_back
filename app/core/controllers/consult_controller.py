@@ -1,8 +1,10 @@
 from app.core.services import consult_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def find_consults(condition):
-    (consults, num, err) = consult_service.find_consults(condition)
+    condition_fin = args_to_dict(condition)
+    (consults, num, err) = consult_service.find_consults(condition_fin)
     if err is not None:
         return None, None, err
     consults_model = list()
@@ -51,7 +53,8 @@ def delete_consult(id):
 
 
 def find_consult_types(condition):
-    (consult_types, num, err) = consult_service.find_consult_types(condition)
+    condition_fin = args_to_dict(condition)
+    (consult_types, num, err) = consult_service.find_consult_types(condition_fin)
     if err is not None:
         return None, None, err
     consult_types_model = list()

@@ -154,7 +154,7 @@ def export_lesson_excel():
 
 @notice_lesson_blueprint.route('/notice_lessons/<int:id>/vote', methods=['POST'])
 def notice_lesson_vote(id):
-    (ifSuccess, err) = notice_lesson_controller.notice_lesson_vote(id, request.json.get('vote', True))
+    (ifSuccess, err) = notice_lesson_controller.notice_lesson_vote(id)
     if err is not None:
         return jsonify({
             'code': err.code,

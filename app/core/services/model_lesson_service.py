@@ -20,8 +20,8 @@ def find_model_lessons(condition):
         model_lessons = ModelLesson.model_lessons(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = model_lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -175,8 +175,8 @@ def model_lesson_dict(lesson, model_lesson):
             'lesson_teacher_id': lesson.lesson_teacher_id,
             'assign_group': model_lesson.assign_group,
             'status': model_lesson.status,
-            'votes': lesson.votes,
-            'notices': model_lesson.notices,
+            'votes': model_lesson.votes,
+            'notices': lesson.notices,
             'term': lesson.term if lesson is not None else None
         }
     except Exception as e:
@@ -191,10 +191,14 @@ def model_lesson_vote(id, vote=True):
         return False, CustomError(500, 500, str(e))
     if model_lesson is None:
         return False, CustomError(404, 404, 'model lesson not found')
+    lesson = Lesson.query.filter(Lesson.lesson_id == model_lesson.lesson_id).filter(Lesson.using == True).first()
+    if model_lesson is None:
+        return False, CustomError(404, 404, 'lesson not found')
     if vote:
         model_lesson.votes = model_lesson.votes + 1
-    model_lesson.notices = model_lesson.notices + 1
+    lesson.notices = lesson.notices + 1
     db.session.add(model_lesson)
+    db.session.add(lesson)
     try:
         db.session.commit()
     except Exception as e:

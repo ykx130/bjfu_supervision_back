@@ -20,7 +20,6 @@ redis_cli = get_redis_con(config['default'].REDIS_URL)
 
 def create_app(config_name):
     app = Flask(__name__, static_folder=basedir + '/static')
-
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     db.init_app(app)

@@ -3,7 +3,9 @@ from app.utils.mysql import db
 from app.utils.Error import CustomError
 from flask import current_app
 import pandas
+from app import redis_cli
 import datetime
+import json
 
 
 def insert_notice_lesson(request_json):
@@ -87,6 +89,13 @@ def get_notice_lesson_num(term=None):
     return len(notice_lessons), None
 
 
+def update_page_data():
+    (num, err) = get_notice_lesson_num()
+    if err is not None:
+        raise err
+    redis_cli.set("sys:notice_lesson_num", json.dumps(num))
+
+
 def delete_notice_lesson(id):
     notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True).first()
     if notice_lesson is None:
@@ -157,8 +166,8 @@ def find_notice_lesson(id):
 
 def find_notice_lessons(condition):
     notice_lessons = NoticeLesson.notice_lessons(condition)
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = notice_lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -174,7 +183,7 @@ def notice_lesson_to_dict(lesson, notice_lesson):
             'lesson_name': lesson.lesson_name,
             'lesson_teacher_id': lesson.lesson_teacher_id,
             'notice_reason': notice_lesson.notice_reason,
-            'votes': notice_lesson.votes,
+            'notices': lesson.notices,
             'assign_group': notice_lesson.assign_group
         }
     except Exception as e:
@@ -182,13 +191,13 @@ def notice_lesson_to_dict(lesson, notice_lesson):
     return notice_lesson_dict, None
 
 
-def notice_lesson_vote(id, vote=True):
+def notice_lesson_vote(id):
     notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True)
     if notice_lesson is None:
         return False, CustomError(404, 404, 'notice lesson not found')
-    if vote:
-        notice_lesson.votes = notice_lesson.votes + 1
-    db.session.add(notice_lesson)
+    lesson = Lesson.query.filter(Lesson.lesson_id == notice_lesson.lesson_id).filter(Lesson.using == True).first()
+    lesson.notices = lesson.notices + 1
+    db.session.add(lesson)
     try:
         db.session.commit()
     except Exception as e:
@@ -208,7 +217,7 @@ def import_lesson_excel(request_json):
         return False, CustomError(500, 200, 'file must be given')
     column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                    '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                   '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'votes'}
+                   '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'notices'}
     filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute',
                    'lesson_grade']
     row_num = df.shape[0]
@@ -241,10 +250,10 @@ def export_lesson_excel(request_json):
     else:
         notice_lesson_ids = request_json['notice_lesson_ids']
         notice_lessons = NoticeLesson.query.filter(
-            NoticeLesson.lesson_id.in_(notice_lesson_ids).filter(NoticeLesson.using == True))
+            NoticeLesson.lesson_id.in_(notice_lesson_ids)).filter(NoticeLesson.using == True)
     column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                    '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                   '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'votes'}
+                   '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'notices'}
     frame_dict = dict()
     for notice_lesson in notice_lessons:
         lesson = Lesson.query.filter(Lesson.lesson_id == notice_lesson.lesson_id).first()

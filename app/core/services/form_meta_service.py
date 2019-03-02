@@ -3,6 +3,93 @@ from flask_login import current_user
 from datetime import datetime
 from app.utils.url_condition.url_condition_mongodb import *
 from app.utils.Error import CustomError
+from app.core.models.form import WorkPlan
+from app.utils.mysql import db
+
+
+def find_work_plan(id):
+    try:
+        work_plan = WorkPlan.query.filter(WorkPlan.id == int(id)).filter(WorkPlan.using == True).first()
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    if work_plan is None:
+        return None, CustomError(404, 404, 'consult not found')
+    return work_plan, None
+
+
+def work_plan_to_dict(work_plan):
+    try:
+        work_plan_dict = {
+            'id': work_plan.id,
+            'term': work_plan.term,
+            'meta_name': work_plan.form_meta_name,
+            'meta_version': work_plan.form_meta_version,
+            'status': work_plan.status
+        }
+    except Exception as e:
+        return None, CustomError(500, 500, str(e))
+    return work_plan_dict, None
+
+
+def find_work_plans(condition):
+    try:
+        work_plans = WorkPlan.work_plans(condition)
+    except Exception as e:
+        return None, None, CustomError(500, 500, str(e))
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
+    pagination = work_plans.paginate(page=int(page), per_page=int(per_page), error_out=False)
+    return pagination.items, pagination.total, None
+
+
+def insert_work_plan(request_json):
+    work_plan = WorkPlan()
+    for key, value in request_json.items():
+        if hasattr(work_plan, key):
+            setattr(work_plan, key, value)
+    db.session.add(work_plan)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
+
+
+def delete_work_plan(id):
+    try:
+        work_plan = WorkPlan.query.filter(WorkPlan.id == int(id)).filter(WorkPlan.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    if work_plan is None:
+        return False, CustomError(404, 404, 'consult not found')
+    work_plan.using = False
+    db.session.add(work_plan)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
+
+
+def update_work_plan(id, request_json):
+    try:
+        work_plan = WorkPlan.query.filter(WorkPlan.id == int(id)).filter(WorkPlan.using == True).first()
+    except Exception as e:
+        return False, CustomError(500, 500, str(e))
+    if work_plan is None:
+        return False, CustomError(404, 404, 'event not found')
+    for key, value in request_json.items():
+        if hasattr(work_plan, key):
+            setattr(work_plan, key, value)
+    db.session.add(work_plan)
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return False, CustomError(500, 500, str(e))
+    return True, None
 
 
 def find_form_meta(name, version=None):
@@ -18,7 +105,7 @@ def find_form_meta(name, version=None):
         if data is None:
             return None, CustomError(404, 404, 'form meta not found')
         return data, None
-    condition = {'name':    name, 'version': version}
+    condition = {'name': name, 'version': version}
     try:
         data = mongo.db.form_meta.find_one(condition)
     except Exception as e:

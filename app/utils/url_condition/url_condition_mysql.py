@@ -16,8 +16,8 @@ class UrlCondition(object):
         self.sort_limit_dict = dict()
         order_list = []
         sort_list = []
-        for k in url_args:
-            for v in url_args.getlist(k):
+        for k, value in url_args.items():
+            for v in value:
                 try:
                     v = json.loads(v)
                 except:
@@ -45,7 +45,7 @@ class UrlCondition(object):
                             break
                     if is_equal:
                         if k not in self.filter_dict:
-                            self.filter_dict[k] = {'_eq':[v]}
+                            self.filter_dict[k] = {'_eq': [v]}
                         else:
                             self.filter_dict[k]['_eq'].append(v)
         if len(order_list) == len(sort_list):
@@ -78,7 +78,7 @@ def filter_query(query, filter_map, name_map, base_table):
                 for eq in value:
                     query = query.filter(getattr(table, column_name) == eq)
             elif key == '_like':
-                query = query.filter(getattr(table, column_name).like(value+"%"))
+                query = query.filter(getattr(table, column_name).like(value + "%"))
     return query
 
 
@@ -100,8 +100,8 @@ def sort_limit_query(query, sort_limit_dict, name_map):
 
 
 def page_query(query, page_dict):
-    page = int(page_dict['_page']) if '_page' in page_dict else 1
-    per_page = int(page_dict['_per_page']) if '_per_page' in page_dict else 20
+    page = int(page_dict['_page'][0]) if '_page' in page_dict else 1
+    per_page = int(page_dict['_per_page'][0]) if '_per_page' in page_dict else 20
     pagination = query.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total
 

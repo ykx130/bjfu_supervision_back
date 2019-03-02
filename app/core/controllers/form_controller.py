@@ -1,4 +1,5 @@
 from app.core.services import form_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 from app.core.services import form_meta_service
 from app.streaming import send_kafka_message
 from app import redis_cli
@@ -26,13 +27,7 @@ def insert_form(request):
 
 
 def find_forms(condition=None):
-    condition_fin = dict()
-    for key in condition:
-        for value in condition.getlist(key):
-            if key not in condition_fin:
-                condition_fin[key] = [value]
-            else:
-                condition_fin[key].append(value)
+    condition_fin = args_to_dict(condition)
     (forms, num, err) = form_service.find_forms(condition_fin)
     if err is not None:
         return None, None, err

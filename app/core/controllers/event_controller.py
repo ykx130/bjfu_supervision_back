@@ -1,12 +1,14 @@
 from app.core.services import event_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def find_user_events(username, condition):
-    filter_dict = dict()
-    for key, value in condition.items():
-        filter_dict[key] = value
-    filter_dict['username'] = username
-    (events, num, err) = event_service.find_events(filter_dict)
+    condition_fin = args_to_dict(condition)
+    if 'username' in condition_fin:
+        condition_fin['username'].append(username)
+    else:
+        condition_fin['username'] = [username]
+    (events, num, err) = event_service.find_events(condition_fin)
     if err is not None:
         return None, None, err
     events_model = list()
@@ -19,7 +21,8 @@ def find_user_events(username, condition):
 
 
 def find_events(condition):
-    (events, num, err) = event_service.find_events(condition)
+    condition_fin = args_to_dict(condition)
+    (events, num, err) = event_service.find_events(condition_fin)
     if err is not None:
         return None, None, err
     events_model = list()

@@ -1,8 +1,10 @@
 from app.core.services import lesson_record_service, lesson_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def find_lesson_records_history(condition):
-    (lesson_records, num, err) = lesson_record_service.find_lesson_records_history(condition)
+    condition_fin = args_to_dict(condition)
+    (lesson_records, num, err) = lesson_record_service.find_lesson_records_history(condition_fin)
     if err is not None:
         return None, None, err
     lesson_records_model = list()
@@ -22,7 +24,8 @@ def find_term_lesson_records(condition):
         if err is not None:
             return None, err
         term = term.name
-    (lesson_records, num, err) = lesson_record_service.find_term_lesson_records(term, condition)
+    condition_fin = args_to_dict(condition)
+    (lesson_records, num, err) = lesson_record_service.find_term_lesson_records(term, condition_fin)
     if err is not None:
         return None, None, err
     lesson_records_model = list()
@@ -49,7 +52,8 @@ def find_lesson_record(username, term=None):
 
 
 def find_lesson_record_history(username, condition):
-    (lesson_records, num, err) = lesson_record_service.find_lesson_record_history(username, condition)
+    condition_fin = args_to_dict(condition)
+    (lesson_records, num, err) = lesson_record_service.find_lesson_record_history(username, condition_fin)
     if err is not None:
         return None, None, err
     lesson_records_model = list()

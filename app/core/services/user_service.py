@@ -13,8 +13,8 @@ def find_users(condition):
         users = User.users(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = int(condition['_page']) if '_page' in condition else 1
-    per_page = int(condition['_per_page']) if '_per_page' in condition else 20
+    page = int(condition['_page'][0]) if '_page' in condition else 1
+    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = users.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total, None
 
@@ -235,7 +235,7 @@ def if_change_supervisor(username, role_names, term=None):
 
 
 def update_user(username, request_json):
-    # user lesson_record 查询
+    # user  查询
     try:
         term = request_json['term'] if request_json is not None and 'term' in request_json else Term.query.order_by(
             Term.name.desc()).filter(Term.using == True).first().name
@@ -249,18 +249,13 @@ def update_user(username, request_json):
         return False, CustomError(500, 500, str(e))
     if user is None:
         return False, CustomError(404, 404, 'user not found')
-    (lesson_record, err) = lesson_record_service.find_lesson_record(username, term)
-    if err is not None:
-        return False, err
-    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'uint', 'status', 'prorank',
+    allow_change_list = ['name', 'sex', 'password', 'sex', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
                          'skill', 'group', 'work_state', 'term']
 
-    # user lesson_record 信息更改
+    # user  信息更改
     for key, value in request_json.items():
         if hasattr(user, key) and key in allow_change_list:
             setattr(user, key, value)
-        if hasattr(lesson_record, key) and key in allow_change_list:
-            setattr(lesson_record, key, value)
 
     # supervisor role_name 变更
     role_names = set(request_json["role_names"] if "role_names" in request_json else [])
@@ -335,13 +330,12 @@ def update_user(username, request_json):
         db.session.add(supervisor)
 
     # user role_name 变更
-    role_dict = {'管理员': 'admin', '领导': 'leader'}
+    role_dict = {'管理员': 'admin', '领导': 'leader', '督导': 'guider'}
     for role_name_c in role_names:
         if role_name_c in role_dict:
             role_name_e = role_dict[role_name_c]
             setattr(user, role_name_e, True)
     db.session.add(user)
-    db.session.add(lesson_record)
     try:
         db.session.commit()
     except Exception as e:
@@ -412,17 +406,26 @@ def find_groups(condition):
         groups = Group.groups(condition)
     except Exception as e:
         return None, None, CustomError(500, 500, str(e))
-    page = condition['_page'] if '_page' in condition else 1
-    per_page = condition['_per_page'] if '_per_page' in condition else 20
+    page = condition['_page'][0] if '_page' in condition else 1
+    per_page = condition['_per_page'][0] if '_per_page' in condition else 20
     pagination = groups.paginate(page=page, per_page=per_page, error_out=False)
     return pagination.items, pagination.total, None
 
 
 @sub_kafka('form_service')
-def user_form_service_receiver(message):
+def user_form_service_server(message):
     method = message.get("method")
     if not method:
         return
     if method == 'add_form' or method == 'repulse_form':
         lesson_record_service.change_user_lesson_record_num(message.get("args", {}).get("username", None),
                                                             message.get("args", {}).get("term", None))
+
+
+@sub_kafka('user_service')
+def user_service_server(message):
+    method = message.get('method')
+    if not method:
+        return
+    if method == 'add_supervisor' or method == 'update_user':
+        lesson_record_service.update_lesson_record_service(message.get("args", {}).get("usernames", None))

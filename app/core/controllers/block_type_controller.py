@@ -1,5 +1,6 @@
 from app.core.services import block_type_service
 from app.utils.url_condition.url_condition_mongodb import *
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def insert_block_type(request_json):
@@ -22,7 +23,8 @@ def find_block_type(_id):
 
 
 def find_block_types(condition=None):
-    url_condition = UrlCondition(condition)
+    condition_fin = args_to_dict(condition)
+    url_condition = UrlCondition(condition_fin)
     (block_types, err) = block_type_service.find_block_types(url_condition.filter_dict)
     if err is not None:
         return None, None, err
@@ -48,6 +50,5 @@ def update_block_type(condition=None, request_json=None):
     if err is not None:
         return False, err
     return ifSuccess, None
-
 
 # 传入一个判断字典，将using字段值更改

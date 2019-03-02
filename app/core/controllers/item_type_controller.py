@@ -1,4 +1,5 @@
 from app.core.services import item_type_service
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def insert_item_type(request_json):
@@ -21,7 +22,8 @@ def find_item_type(_id):
 
 
 def find_item_types(condition=None):
-    (item_types, num, err) = item_type_service.find_item_types(condition)
+    condition_fin = args_to_dict(condition)
+    (item_types, num, err) = item_type_service.find_item_types(condition_fin)
     if err is not None:
         return None, None, err
     item_types_model = [item_type_service.object_to_str(item_type) for item_type in item_types]

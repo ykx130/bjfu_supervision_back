@@ -1,5 +1,6 @@
 from app.core.services import activity_service
 from app.utils.Error import CustomError
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def insert_activity(request_json):
@@ -24,7 +25,8 @@ def delete_activity(id):
 
 
 def find_activities(condition):
-    (activities, num, err) = activity_service.find_activities(condition)
+    condition_fin = args_to_dict(condition)
+    (activities, num, err) = activity_service.find_activities(condition_fin)
     if err is not None:
         return None, None, err
     activity_models = list()

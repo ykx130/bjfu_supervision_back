@@ -1,9 +1,11 @@
 from app.core.services import user_service, supervisor_service, lesson_record_service
 from app.streaming import send_kafka_message
+from app.utils.url_condition.url_args_to_dict import args_to_dict
 
 
 def find_users(condition):
-    (users, num, err) = user_service.find_users(condition)
+    condition_fin = args_to_dict(condition)
+    (users, num, err) = user_service.find_users(condition_fin)
     if err is not None:
         return None, None, err
     users_model = list()
@@ -48,18 +50,20 @@ def update_user(username, request_json):
     term = request_json.get("term", None)
     role_names = request_json.get("role_names", [])
     (ifInsert, err) = user_service.if_change_supervisor(username, role_names, term)
+    if err is not None:
+        return None, err
     (ifSuccess, err) = user_service.update_user(username, request_json)
     if err is not None:
         return None, err
-    if '督导' in role_names:
-        send_kafka_message(topic='user_service',
-                           method='add_supervisor',
-                           usernames=[username])
+    send_kafka_message(topic='user_service',
+                       method='update_user',
+                       usernames=[username])
     return ifSuccess, None
 
 
 def find_supervisors(condition):
-    (supervisors, num, err) = supervisor_service.get_supervisors(condition)
+    condition_fin = args_to_dict(condition)
+    (supervisors, num, err) = supervisor_service.get_supervisors(condition_fin)
     if err is not None:
         return None, None, err
     supervisors_model = list()
@@ -75,7 +79,8 @@ def find_supervisors(condition):
 
 
 def find_supervisors_expire(condition):
-    (supervisors, num, err) = supervisor_service.get_supervisors_expire(condition)
+    condition_fin = args_to_dict(condition)
+    (supervisors, num, err) = supervisor_service.get_supervisors_expire(condition_fin)
     if err is not None:
         return None, None, err
     supervisors_model = list()
@@ -122,7 +127,8 @@ def find_role(role_name):
 
 
 def find_groups(condition):
-    (groups, num, err) = user_service.find_groups(condition)
+    condition_fin = args_to_dict(condition)
+    (groups, num, err) = user_service.find_groups(condition_fin)
     if err is not None:
         return None, None, err
     groups_model = list()

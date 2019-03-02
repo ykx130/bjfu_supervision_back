@@ -2,6 +2,7 @@ from app import redis_cli
 from app.core.services import supervisor_service, form_service, notice_lesson_service
 import json
 
+
 def get_page_data_service():
     data_dict = dict()
     data_func = {"sys:guider_num": supervisor_service.get_supervisor_num,
