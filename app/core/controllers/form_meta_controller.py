@@ -141,24 +141,29 @@ def insert_work_plan(request_json):
 
 def find_work_plan_detail(term):
     condition = {'term': [term]}
-    (work_plan, num, err) = form_meta_service.find_work_plans(condition)
-    if num == 0:
-        return None, CustomError(404, 404, 'work_plan not found')
+    (work_plans, work_plans_num, err) = form_meta_service.find_work_plans(condition)
+    if work_plans_num == 0:
+        return None, 0, CustomError(404, 404, 'work_plan not found')
     if err is not None:
-        return None, err
-    condition = {'name': [work_plan.form_meta_name], 'version': [work_plan.form_meta_version],
-                 'using': [True]}
-    (form_meta, num, err) = form_meta_service.find_form_metas(condition)
-    if num == 0:
-        return None, CustomError(404, 404, 'form_meta not found')
-    (form_meta_model, err) = form_meta_service.to_json_dict(form_meta)
-    if err is not None:
-        return None, err
-    (work_plan_model, err) = form_meta_service.work_plan_to_dict(work_plan)
-    if err is not None:
-        return None, err
-    work_plan_model['form_meta'] = form_meta_model
-    return work_plan_model, None
+        return None, 0, err
+    work_plans_model = list()
+    for work_plan in work_plans:
+        condition = {'name': [work_plan.form_meta_name], 'version': [work_plan.form_meta_version],
+                     'using': [True]}
+        (form_metas, num, err) = form_meta_service.find_form_metas(condition)
+        if num == 0:
+            return None, CustomError(404, 404, 'form_meta not found')
+        if err is not None:
+            return None, 0, err
+        (form_meta_model, err) = form_meta_service.to_json_dict(form_metas[0])
+        if err is not None:
+            return None, 0, err
+        (work_plan_model, err) = form_meta_service.work_plan_to_dict(work_plan)
+        if err is not None:
+            return None, 0, err
+        work_plan_model['form_meta'] = form_meta_model
+        work_plans_model.append(work_plan_model)
+    return work_plans_model, work_plans_num, None
 
 
 def update_work_plan(id, request_json):
