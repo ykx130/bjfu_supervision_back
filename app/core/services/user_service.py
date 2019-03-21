@@ -139,16 +139,6 @@ def user_to_dict(user):
     return user_dict, None
 
 
-def find_user(username):
-    try:
-        user = User.query.filter(User.username == username).filter(User.using == True).first()
-    except Exception as e:
-        return None, CustomError(500, 500, str(e))
-    if user is None:
-        return None, CustomError(404, 404, 'user not found')
-    return user, None
-
-
 def insert_user(request_json):
     username = request_json['username'] if 'username' in request_json else None
     if username is None:

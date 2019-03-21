@@ -106,7 +106,8 @@ def page_query(query, page_dict):
     return pagination.items, pagination.total
 
 
-def process_query(query, url_condition, name_map, base_table):
-    query = filter_query(query, url_condition.filter_dict, name_map, base_table)
-    query = sort_limit_query(query, url_condition.sort_limit_dict, name_map)
-    return query
+def process_query(query, filter_dict, sort_limit_dict, page_dict, name_map, base_table):
+    query = filter_query(query, filter_dict, name_map, base_table)
+    query = sort_limit_query(query, sort_limit_dict, name_map)
+    (query, total) = page_query(query, page_dict)
+    return query, total
