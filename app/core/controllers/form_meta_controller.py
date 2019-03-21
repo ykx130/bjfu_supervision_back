@@ -146,7 +146,7 @@ def find_work_plan_detail(term):
         return None, CustomError(404, 404, 'work_plan not found')
     if err is not None:
         return None, err
-    condition = {'name': [work_plan.form_meta_name], 'version': [work_plan.form_meta_version],
+    condition = {'name': [work_plan[0].form_meta_name], 'version': [work_plan[0].form_meta_version],
                  'using': [True]}
     (form_meta, num, err) = form_meta_service.find_form_metas(condition)
     if num == 0:
