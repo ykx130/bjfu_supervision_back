@@ -129,7 +129,7 @@ def insert_work_plan(request_json):
     form_meta_version = request_json['form_meta_version'] if 'form_meta_version' in request_json else None
     if form_meta_version is None:
         return False, CustomError(500, 200, 'form_meta_version must be given')
-    condition = {'form_meta_name': [form_meta_name], 'meta_version': [form_meta_version], 'using': [True]}
+    condition = {'name': [form_meta_name], 'version': [form_meta_version], 'using': [True]}
     (form_meta, num, err) = form_meta_service.find_form_metas(condition)
     if num == 0:
         return False, CustomError(404, 404, 'form_meta not found')
@@ -139,11 +139,14 @@ def insert_work_plan(request_json):
     return ifSuccess, None
 
 
-def find_work_plan_detail(id):
-    (work_plan, err) = form_meta_service.find_work_plan(id)
+def find_work_plan_detail(term):
+    condition = {'term': [term]}
+    (work_plan, num, err) = form_meta_service.find_work_plans(condition)
+    if num == 0:
+        return None, CustomError(404, 404, 'work_plan not found')
     if err is not None:
         return None, err
-    condition = {'form_meta_name': [work_plan.form_meta_name], 'meta_version': [work_plan.form_meta_version],
+    condition = {'name': [work_plan.form_meta_name], 'version': [work_plan.form_meta_version],
                  'using': [True]}
     (form_meta, num, err) = form_meta_service.find_form_metas(condition)
     if num == 0:
