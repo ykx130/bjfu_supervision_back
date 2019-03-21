@@ -141,23 +141,9 @@ def insert_work_plan(request_json):
 
 def find_work_plan_detail(term):
     condition = {'term': [term]}
-<<<<<<< HEAD
-    (work_plan, num, err) = form_meta_service.find_work_plans(condition)
-    if num == 0:
-        return None, CustomError(404, 404, 'work_plan not found')
-    if err is not None:
-        return None, err
-    condition = {'name': [work_plan[0].form_meta_name], 'version': [work_plan[0].form_meta_version],
-                 'using': [True]}
-    (form_meta, num, err) = form_meta_service.find_form_metas(condition)
-    if num == 0:
-        return None, CustomError(404, 404, 'form_meta not found')
-    (form_meta_model, err) = form_meta_service.to_json_dict(form_meta)
-=======
     (work_plans, work_plans_num, err) = form_meta_service.find_work_plans(condition)
     if work_plans_num == 0:
         return None, 0, CustomError(404, 404, 'work_plan not found')
->>>>>>> d870592e45793d02b081dfe82ec426dfc0c3f9aa
     if err is not None:
         return None, 0, err
     work_plans_model = list()
