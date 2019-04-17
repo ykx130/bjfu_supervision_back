@@ -24,7 +24,7 @@ class FormMetaController(object):
             query_dict = {'name': [name]}
         else:
             query_dict['name'] = [name]
-        (form_metas, total, err) = dao.FormMeta.query_form_meta(query_dict)
+        (form_metas, total) = dao.FormMeta.query_form_meta(query_dict)
         return form_metas, total
 
     @classmethod
@@ -74,7 +74,7 @@ class WorkPlanController(object):
         if form_meta_version is None:
             raise CustomError(500, 200, 'form_meta_version must be given')
         condition = {'form_meta_name': [form_meta_name], 'form_meta_version': [form_meta_version], 'using': [True]}
-        form_meta, num = dao.FormMeta.query_form_meta(condition)
+        (form_meta, num) = dao.FormMeta.query_form_meta(condition)
         if num == 0:
             raise CustomError(404, 404, 'form_meta not found')
         ifSuccess = dao.WorkPlan.insert_work_plan(data)

@@ -44,7 +44,7 @@ class UserController():
 
     @classmethod
     def query_users(cls, query_dict: dict = None, unscoped=False):
-        users, num = dao.User.query_users(query_dict=query_dict, unscoped=unscoped)
+        (users, num) = dao.User.query_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(user) for user in users], num
 
     @classmethod
@@ -115,9 +115,9 @@ class UserController():
                 new_role_names.remove('小组长')
                 supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
                 group_name = data['group'] if 'group' in data else supervisor['group']
-                groupers = dao.Supervisor.query_supervisors(
+                (groupers, num) = dao.Supervisor.query_supervisors(
                     query_dict={'term_gte': [term], 'grouper': [True], 'group': [group_name]})
-                if len(groupers) > 0:
+                if num > 0:
                     grouper = groupers[0]
                     SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
                                                         group_name=group_name, role_name='小组长', add=False)
@@ -129,9 +129,9 @@ class UserController():
                                                     add=False)
             elif '大组长' in new_role_names:
                 new_role_names.remove('大组长')
-                groupers = dao.Supervisor.query_supervisors(
+                (groupers, num) = dao.Supervisor.query_supervisors(
                     query_dict={'term_gte': [term], 'grouper': [True], 'main_grouper': [True]})
-                if len(groupers) > 0:
+                if num > 0:
                     grouper = groupers[0]
                     SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
                                                         role_name='main_grouper', add=False)
@@ -167,9 +167,9 @@ class UserController():
 class SupervisorController():
     @classmethod
     def query_supervisors(cls, query_dict: dict = {}, unscoped: bool = False):
-        supervisors, num = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
+        (supervisors, _) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
         usernames = [supervisor['username'] for supervisor in supervisors]
-        users = UserController.query_users(query_dict={'username': usernames}, unscoped=unscoped)
+        (users, num) = UserController.query_users(query_dict={'username': usernames}, unscoped=unscoped)
         return users, num
 
     @classmethod
@@ -185,7 +185,7 @@ class SupervisorController():
         all_query_dict['term'] = term
         all_query_dict['_per_page'] = [100000]
         all_usernames = list()
-        all_supervisors, num = dao.Supervisor.query_supervisors(query_dict=all_query_dict, unscoped=unscoped)
+        (all_supervisors, num) = dao.Supervisor.query_supervisors(query_dict=all_query_dict, unscoped=unscoped)
         for supervisor in all_supervisors:
             all_usernames.append(supervisor['username'])
 
@@ -193,13 +193,13 @@ class SupervisorController():
         can_query_dict['term'] = new_term
         can_query_dict['_per_page'] = [100000]
         can_usernames = list()
-        can_supervisors, num = dao.Supervisor.query_supervisors(query_dict=can_query_dict, unscoped=unscoped)
+        (can_supervisors, num) = dao.Supervisor.query_supervisors(query_dict=can_query_dict, unscoped=unscoped)
         for supervisor in can_supervisors:
             can_usernames.append(supervisor['username'])
 
         expire_usernames = list(set(all_usernames) - set(can_usernames))
         query_dict['username'] = expire_usernames
-        users, num = UserController.query_users(query_dict=query_dict, unscoped=False)
+        (users, num) = UserController.query_users(query_dict=query_dict, unscoped=False)
         return users, num
 
     @classmethod
@@ -253,8 +253,8 @@ class SupervisorController():
     @classmethod
     def update_grouper(cls, ctx: bool = True, username: str = '', term: str = '', group_name: str = '',
                        role_name: str = '', add: bool = False):
-        supervisors = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term_gte': [term]})
-        if len(supervisors) == 0:
+        (supervisors, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term_gte': [term]})
+        if num == 0:
             raise CustomError(500, 200, 'user must be supervisor')
         try:
             dao.Supervisor.update_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]},
@@ -306,7 +306,7 @@ class SupervisorController():
     @classmethod
     def get_supervisor_num(cls, query_dict: dict = {}):
         term = query_dict['term'] if 'term' in query_dict else dao.Term.get_now_term()['name']
-        supervisors, num = dao.Supervisor.query_supervisors(query_dict={'_per_page': [100000], 'term':[term]})
+        (supervisors, num) = dao.Supervisor.query_supervisors(query_dict={'_per_page': [100000], 'term': [term]})
         return num
 
 

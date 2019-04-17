@@ -42,7 +42,6 @@ class ModelLessonController(object):
     def insert_model_lesson(cls, ctx: bool = True, data: dict = {}):
         data['term'] = data['term'] if 'term' in data else dao.Term.get_now_term()['name']
         data = cls.reformatter_insert(data=data)
-        status = data.get('status', '推荐课')
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
         try:
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
@@ -67,6 +66,7 @@ class ModelLessonController(object):
             for lesson_id in lesson_ids:
                 dao.Lesson.get_lesson(id=lesson_id, unscoped=False)
                 data['lesson_id'] = lesson_id
+                data = cls.reformatter_insert(data=data)
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'id': [lesson_id]}, data={'lesson_model': status})
 
@@ -144,13 +144,13 @@ class ModelLessonController(object):
     @classmethod
     def model_lesson_vote(cls, ctx: bool = True, id: int = 0, vote: bool = True):
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
-        dao.Lesson.get_lesson(id=id, unscoped=False)
+        lesson = dao.Lesson.get_lesson(id=id, unscoped=False)
         try:
             if vote:
                 dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]},
                                                     data={'votes': int(model_lesson['votes']) + 1})
             dao.Lesson.update_lesson(ctx=False, query_dict={'id': model_lesson['lesson_id']},
-                                     data={'notices': int(model_lesson['notices'] + 1)})
+                                     data={'notices': int(lesson['notices'] + 1)})
             if ctx:
                 db.session.commit()
         except Exception as e:
