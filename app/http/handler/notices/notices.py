@@ -15,8 +15,8 @@ from app.core.controllers import notices_controller
 def get_notices_num():
     num = notices_controller.get_notices_num(current_user.username)
     return jsonify({
-        "code": 200,
-        "total": num
+        'code': 200,
+        'total': num
     })
 
 
@@ -24,6 +24,6 @@ def get_notices_num():
 def get_newest_notice():
     notice = notices_controller.get_newest_notices(current_user.username)
     return jsonify({
-        "code": 200,
-        "notice": notice
+        'code': 200,
+        'notice': notice
     })

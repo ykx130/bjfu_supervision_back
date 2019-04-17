@@ -49,17 +49,6 @@ def find_lesson_record(username, term):
     return lesson_record, None
 
 
-def insert_lesson_record(request_json):
-    lesson_record = LessonRecord()
-    for key, value in request_json.items():
-        if hasattr(lesson_record, key):
-            setattr(lesson_record, key, value)
-    try:
-        db.session.add(lesson_record)
-    except Exception as e:
-        db.session.rollback()
-        return False, CustomError(500, 500, str(e))
-    return True, None
 
 
 def delete_lesson_record(username, term):
@@ -131,7 +120,7 @@ def update_lesson_record_service(usernames):
         for supervisor in supervisors:
             user = User.query.filter(User.username == username).filter(User.using == True).first()
             if user is None:
-                return False, CustomError(404, 404, "user not found")
+                return False, CustomError(404, 404, 'user not found')
             lesson_record = LessonRecord.query.filter(LessonRecord.username == username).filter(
                 LessonRecord.term == supervisor.term).filter(LessonRecord.using == True).first()
             if lesson_record is None:

@@ -12,7 +12,7 @@ def sub_kafka(topic=''):
                                      group_id=func.__name__ + '_group'
                                      )
             for msg in consumer:
-                log.info("received msg : {}".format(msg))
+                log.info('received msg : {}'.format(msg))
                 func(msg.value)
 
         return ex
@@ -25,7 +25,7 @@ def send_kafka_message(topic, method, **args):
                              value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     producer.send(topic, value={
-        "method": method,
-        "args": args
+        'method': method,
+        'args': args
     })
-    log.info("SEND MESSAGE  method : {} args: {}".format(method, json.dumps(args)))
+    log.info('SEND MESSAGE  method : {} args: {}'.format(method, json.dumps(args)))

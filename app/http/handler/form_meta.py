@@ -11,8 +11,8 @@ from datetime import datetime
 def insert_form_meta():
     request_json = request.json
     meta = request_json.get('meta', {})
-    meta.update({"created_by": current_user.username,
-                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    meta.update({'created_by': current_user.username,
+                 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
     request_json['meta'] = meta
     (ifSuccess, err) = core.FormMetaController.insert_form_meta(request_json)
     if err is not None:

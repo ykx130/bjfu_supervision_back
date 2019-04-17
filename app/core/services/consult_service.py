@@ -19,7 +19,7 @@ def find_consults(condition):
 
 def insert_consult(request_json):
     consult = Consult()
-    consult.state = "待协调"
+    consult.state = '待协调'
     consult.term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first().name
     consult.requester_username = current_user.username
     consult.submit_time = datetime.now()
@@ -42,7 +42,7 @@ def update_consult(id, request_json):
         return False, CustomError(500, 500, str(e))
     if consult is None:
         return False, CustomError(404, 404, 'consult not found')
-    consult.state = "已协调"
+    consult.state = '已协调'
     consult.responsor_username = current_user.username
     consult.answer_time = datetime.now()
     for key, value in request_json.items():

@@ -14,20 +14,20 @@ class FormController(object):
         :param form_model:
         :return:
         """
-        tmpl = "课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被{created_by} 评价， 评价者{guider}, 督导小组{group}."
-        send_kafka_message(topic="notice_service", method="send_msg",
-                           username=form_model.get('meta', {}).get("guider"),
+        tmpl = '课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被{created_by} 评价， 评价者{guider}, 督导小组{group}.'
+        send_kafka_message(topic='notice_service', method='send_msg',
+                           username=form_model.get('meta', {}).get('guider'),
                            msg={
-                               "title": "问卷新增",
-                               "body": tmpl.format(
-                                   lesson_name=form_model.get('meta', {}).get("lesson", {}).get("lesson_name", ''),
-                                   created_at=form_model.get('meta', {}).get("created_at"),
-                                   created_by=form_model.get('meta', {}).get("created_by"),
-                                   guider=form_model.get('meta', {}).get("guider_name"),
-                                   group=form_model.get('meta', {}).get("guider_group"),
-                                   lesson_level=form_model.get('meta', {}).get("lesson", {}).get("lesson_level", ''),
-                                   lesson_teacher=form_model.get('meta', {}).get("lesson", {}).get(
-                                       "lesson_teacher_name", '')
+                               'title': '问卷新增',
+                               'body': tmpl.format(
+                                   lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),
+                                   created_at=form_model.get('meta', {}).get('created_at'),
+                                   created_by=form_model.get('meta', {}).get('created_by'),
+                                   guider=form_model.get('meta', {}).get('guider_name'),
+                                   group=form_model.get('meta', {}).get('guider_group'),
+                                   lesson_level=form_model.get('meta', {}).get('lesson', {}).get('lesson_level', ''),
+                                   lesson_teacher=form_model.get('meta', {}).get('lesson', {}).get(
+                                       'lesson_teacher_name', '')
                                )
                            }
                            )
@@ -39,20 +39,20 @@ class FormController(object):
         :param form_model:
         :return:
         """
-        tmpl = "问卷 课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被打回， 评价者{guider}, 督导小组{group}."
-        send_kafka_message(topic="notice_service", method="send_msg",
-                           username=form_model.get('meta', {}).get("guider"),
+        tmpl = '问卷 课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被打回， 评价者{guider}, 督导小组{group}.'
+        send_kafka_message(topic='notice_service', method='send_msg',
+                           username=form_model.get('meta', {}).get('guider'),
                            msg={
-                               "title": "问卷打回",
-                               "body": tmpl.format(
-                                   lesson_name=form_model.get('meta', {}).get("lesson", {}).get("lesson_name", ''),
-                                   created_at=form_model.get('meta', {}).get("created_at"),
-                                   created_by=form_model.get('meta', {}).get("created_by"),
-                                   guider=form_model.get('meta', {}).get("guider_name"),
-                                   group=form_model.get('meta', {}).get("guider_group"),
-                                   lesson_level=form_model.get('meta', {}).get("lesson", {}).get("lesson_level", ''),
-                                   lesson_teacher=form_model.get('meta', {}).get("lesson", {}).get(
-                                       "lesson_teacher_name", '')
+                               'title': '问卷打回',
+                               'body': tmpl.format(
+                                   lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),
+                                   created_at=form_model.get('meta', {}).get('created_at'),
+                                   created_by=form_model.get('meta', {}).get('created_by'),
+                                   guider=form_model.get('meta', {}).get('guider_name'),
+                                   group=form_model.get('meta', {}).get('guider_group'),
+                                   lesson_level=form_model.get('meta', {}).get('lesson', {}).get('lesson_level', ''),
+                                   lesson_teacher=form_model.get('meta', {}).get('lesson', {}).get(
+                                       'lesson_teacher_name', '')
                                )
                            }
                            )
@@ -61,13 +61,11 @@ class FormController(object):
     def insert_form(cls, data: dict = None):
         if data is None:
             data = dict()
-        (ifSuccess, err) = dao.Form.insert_form(data)
-        if err is not None:
-            return False, err
         meta = data.get('meta', {})
         lesson_id = meta.get('lesson', {}).get('lesson_id', None)
         if lesson_id is None:
-            return False, CustomError(500, 200, "lesson_id should be given")
+            raise CustomError(500, 200, 'lesson_id should be given')
+        ifSuccess = dao.Form.insert_form(data)
         form_model = dao.Form.formatter_total(data)
         send_kafka_message(topic='form_service',
                            method='add_form',
@@ -76,7 +74,7 @@ class FormController(object):
                            form=form_model,
                            lesson_id=lesson_id)
         cls.push_new_form_message(form_model)
-        return ifSuccess, None
+        return ifSuccess
 
     @classmethod
     def query_forms(cls, query_dict: dict = None):
@@ -94,14 +92,10 @@ class FormController(object):
 
     @classmethod
     def update_form(cls, where_dict: dict = None, data: dict = None):
-        (ifSuccess, err) = dao.Form.update_form(where_dict, data)
-        if err is not None:
-            return False, err
+        ifSuccess = dao.Form.update_form(where_dict, data)
         if 'status' in data:
-            (form, err) = dao.Form.get_form(where_dict.get('_id'))
-            if err is not None:
-                return False, err
-            lesson_id = form.get("meta", {}).get("lesson", {}).get("lesson_id", None)
+            form = dao.Form.get_form(where_dict.get('_id'))
+            lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)
             if data.get('status') == '待提交':
                 send_kafka_message(topic='form_service',
                                    method='repulse_form',
@@ -112,18 +106,18 @@ class FormController(object):
                                    method='add_form',
                                    lesson_id=lesson_id)
 
-        return ifSuccess, None
+        return ifSuccess
 
     @classmethod
     def get_form_map(cls, meta_name):
         item_map = []
         word_cloud = []
-        if redis_cli.exists("form_service:{}:map".format(meta_name)):
-            item_map = json.loads(redis_cli.get("form_service:{}:map".format(meta_name)))
-        if redis_cli.exists("form_service:{}:word_cloud".format(meta_name)):
-            word_cloud = json.loads(redis_cli.get("form_service:{}:word_cloud".format(meta_name)))
+        if redis_cli.exists('form_service:{}:map'.format(meta_name)):
+            item_map = json.loads(redis_cli.get('form_service:{}:map'.format(meta_name)))
+        if redis_cli.exists('form_service:{}:word_cloud'.format(meta_name)):
+            word_cloud = json.loads(redis_cli.get('form_service:{}:word_cloud'.format(meta_name)))
 
         return {
-            "item_map": item_map,
-            "word_cloud": word_cloud
+            'item_map': item_map,
+            'word_cloud': word_cloud
         }

@@ -2,11 +2,11 @@ import pymysql
 from app.utils.mysql import db
 from datetime import datetime, timedelta
 import json
-from app.core.models.lesson import Lesson, LessonCase, Term
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
 from app.core.services import form_service, notice_lesson_service
 import re
+import app.core.dao as dao
 
 
 def lesson_week_list(lesson_week):
@@ -30,13 +30,13 @@ def week_to_date(term_begin_time, week, weekday):
 
 
 def update_database():
-    lesson_db = pymysql.connect(host="localhost", user="root", passwd="wshwoaini", db="lessons", charset='utf8',
+    lesson_db = pymysql.connect(host='localhost', user='root', passwd='wshwoaini', db='lessons', charset='utf8',
                                 cursorclass=pymysql.cursors.DictCursor)
     cursor = lesson_db.cursor()
 
-    cursor.execute("select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name, \
+    cursor.execute('select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name, \
                    lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class, lesson_attention_reason,\
-                   lesson_model, lesson_grade, assign_group from lessons")
+                   lesson_model, lesson_grade, assign_group from lessons')
     datas = cursor.fetchall()
     for data in datas:
         teacher_name = data['lesson_teacher_name']
@@ -48,8 +48,8 @@ def update_database():
         data['lesson_teacher_unit'] = teacher_units
         lesson_id = data['lesson_id']
         data['lesson_id'] = [lesson_id + teacher_id for teacher_id in teacher_ids]
-        term_name = "-".join([data['lesson_year'], data['lesson_semester']]).replace(" ", "")
-        (term, err) = find_term(term_name)
+        term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
+        term, err = dao.Term.get_term(term_name=term_name)
         if err is not None:
             continue
         if term is None:
@@ -72,15 +72,15 @@ def update_database():
                         setattr(lesson, k, v)
             db.session.add(lesson)
             db.session.commit()
-            cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
-                            ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
+            cursor.execute('select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
+                            ='{}' and lesson_teacher_name='{}''.format(lesson_id, teacher_name))
             lesson_case_datas = cursor.fetchall()
             lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
                                '06': '0607',
                                '07': '0607', '08': '0809', '09': '0809', '10': '1011', '11': '1011',
                                '12': '12'}
             for lesson_case_data in lesson_case_datas:
-                if lesson_case_data['lesson_week'] == "":
+                if lesson_case_data['lesson_week'] == '':
                     lesson_case = LessonCase()
                     for k, v in lesson_case_data.items():
                         try:
@@ -128,20 +128,20 @@ def update_database():
 
 def lesson_to_model(lesson):
     try:
-        lesson_cases = [{"lesson_week": lesson_case.lesson_week, "lesson_time": str(lesson_case.lesson_time),
-                         "lesson_date": str(lesson_case.lesson_date.strftime("%Y-%m-%d")),
-                         "lesson_weekday": lesson_case.lesson_weekday,
-                         "lesson_room": lesson_case.lesson_room} for
+        lesson_cases = [{'lesson_week': lesson_case.lesson_week, 'lesson_time': str(lesson_case.lesson_time),
+                         'lesson_date': str(lesson_case.lesson_date.strftime('%Y-%m-%d')),
+                         'lesson_weekday': lesson_case.lesson_weekday,
+                         'lesson_room': lesson_case.lesson_room} for
                         lesson_case in lesson.lesson_cases]
-        lesson_model = {"id": lesson.id, "lesson_id": lesson.lesson_id, "lesson_attribute": lesson.lesson_attribute,
-                        "lesson_state": lesson.lesson_state, "lesson_teacher_id": lesson.lesson_teacher_id,
-                        "lesson_name": lesson.lesson_name, "lesson_teacher_name": lesson.lesson_teacher_name,
-                        "lesson_semester": lesson.lesson_semester, "lesson_level": lesson.lesson_level,
-                        "lesson_teacher_unit": lesson.lesson_teacher_unit, "lesson_unit": lesson.lesson_unit,
-                        "lesson_year": lesson.lesson_year, "lesson_type": lesson.lesson_type,
-                        "lesson_class": lesson.lesson_class, "lesson_grade": lesson.lesson_grade,
-                        "lesson_cases": lesson_cases, "lesson_model": lesson.lesson_model,
-                        "term": lesson.term}
+        lesson_model = {'id': lesson.id, 'lesson_id': lesson.lesson_id, 'lesson_attribute': lesson.lesson_attribute,
+                        'lesson_state': lesson.lesson_state, 'lesson_teacher_id': lesson.lesson_teacher_id,
+                        'lesson_name': lesson.lesson_name, 'lesson_teacher_name': lesson.lesson_teacher_name,
+                        'lesson_semester': lesson.lesson_semester, 'lesson_level': lesson.lesson_level,
+                        'lesson_teacher_unit': lesson.lesson_teacher_unit, 'lesson_unit': lesson.lesson_unit,
+                        'lesson_year': lesson.lesson_year, 'lesson_type': lesson.lesson_type,
+                        'lesson_class': lesson.lesson_class, 'lesson_grade': lesson.lesson_grade,
+                        'lesson_cases': lesson_cases, 'lesson_model': lesson.lesson_model,
+                        'term': lesson.term}
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return lesson_model, None
@@ -214,7 +214,7 @@ def update_lesson_notices(lesson_id):
 
 @sub_kafka('lesson_service')
 def lesson_service_server(message):
-    method = message.get("method")
+    method = message.get('method')
     if not method:
         return
     if method == 'add_notice_lesson' or method == 'delete_notice_lesson':
@@ -223,8 +223,8 @@ def lesson_service_server(message):
 
 @sub_kafka('form_service')
 def lesson_form_service_server(message):
-    method = message.get("method")
+    method = message.get('method')
     if not method:
         return
     if method == 'add_form' or method == 'repulse_form':
-        update_lesson_notices(message.get("args", {}).get("lesson_id", None))
+        update_lesson_notices(message.get('args', {}).get('lesson_id', None))

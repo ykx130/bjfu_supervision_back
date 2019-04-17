@@ -49,7 +49,7 @@ def get_lesson(lesson_id):
     }), 200
 
 
-@lesson_blueprint.route('/lessons/<int:id>', methods=["PUT"])
+@lesson_blueprint.route('/lessons/<int:id>', methods=['PUT'])
 def update_lesson(id):
     (_, err) = lesson_controller.change_lesson(id, request.json)
     if err is not None:

@@ -1,5 +1,5 @@
 import app.core.dao as dao
-from app.utils.Error import CustomError
+from app.utils import CustomError
 
 
 class FormMetaController(object):
@@ -19,15 +19,13 @@ class FormMetaController(object):
     @classmethod
     def get_history_form_meta(cls, name: str = None, query_dict: dict = None):
         if name is None:
-            return None, None, CustomError(500, 200, "name must be given")
+            raise CustomError(500, 200, 'name must be given')
         if query_dict is None:
             query_dict = {'name': [name]}
         else:
             query_dict['name'] = [name]
         (form_metas, total, err) = dao.FormMeta.query_form_meta(query_dict)
-        if err is not None:
-            return None, None, err
-        return form_metas, total, None
+        return form_metas, total
 
     @classmethod
     def query_form_meta_history(cls, query_dict: dict = None):
@@ -43,16 +41,10 @@ class FormMetaController(object):
 
     @classmethod
     def update_form_meta(cls, name: str = None, data: dict = None):
-        (form_meta, err) = dao.FormMeta.get_form_meta(name)
-        if err is not None:
-            return False, err
-        (ifSuccess, err) = dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
-        if err is not None:
-            return False, err
-        (ifSuccess, err) = dao.FormMeta.insert_form_meta(data)
-        if err is not None:
-            return False, err
-        return ifSuccess, None
+        form_meta = dao.FormMeta.get_form_meta(name)
+        ifSuccess = dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
+        ifSuccess = dao.FormMeta.insert_form_meta(data)
+        return ifSuccess
 
 
 class WorkPlanController(object):
@@ -77,15 +69,13 @@ class WorkPlanController(object):
     def insert_work_plan(cls, data: dict = None):
         form_meta_name = data['form_meta_name'] if 'form_meta_name' in data else None
         if form_meta_name is None:
-            return False, CustomError(500, 200, 'form_meta_name must be given')
-        form_meta_version = data['form_meta_version'] if 'form_meta_version' in request_json else None
+            raise CustomError(500, 200, 'form_meta_name must be given')
+        form_meta_version = data['form_meta_version'] if 'form_meta_version' in data else None
         if form_meta_version is None:
-            return False, CustomError(500, 200, 'form_meta_version must be given')
+            raise CustomError(500, 200, 'form_meta_version must be given')
         condition = {'form_meta_name': [form_meta_name], 'form_meta_version': [form_meta_version], 'using': [True]}
-        (form_meta, num, err) = dao.FormMeta.query_form_meta(condition)
+        form_meta, num = dao.FormMeta.query_form_meta(condition)
         if num == 0:
-            return False, CustomError(404, 404, 'form_meta not found')
-        (ifSuccess, err) = dao.WorkPlan.insert_work_plan(data)
-        if err is not None:
-            return False, err
-        return ifSuccess, None
+            raise CustomError(404, 404, 'form_meta not found')
+        ifSuccess = dao.WorkPlan.insert_work_plan(data)
+        return ifSuccess

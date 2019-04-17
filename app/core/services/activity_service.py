@@ -17,11 +17,11 @@ def insert_activity(request_json):
         if hasattr(activity, key):
             setattr(activity, key, value)
     if activity.apply_start_time > activity.apply_end_time:
-        return False, "apply_start_time can not be after apply_end_time"
+        return False, 'apply_start_time can not be after apply_end_time'
     if activity.start_time > activity.end_time:
-        return False, "start_time can not be after end_time"
+        return False, 'start_time can not be after end_time'
     if activity.apply_end_time > activity.start_time:
-        return False, "apply_end_time can not be after start_time"
+        return False, 'apply_end_time can not be after start_time'
     now = datetime.now()
     if str(now) > activity.apply_end_time:
         activity.apply_state = '报名已结束'
@@ -61,11 +61,11 @@ def update_activity(id, request_json):
         if hasattr(activity, key):
             setattr(activity, key, value)
     if activity.apply_start_time > activity.apply_end_time:
-        return False, CustomError(500, 200, "apply_start_time can not be after apply_end_time")
+        return False, CustomError(500, 200, 'apply_start_time can not be after apply_end_time')
     if activity.start_time > activity.end_time:
-        return False, CustomError(500, 200, "start_time can not be after end_time")
+        return False, CustomError(500, 200, 'start_time can not be after end_time')
     if activity.apply_end_time > activity.start_time:
-        return False, CustomError(500, 200, "apply_end_time can not be after start_time")
+        return False, CustomError(500, 200, 'apply_end_time can not be after start_time')
     now = datetime.now()
     if now > activity.apply_end_time:
         activity.apply_state = '报名已结束'
@@ -80,7 +80,7 @@ def update_activity(id, request_json):
     else:
         activity.state = '活动进行中'
     if activity.all_num < activity.attend_num:
-        return False, CustomError(500, 200, "all_num can not less than attend_num")
+        return False, CustomError(500, 200, 'all_num can not less than attend_num')
     activity.remainder_num = activity.all_num - activity.attend_num
     db.session.add(activity)
     try:
@@ -111,21 +111,21 @@ def delete_activity(id):
 def activity_to_dict(activity):
     try:
         activity_dict = {
-            "id": activity.id,
-            "name": activity.name,
-            "teacher": activity.teacher,
-            "start_time": str(activity.start_time),
-            "end_time": str(activity.end_time),
-            "place": activity.place,
-            "state": activity.state,
-            "information": activity.information,
-            "all_num": activity.all_num,
-            "attend_num": activity.attend_num,
-            "remainder_num": activity.remainder_num,
-            "term": activity.term,
-            "apply_start_time": str(activity.apply_start_time),
-            "apply_end_time": str(activity.apply_end_time),
-            "apply_state": activity.apply_state
+            'id': activity.id,
+            'name': activity.name,
+            'teacher': activity.teacher,
+            'start_time': str(activity.start_time),
+            'end_time': str(activity.end_time),
+            'place': activity.place,
+            'state': activity.state,
+            'information': activity.information,
+            'all_num': activity.all_num,
+            'attend_num': activity.attend_num,
+            'remainder_num': activity.remainder_num,
+            'term': activity.term,
+            'apply_start_time': str(activity.apply_start_time),
+            'apply_end_time': str(activity.apply_end_time),
+            'apply_state': activity.apply_state
         }
     except Exception as e:
         return None, CustomError(500, 500, str(e))
@@ -138,9 +138,9 @@ def activity_user_dict(id, user):
         return None, err
     try:
         act_user_dict = {
-            "user": user_model,
-            "state": ActivityUser.activity_user_state(id, user.username).state,
-            "fin_state": ActivityUser.activity_user_state(id, user.username).fin_state
+            'user': user_model,
+            'state': ActivityUser.activity_user_state(id, user.username).state,
+            'fin_state': ActivityUser.activity_user_state(id, user.username).fin_state
         }
     except Exception as e:
         return None, CustomError(500, 500, str(e))
@@ -201,14 +201,14 @@ def insert_activity_user(id, request_json):
     username = request_json.get('username',current_user.username)
     user = User.query.filter(User.username == username).filter(User.using == True).first()
     if user is None:
-        return False, CustomError(404, 404, "user not found")
+        return False, CustomError(404, 404, 'user not found')
     activity = Activity.query.filter(Activity.using == True).filter(Activity.id == id).first()
     if activity is None:
-        return False, CustomError(404, 404, "activity not found")
-    if activity.apply_state in ["报名未开始", "报名已结束"]:
+        return False, CustomError(404, 404, 'activity not found')
+    if activity.apply_state in ['报名未开始', '报名已结束']:
         return False, CustomError(500, 200, activity.state)
     if activity.remainder_num <= 0:
-        return False, CustomError(500, 200, "remain number is zero")
+        return False, CustomError(500, 200, 'remain number is zero')
     activity_user = ActivityUser()
     activity_user.username = user.username
     for key, value in request_json.items():
@@ -232,17 +232,17 @@ def insert_activity_user(id, request_json):
 
 def update_activity_user(id, username, request_json):
     if username is None:
-        return False, CustomError(500, 200, "username should be given")
+        return False, CustomError(500, 200, 'username should be given')
     user = User.query.filter(User.username == username).filter(User.using == True).first()
     if user is None:
-        return False, CustomError(404, 404, "user not found")
+        return False, CustomError(404, 404, 'user not found')
     activity = Activity.query.filter(Activity.id == id).filter(Activity.using == True).first()
     if activity is None:
-        return False, CustomError(404, 404, "activity not found")
+        return False, CustomError(404, 404, 'activity not found')
     activity_user = ActivityUser.query.filter(Activity.id == id).filter(User.username == username).filter(
         ActivityUser.using == True).first()
     if activity_user is None:
-        return False, CustomError(404, 404, "user does not attend this activity")
+        return False, CustomError(404, 404, 'user does not attend this activity')
     for key, value in request_json.items():
         if key in ['state', 'user']:
             continue
@@ -259,17 +259,17 @@ def update_activity_user(id, username, request_json):
 
 def delete_activity_user(id, username):
     if username is None:
-        return False, CustomError(500, 200, "username should be given")
+        return False, CustomError(500, 200, 'username should be given')
     user = User.query.filter(User.username == username).filter(User.using == True).first()
     if user is None:
-        return False, CustomError(404, 404, "user not found")
+        return False, CustomError(404, 404, 'user not found')
     activity = Activity.query.filter(Activity.id == id).filter(Activity.using == True).first()
     if activity is None:
-        return False, CustomError(404, 404, "activity not found")
+        return False, CustomError(404, 404, 'activity not found')
     activity_user = ActivityUser.query.filter(Activity.id == id).filter(User.username == username).filter(
         ActivityUser.using == True).first()
     if activity_user is None:
-        return False, CustomError(404, 404, "user does not attend this activity")
+        return False, CustomError(404, 404, 'user does not attend this activity')
     activity_user.using = False
     activity.attend_num = activity.attend_num - 1
     activity.remainder_num = activity.remainder_num + 1
@@ -285,23 +285,23 @@ def delete_activity_user(id, username):
 
 def find_current_user_activities(username, condition=None):
     if username is None:
-        return None, None, CustomError(500, 200, "username should be given")
+        return None, None, CustomError(500, 200, 'username should be given')
     # activity_users = ActivityUser.query.filter(ActivityUser.using == True)
     # users = User.query.filter(User.using == True)
     activities = Activity.query.filter(Activity.using == True).outerjoin(
         ActivityUser, ActivityUser.activity_id == Activity.id).outerjoin(
         User, User.username == ActivityUser.username)
     if 'state' not in condition:
-        return None, None, CustomError(500, 200, "state must be given")
+        return None, None, CustomError(500, 200, 'state must be given')
     state = condition['state']
     if state == 'hasAttended':
-        activities = activities.filter(ActivityUser.state == "已报名").filter(
+        activities = activities.filter(ActivityUser.state == '已报名').filter(
             ActivityUser.username == username)
     elif state == 'canAttend':
-        activities = activities.filter(Activity.using == True).filter(Activity.apply_state == "报名进行中").filter(
+        activities = activities.filter(Activity.using == True).filter(Activity.apply_state == '报名进行中').filter(
             or_(ActivityUser.state == None, ActivityUser.state == '未报名')).filter(Activity.remainder_num > 0)
     else:
-        return None, None, CustomError(500, 200, "state is wrong")
+        return None, None, CustomError(500, 200, 'state is wrong')
     page = int(condition['_page'][0]) if '_page' in condition else 1
     per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
     pagination = activities.paginate(page=int(page), per_page=int(per_page), error_out=False)
@@ -312,21 +312,21 @@ def has_attended_activity_dict(activity, username):
     try:
         attended_activity_dict = {
             'activity': {
-                "id": activity.id,
-                "name": activity.name,
-                "teacher": activity.teacher,
-                "start_time": activity.start_time,
-                "end_time": activity.end_time,
-                "place": activity.place,
-                "state": activity.state,
-                "information": activity.information,
-                "all_num": activity.all_num,
-                "attend_num": activity.attend_num,
-                "remainder_num": activity.remainder_num,
-                "term": activity.term,
-                "apply_start_time": activity.apply_start_time,
-                "apply_end_time": activity.apply_end_time,
-                "apply_state": activity.apply_state
+                'id': activity.id,
+                'name': activity.name,
+                'teacher': activity.teacher,
+                'start_time': activity.start_time,
+                'end_time': activity.end_time,
+                'place': activity.place,
+                'state': activity.state,
+                'information': activity.information,
+                'all_num': activity.all_num,
+                'attend_num': activity.attend_num,
+                'remainder_num': activity.remainder_num,
+                'term': activity.term,
+                'apply_start_time': activity.apply_start_time,
+                'apply_end_time': activity.apply_end_time,
+                'apply_state': activity.apply_state
             },
             'activity_user': {
                 'state': ActivityUser.activity_user_state(activity.id, username).state,
@@ -342,21 +342,21 @@ def can_attend_activity_dict(activity):
     try:
         attend_activity_dict = {
             'activity': {
-                "id": activity.id,
-                "name": activity.name,
-                "teacher": activity.teacher,
-                "start_time": activity.start_time,
-                "end_time": activity.end_time,
-                "place": activity.place,
-                "state": activity.state,
-                "information": activity.information,
-                "all_num": activity.all_num,
-                "attend_num": activity.attend_num,
-                "remainder_num": activity.remainder_num,
-                "term": activity.term,
-                "apply_start_time": activity.apply_start_time,
-                "apply_end_time": activity.apply_end_time,
-                "apply_state": activity.apply_state
+                'id': activity.id,
+                'name': activity.name,
+                'teacher': activity.teacher,
+                'start_time': activity.start_time,
+                'end_time': activity.end_time,
+                'place': activity.place,
+                'state': activity.state,
+                'information': activity.information,
+                'all_num': activity.all_num,
+                'attend_num': activity.attend_num,
+                'remainder_num': activity.remainder_num,
+                'term': activity.term,
+                'apply_start_time': activity.apply_start_time,
+                'apply_end_time': activity.apply_end_time,
+                'apply_state': activity.apply_state
             },
             'activity_user': {
                 'state': '未报名',

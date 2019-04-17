@@ -16,42 +16,42 @@ class UrlCondition(object):
         self.sort_limit_dict = dict()
         order_list = []
         sort_list = []
-        for k, value in url_args.items():
+        for key, value in url_args.items():
             for v in value:
                 try:
                     v = json.loads(v)
                 except:
                     v = v
-                if k == '_per_page' or k == '_page':
-                    self.page_dict[k] = v
-                elif k == '_sort':
+                if key == '_per_page' or key == '_page':
+                    self.page_dict[key] = v
+                elif key == '_sort':
                     v = v.replace(' ', '')
                     sort_list = v.split(',')
-                elif k == '_order':
+                elif key == '_order':
                     v = v.replace(' ', '')
                     order_list = [int(item_order) for item_order in v.split(',')]
-                elif k == '_limit':
-                    self.sort_limit_dict[k] = v
+                elif key == '_limit':
+                    self.sort_limit_dict[key] = v
                 else:
                     is_equal = True  # 筛选是相等的标志
                     for item in filter_list:
-                        if item in k and k.endswith(item):
+                        if item in key and key.endswith(item):
                             is_equal = False
-                            k = k[:len(k) - len(item)]
-                            if k not in self.filter_dict:
-                                self.filter_dict[k] = {item: v}
+                            key = key[:len(key) - len(item)]
+                            if key not in self.filter_dict:
+                                self.filter_dict[key] = {item: v}
                             else:
-                                self.filter_dict[k][item] = v
+                                self.filter_dict[key][item] = v
                             break
                     if is_equal:
-                        if k not in self.filter_dict:
-                            self.filter_dict[k] = {'_eq': [v]}
+                        if key not in self.filter_dict:
+                            self.filter_dict[key] = {'_eq': [v]}
                         else:
-                            self.filter_dict[k]['_eq'].append(v)
+                            self.filter_dict[key]['_eq'].append(v)
         if len(order_list) == len(sort_list):
             self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, order_list))
         else:
-            self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, ["desc" for i in range(len(sort_list))]))
+            self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, ['desc' for i in range(len(sort_list))]))
 
 
 def filter_query(query, filter_map, name_map, base_table):
@@ -78,7 +78,7 @@ def filter_query(query, filter_map, name_map, base_table):
                 for eq in value:
                     query = query.filter(getattr(table, column_name) == eq)
             elif key == '_like':
-                query = query.filter(getattr(table, column_name).like(value + "%"))
+                query = query.filter(getattr(table, column_name).like(value + '%'))
     return query
 
 
@@ -89,7 +89,7 @@ def sort_limit_query(query, sort_limit_dict, name_map):
         table_name = params[len(params) - 2]
         table = name_map[table_name]
         column_name = params[len(params) - 1]
-        if sort_value == "desc":
+        if sort_value == 'desc':
             query = query.order_by(getattr(table, column_name).desc())
         else:
             query = query.order_by(getattr(table, column_name))
