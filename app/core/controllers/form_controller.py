@@ -66,7 +66,7 @@ def update_form(condition=None, change_item=None):
         (form_model, err) = form_service.to_json_dict(form)
         if err is not None:
             return False, err
-        lesson_id = form.meta.get("lesson", {}).get("lesson_id", None)
+        lesson_id = form.get("meta", {}).get("lesson", {}).get("lesson_id", None)
         if change_item.get('status') == '待提交':
             send_kafka_message(topic='form_service',
                                method='repulse_form',

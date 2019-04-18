@@ -269,8 +269,9 @@ def export_lesson_excel(request_json):
     try:
         frame = pandas.DataFrame(frame_dict)
         from app import basedir
-        filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
-        frame.to_excel(filename, sheet_name="123", index=False, header=True)
+        filename = '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+        filename_full = basedir + filename
+        frame.to_excel(filename_full, sheet_name="123", index=False, header=True)
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return filename, None
