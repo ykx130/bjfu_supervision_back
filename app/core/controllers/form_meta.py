@@ -73,15 +73,38 @@ class WorkPlanController(object):
 
     @classmethod
     def delete_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = {}):
-        dao.WorkPlan.get_work_plan(id, unscoped=False)
-        return dao.WorkPlan.delete_work_plan(id)
+        dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        try:
+            dao.WorkPlan.delete_work_plan(ctx=False, query_dict={'id': [id]})
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
 
     @classmethod
-    def update_work_plan(cls, id: int, data: dict):
-        return dao.WorkPlan.update_work_plan(id, data)
+    def update_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+        dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        try:
+            dao.WorkPlan.update_work_plan(ctx=False, query_dict={'id': [id]}, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError) == CustomError:
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
 
     @classmethod
-    def insert_work_plan(cls, ctx: bool = True, data: dict = None):
+    def insert_work_plan(cls, ctx: bool = True, data: dict = {}):
         data = cls.reformatter_insert(data)
         (form_meta, num) = dao.FormMeta.query_form_meta(
             query_dict={'form_meta_name': [data['form_meta_name']], 'form_meta_version': [data['form_meta_version']],
@@ -95,7 +118,7 @@ class WorkPlanController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))

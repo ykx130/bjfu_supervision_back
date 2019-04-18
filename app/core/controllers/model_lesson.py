@@ -51,7 +51,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -75,7 +75,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -95,7 +95,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -114,7 +114,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -135,7 +135,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -156,7 +156,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -198,7 +198,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if type(e) == CustomError:
+            if isinstance(e, CustomError) == CustomError:
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
