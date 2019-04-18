@@ -1,5 +1,5 @@
 import app.core.dao as dao
-from app.utils import CustomError
+from app.utils import CustomError, db
 
 
 class FormMetaController(object):
@@ -50,15 +50,30 @@ class FormMetaController(object):
 class WorkPlanController(object):
 
     @classmethod
-    def get_work_plan(cls, id: int):
-        return dao.WorkPlan.get_work_plan(id)
+    def formatter(cls, work_plan):
+        return work_plan
 
     @classmethod
-    def query_work_plan(cls, query_dict: dict = None):
-        return dao.WorkPlan.query_work_plan(query_dict)
+    def reformatter_insert(cls, data: dict):
+        if 'form_meta_name' not in data:
+            raise CustomError(500, 200, 'form meta name should be given')
+        if 'form_meta_version' not in data:
+            raise CustomError(500, 200, 'form meta version  should be given')
+        return data
 
     @classmethod
-    def delete_work_plan(cls, id: int):
+    def get_work_plan(cls, id: int, unscoped: bool = False):
+        work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=unscoped)
+        return cls.formatter(work_plan)
+
+    @classmethod
+    def query_work_plan(cls, query_dict: dict, unscoped: bool = False):
+        (work_plans, num) = dao.WorkPlan.query_work_plan(query_dict=query_dict, unscoped=unscoped)
+        return [cls.formatter(work_plan) for work_plan in work_plans], num
+
+    @classmethod
+    def delete_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+        dao.WorkPlan.get_work_plan(id, unscoped=False)
         return dao.WorkPlan.delete_work_plan(id)
 
     @classmethod
@@ -66,16 +81,22 @@ class WorkPlanController(object):
         return dao.WorkPlan.update_work_plan(id, data)
 
     @classmethod
-    def insert_work_plan(cls, data: dict = None):
-        form_meta_name = data['form_meta_name'] if 'form_meta_name' in data else None
-        if form_meta_name is None:
-            raise CustomError(500, 200, 'form_meta_name must be given')
-        form_meta_version = data['form_meta_version'] if 'form_meta_version' in data else None
-        if form_meta_version is None:
-            raise CustomError(500, 200, 'form_meta_version must be given')
-        condition = {'form_meta_name': [form_meta_name], 'form_meta_version': [form_meta_version], 'using': [True]}
-        (form_meta, num) = dao.FormMeta.query_form_meta(condition)
+    def insert_work_plan(cls, ctx: bool = True, data: dict = None):
+        data = cls.reformatter_insert(data)
+        (form_meta, num) = dao.FormMeta.query_form_meta(
+            query_dict={'form_meta_name': [data['form_meta_name']], 'form_meta_version': [data['form_meta_version']],
+                        'using': [True]})
         if num == 0:
             raise CustomError(404, 404, 'form_meta not found')
-        ifSuccess = dao.WorkPlan.insert_work_plan(data)
-        return ifSuccess
+        try:
+            dao.WorkPlan.insert_work_plan(ctx=ctx, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if type(e) == CustomError:
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True

@@ -174,7 +174,7 @@ class LessonRecord(db.Model):
 
     @classmethod
     def update_lesson_record(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
-        data = cls.reformatter_insert(data)
+        data = cls.reformatter_update(data)
         name_map = {'lesson_records': LessonRecord}
         lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
@@ -312,7 +312,7 @@ class Lesson(db.Model):
 
     @classmethod
     def update_lesson(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
-        data = cls.reformatter_insert(data)
+        data = cls.reformatter_update(data)
         name_map = {'lessons': Lesson}
         lessons = Lesson.query.filter(Lesson.using == True)
         url_condition = UrlCondition(query_dict)
@@ -426,7 +426,7 @@ class LessonCase(db.Model):
 
     @classmethod
     def update_lesson_case(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
-        data = cls.reformatter_insert(data)
+        data = cls.reformatter_update(data)
         name_map = {'lesson_cases': LessonCase}
         lesson_cases = LessonCase.query.filter(LessonCase.using == True)
         url_condition = UrlCondition(query_dict)
@@ -541,7 +541,7 @@ class NoticeLesson(db.Model):
 
     @classmethod
     def update_notice_lesson(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
-        data = cls.reformatter_insert(data)
+        data = cls.reformatter_update(data)
         name_map = {'notice_lessons': NoticeLesson}
         notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
@@ -663,7 +663,7 @@ class ModelLesson(db.Model):
 
     @classmethod
     def update_model_lesson(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
-        data = cls.reformatter_insert(data)
+        data = cls.reformatter_update(data)
         name_map = {'model_lessons': ModelLesson}
         model_lessons = ModelLesson.query.filter(ModelLesson.using == True)
         url_condition = UrlCondition(query_dict)

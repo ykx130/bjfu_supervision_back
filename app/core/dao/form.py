@@ -156,31 +156,35 @@ class WorkPlan(db.Model):
         return work_plan_dict
 
     @classmethod
-    def reformatter(cls, data: dict):
+    def reformatter_insert(cls, data: dict):
         return data
 
     @classmethod
-    def insert_work_plan(cls, data: dict = None):
-        if data is None:
-            data = {}
-        data = cls.reformatter(data)
+    def reformatter_update(cls, data: dict):
+        return data
+
+    @classmethod
+    def insert_work_plan(cls, ctx: bool = True, data: dict = {}):
+        data = cls.reformatter_insert(data)
         work_plan = WorkPlan()
         for key, value in data.items():
             if hasattr(work_plan, key):
                 setattr(work_plan, key, value)
         db.session.add(work_plan)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise CustomError(500, 500, str(e))
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
         return True
 
     @classmethod
-    def query_work_plan(cls, query_dict: dict):
-        url_condition = mysql_url_condition.UrlCondition(query_dict)
-        query = WorkPlan.query.filter(WorkPlan.using == True)
+    def query_work_plan(cls, query_dict: dict = {}, unscoped: bool = False):
         name_map = {'work_plans': WorkPlan}
+        query = WorkPlan.query
+        if not unscoped:
+            query = query.filter(WorkPlan.using == True)
+        url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
             (query, total) = mysql_url_condition.process_query(query, url_condition.filter_dict,
                                                                url_condition.sort_limit_dict, url_condition.page_dict,
@@ -190,61 +194,61 @@ class WorkPlan(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def get_work_plan(cls, id: int):
+    def get_work_plan(cls, id: int, unscoped: bool = False):
+        work_plan = WorkPlan.query
+        if not unscoped:
+            work_plan = work_plan.filter(WorkPlan.using == True)
         try:
-            work_plan = WorkPlan.query.filter(WorkPlan.id == int(id)).filter(WorkPlan.using == True).first()
+            work_plan = work_plan.query.filter(WorkPlan.id == int(id)).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if work_plan is None:
-            raise CustomError(404, 404, 'consult not found')
+            raise CustomError(404, 404, 'work plan not found')
         return cls.formatter(work_plan)
 
     @classmethod
-    def delete_work_plan(cls, id: int):
+    def delete_work_plan(cls, ctx: bool = True, query_dict: dict = {}):
+        name_map = {'work_plans': WorkPlan}
+        work_plans = WorkPlan.query.filter(WorkPlan.using == True)
+        url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
-            work_plan = WorkPlan.query.filter(WorkPlan.id == int(id)).filter(WorkPlan.using == True).first()
+            (work_plans, total) = mysql_url_condition.process_query(work_plans, url_condition.filter_dict,
+                                                                    url_condition.sort_limit_dict,
+                                                                    url_condition.page_dict, name_map, WorkPlan)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if work_plan is None:
-            raise CustomError(404, 404, 'consult not found')
-        work_plan.using = False
-        db.session.add(work_plan)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise CustomError(500, 500, str(e))
+        for work_plan in work_plans:
+            work_plan.using = False
+            db.session.add(work_plan)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
         return True
 
     @classmethod
-    def update_work_plan(cls, id: int, data: dict = None):
-        if data is None:
-            data = dict()
-        data = cls.reformatter(data)
+    def update_work_plan(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+        data = cls.reformatter_update(data)
+        name_map = {'work_plans': WorkPlan}
+        work_plans = WorkPlan.query.filter(WorkPlan.using == True)
+        url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
-            work_plan = WorkPlan.query.filter(WorkPlan.id == int(id)).filter(WorkPlan.using == True).first()
+            (work_plans, total) = mysql_url_condition.process_query(work_plans, url_condition.filter_dict,
+                                                                    url_condition.sort_limit_dict,
+                                                                    url_condition.page_dict, name_map, WorkPlan)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if work_plan is None:
-            raise CustomError(404, 404, 'event not found')
-        for key, value in data.items():
-            if hasattr(work_plan, key):
-                setattr(work_plan, key, value)
-        db.session.add(work_plan)
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise CustomError(500, 500, str(e))
-        return True
-
-    @classmethod
-    def commit(cls):
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            raise CustomError(500, 500, str(e))
+        for lesson_record in work_plans:
+            for key, value in data.items():
+                if hasattr(lesson_record, key):
+                    setattr(lesson_record, key, value)
+            db.session.add(lesson_record)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
         return True
 
 
