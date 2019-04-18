@@ -1,6 +1,5 @@
 import pymysql
 from app.utils.mysql import db
-from datetime import datetime, timedelta
 import json
 from app.utils.Error import CustomError
 from app.streaming import sub_kafka
@@ -9,24 +8,7 @@ import re
 import app.core.dao as dao
 
 
-def lesson_week_list(lesson_week):
-    lesson_weeks = list()
-    lesson_week_blocks = lesson_week.replace(' ', '').split(',')
-    for lesson_week_block in lesson_week_blocks:
-        weeks = lesson_week_block.replace(' ', '').split('-')
-        if len(weeks) == 2:
-            week_begin = int(weeks[0])
-            week_end = int(weeks[1])
-            [lesson_weeks.append(str(week)) for week in range(week_begin, week_end + 1)]
-        else:
-            lesson_weeks.append(weeks[0])
-    return lesson_weeks
 
-
-def week_to_date(term_begin_time, week, weekday):
-    time = term_begin_time
-    date = time + timedelta((int(week) - 1) * 7 + int(weekday) - 1)
-    return date
 
 
 def update_database():
