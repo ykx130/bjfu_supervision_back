@@ -1,15 +1,23 @@
-import json
-from app.http.handler.form import form_blueprint
-from flask import jsonify, request
-from werkzeug.datastructures import ImmutableMultiDict
-from flask_login import current_user, login_required
-from app.core.controllers import form_controller
+import app.core.controllers as core
 from flask_pymongo import ObjectId
+from flask import jsonify, request
+from flask_login import current_user, login_required
+from app.http.handler import form_blueprint
+from app.utils.url_condition.url_condition_mysql import *
+from werkzeug.datastructures import ImmutableMultiDict
+from datetime import datetime
 
 
+@login_required
 @form_blueprint.route('/forms', methods=['POST'])
 def new_form():
-    (_, err) = form_controller.insert_form(request.json)
+    request_json = request.json
+    meta = request_json.get('meta', {})
+    meta.update({'created_by': current_user.username,
+                 'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
+    request_json['meta'] = meta
+    (_, err) = core.FormController.insert_form(request.json)
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -27,10 +35,10 @@ def new_form():
 def get_forms():
     args = request.args
     if not current_user.admin:
-        if current_user.is_group == True:
-            args = ImmutableMultiDict({**request.args, 'meta.guider_group': [current_user.username]})
+        if current_user.is_group == True: args = ImmutableMultiDict(
+            {**request.args, 'meta.guider_group': [current_user.username]})
 
-    (forms, total, err) = form_controller.find_forms(args)
+    (forms, total, err) = core.FormController.query_forms(args)
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -48,7 +56,7 @@ def get_forms():
 
 @form_blueprint.route('/forms/<string:_id>')
 def get_form(_id):
-    (form, err) = form_controller.find_form(_id)
+    (form, err) = core.FormController.find_form(_id)
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -64,14 +72,14 @@ def get_form(_id):
 
 @form_blueprint.route('/forms/<string:_id>', methods=['DELETE'])
 def delete_from(_id):
-    (form, err) = form_controller.find_form(_id)
+    (form, err) = core.FormController.find_form(_id)
     if err is not None:
         return jsonify({
             'code': err.code,
             'message': err.err_info,
             'form': None,
         }), err.status_code
-    (_, err) = form_controller.delete_form({'_id': ObjectId(_id)})
+    (_, err) = core.FormController.delete_form({'_id': ObjectId(_id)})
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -87,7 +95,7 @@ def delete_from(_id):
 
 @form_blueprint.route('/forms/<string:_id>', methods=['PUT'])
 def change_form(_id):
-    (form, err) = form_controller.find_form(_id)
+    (form, err) = core.FormController.find_form(_id)
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -95,7 +103,7 @@ def change_form(_id):
             'form': None,
         }), err.status_code
 
-    (_, err) = form_controller.update_form({'_id': ObjectId(_id)}, request.json)
+    (_, err) = core.FormController.update_form({'_id': ObjectId(_id)}, request.json)
     if err is not None:
         return jsonify({
             'code': err.code,
@@ -112,7 +120,7 @@ def change_form(_id):
 @login_required
 @form_blueprint.route('/my/forms')
 def get_my_forms():
-    (forms, total, err) = form_controller.find_forms(
+    (forms, total, err) = core.FormController.query_forms(
         ImmutableMultiDict({**request.args, 'meta.guider': [current_user.username]}))
     if err is not None:
         return jsonify({
@@ -131,4 +139,4 @@ def get_my_forms():
 
 @form_blueprint.route('/graph/form/<string:name>/map')
 def get_form_map(name):
-    return jsonify(form_controller.get_form_map(name))
+    return jsonify(core.FormController.get_form_map(name))

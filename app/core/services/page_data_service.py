@@ -5,10 +5,10 @@ import json
 
 def get_page_data_service():
     data_dict = dict()
-    data_func = {"sys:guider_num": supervisor_service.get_supervisor_num,
-                 "sys:submitted_form": form_service.get_submitted_form_num,
-                 "sys:wait_submitted_form": form_service.get_wait_submitted_form_num,
-                 "sys:notice_lesson_num": notice_lesson_service.get_notice_lesson_num
+    data_func = {'sys:guider_num': supervisor_service.get_supervisor_num,
+                 'sys:submitted_form': form_service.get_submitted_form_num,
+                 'sys:wait_submitted_form': form_service.get_wait_submitted_form_num,
+                 'sys:notice_lesson_num': notice_lesson_service.get_notice_lesson_num
                  }
     units = ['林学院', '水土保持学院', '生物科学与技术学院', '园林学院', '经济管理学院', '工学院',
              '理学院', '信息学院', '人文社会科学学院', '外语学院', '材料科学与技术学院',

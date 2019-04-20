@@ -3,7 +3,7 @@ from flask import jsonify
 from app.http.handler.page_data import page_data_blueprint
 
 
-@page_data_blueprint.route("/page_data")
+@page_data_blueprint.route('/page_data')
 def get_page_data():
     (data, err) = page_data_controller.get_page_data()
     if err is not None:

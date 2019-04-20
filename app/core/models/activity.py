@@ -7,20 +7,20 @@ from app.utils.url_condition.url_condition_mysql import UrlCondition, process_qu
 class Activity(db.Model):
     __tablename__ = 'activities'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    name = db.Column(db.String(64), default="")
-    teacher = db.Column(db.String(64), default="")
+    name = db.Column(db.String(64), default='')
+    teacher = db.Column(db.String(64), default='')
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     end_time = db.Column(db.TIMESTAMP, default=datetime.now)
-    place = db.Column(db.String(128), default="")
-    state = db.Column(db.String(16), default="")
-    information = db.Column(db.String(128), default="")
+    place = db.Column(db.String(128), default='')
+    state = db.Column(db.String(16), default='')
+    information = db.Column(db.String(128), default='')
     all_num = db.Column(db.Integer, default=0)
     attend_num = db.Column(db.Integer, default=0)
     remainder_num = db.Column(db.Integer, default=0)
-    term = db.Column(db.String(32), default="")
+    term = db.Column(db.String(32), default='')
     apply_start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     apply_end_time = db.Column(db.TIMESTAMP, default=datetime.now)
-    apply_state = db.Column(db.String(32), default="")
+    apply_state = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod
@@ -45,10 +45,10 @@ class Activity(db.Model):
 class ActivityUser(db.Model):
     __tablename__ = 'activity_users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    username = db.Column(db.String(64), default="")
+    username = db.Column(db.String(64), default='')
     activity_id = db.Column(db.Integer, default=-1)
-    state = db.Column(db.String(16), default="")
-    fin_state = db.Column(db.String(16), default="")
+    state = db.Column(db.String(16), default='')
+    fin_state = db.Column(db.String(16), default='')
     using = db.Column(db.Boolean, default=True)
 
     @staticmethod

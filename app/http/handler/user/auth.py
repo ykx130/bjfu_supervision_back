@@ -6,52 +6,52 @@ from app.core.controllers import user_controller
 from app.utils.misc import convert_datetime_to_string
 
 
-@user_blueprint.route("/login", methods=["POST"])
+@user_blueprint.route('/login', methods=['POST'])
 def login():
-    if request.method == "POST":
-        username = request.json.get("username")
-        password = request.json.get("password")
+    if request.method == 'POST':
+        username = request.json.get('username')
+        password = request.json.get('password')
         if username is None or password is None:
             return jsonify({
-                "code": 500,
-                "message": "username or password can not be null"
+                'code': 500,
+                'message': 'username or password can not be null'
             }), 401
         try:
             user = User.query.filter(User.username == username).filter(User.using == True).first()
             if user is None or not user.verify_password(password=password):
                 return jsonify({
-                    "code": 500,
-                    "message": "username or password may be wrong"
+                    'code': 500,
+                    'message': 'username or password may be wrong'
                 }), 401
             login_user(user, remember=False)
         except Exception as e:
             return jsonify({
-                "code": 500,
-                "message": str(e)
+                'code': 500,
+                'message': str(e)
             }), 500
         return jsonify({
-            "code": 200,
-            "message": "success"
+            'code': 200,
+            'message': 'success'
         }), 200
 
 
-@user_blueprint.route("/logout", methods=["GET"])
+@user_blueprint.route('/logout', methods=['GET'])
 @login_required
 def logout():
     try:
         logout_user()
     except Exception as e:
         return jsonify({
-            "code": 500,
-            "message": str(e)
+            'code': 500,
+            'message': str(e)
         }), 500
     return jsonify({
-        "code": 200,
-        "message": "success"
+        'code': 200,
+        'message': 'success'
     }), 200
 
 
-@user_blueprint.route("/current_user", methods=["GET"])
+@user_blueprint.route('/current_user', methods=['GET'])
 @login_required
 def get_current():
     (user, err) = user_controller.find_user(current_user.username)

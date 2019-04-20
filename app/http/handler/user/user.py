@@ -1,172 +1,187 @@
-from app.core.controllers import user_controller
-from flask import request, jsonify, url_for, json
-from app.utils.misc import convert_datetime_to_string
 from app.http.handler.user import user_blueprint
+from flask import request,jsonify,url_for,json
+from pymongo.errors import ServerSelectionTimeoutError,PyMongoError
+from app.core.controllers.common_controller import dict_serializable, UrlCondition, Paginate, object_to_str, sort_limit
+from flask_pymongo import ObjectId
+from app.core.controllers.user_event_controller import to_json_list, find_user,find_users, delete_user, insert_user, request_to_class,update_user,request_to_class_event,insert_event,find_event,delete_event,update_event
 
+
+@user_blueprint.route('/users',methods=['POST'])
+def new_user():
+    from run import mongo
+    user=request_to_class(request.json)
+    try:
+        insert_user(mongo,user)
+    except ServerSelectionTimeoutError as e:
+        return jsonify({
+            'code':500,
+            'message':str(e),
+            'users':None
+        }),500
+    return jsonify({
+        'code':200,
+        'message':'',
+        'users':None
+    }),200
 
 @user_blueprint.route('/users')
 def get_users():
-    (users, total, err) = user_controller.find_users(request.args)
-    if err is not None:
+    url_condition=UrlCondition(request.args)
+    from run import mongo
+    try:
+        users=find_users(mongo,url_condition.filter_dict)
+    except PyMongoError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'users': None,
-            'total': None
-        }), err.status_code
+            'code':'500',
+            'message':str(e),
+            'users':None
+        }),500
+    users=sort_limit(users,url_condition.sort_limit_dict)
+    paginate=Paginate(users,url_condition.page_dict)
+    users_list=[to_json_list(user) for user in paginate.data_page]
     return jsonify({
-        'code': 200,
-        'total': total,
-        'users': users,
-        'message': ''
-    }), 200
-
-
-@user_blueprint.route('/users/<string:username>')
-def get_user(username):
-    (user, err) = user_controller.find_user(username)
-    if err is not None:
-        return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'user': None
-        }), err.status_code
-    return jsonify({
-        'code': 200,
-        'user': user,
+        'code': '200',
         'message': '',
-    }), 200
+        'users': [object_to_str(users_list_node) for users_list_node in users_list],
+        'total': paginate.total,
+        }),200
 
-
-@user_blueprint.route('/users', methods=['POST'])
-def new_user():
-    (_, err) = user_controller.insert_user(request.json)
-    if err is not None:
+@user_blueprint.route('/users/<string:_id>')
+def get_user(_id):
+    from run import mongo
+    try:
+        user_data=find_user(mongo, _id)
+    except PyMongoError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'user': None
-        }), err.status_code
-    return jsonify({
-        'code': 200,
-        'user': None,
-        'message': ''
-    }), 200
-
-
-@user_blueprint.route('/users/<string:username>', methods=['PUT'])
-def change_user(username):
-    (_, err) = user_controller.update_user(username, request.json)
-    if err is not None:
+            'code': '500',
+            'message':str(e),
+            'users':None
+        }),500
+    if user_data is None:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'user': None
-        }), err.status_code
+            'code': '404',
+            'message':'Not found',
+            'users':None
+        }),404
     return jsonify({
-        'code': 200,
-        'user': None,
-        'message': ''
-    }), 200
-
-
-@user_blueprint.route('/users/<string:username>', methods=['DELETE'])
-def del_user(username):
-    (_, err) = user_controller.delete_user(username)
-    if err is not None:
-        return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'user': None
-        }), err.status_code
-    return jsonify({
-        'code': 200,
-        'user': None,
-        'message': ''
-    }), 200
-
-
-@user_blueprint.route('/supervisors', methods=['GET'])
-def get_supervisors():
-    (supervisors, total, err) = user_controller.find_supervisors(request.args)
-    if err is not None:
-        return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'users': None,
-            'total': None
-        }), err.status_code
-    return jsonify({
-        'code': 200,
-        'total': total,
-        'users': supervisors,
-        'message': ''
-    }), 200
-
-
-@user_blueprint.route('/supervisors/expire', methods=['GET'])
-def find_supervisors_expire():
-    (supervisors, total, err) = user_controller.find_supervisors_expire(request.args)
-    if err is not None:
-        return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'users': None,
-            'total': None
-        }), err.status_code
-    return jsonify({
-        'code': 200,
-        'total': total,
-        'users': supervisors,
-        'message': ''
-    }), 200
-
-
-@user_blueprint.route('/supervisors/batch_renewal', methods=['POST'])
-def batch_renewal():
-    (ifSuccess, err) = user_controller.batch_renewal(request.json)
-    if err is not None:
-        return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'user': None,
-        }), err.status_code
-    return jsonify({
-        'code': 200,
+        'code': '200',
         'message': '',
-        'user': None
-    }), 200
+        'users': object_to_str(user_data)
+    })
 
-
-@user_blueprint.route('/supervisors', methods=['POST'])
-def insert_supervisor():
-    (ifSuccess, err) = user_controller.insert_supervisor(request.json)
-    if err is not None:
+@user_blueprint.route('/users/<string:_id>',methods=['DELETE'])
+def delete_user(_id):
+    from run import mongo
+    user=find_user(mongo,_id)
+    if user is None:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'user': None,
-        }), err.status_code
+            'code':404,
+            'message':"Not found",
+            "users":None
+        }),404
+    try:
+        delete_user(mongo,{'_id':ObjectId(_id)})
+    except PyMongoError as e:
+        return jsonify({
+            'code': '500',
+            'message': str(e),
+            'users':None
+        }),500
     return jsonify({
-        'code': 200,
+        'code': '200',
         'message': '',
-        'user': None
-    }), 200
+        'users':None
+    }),200
 
-
-@user_blueprint.route('/groups', methods=['GET'])
-def get_groups():
-    (groups, total, err) = user_controller.find_groups(request.args)
-    if err is not None:
+@user_blueprint.route('/users/<string:_id>',methods=['PUT'])
+def change_user(_id):
+    from run import mongo
+    user = find_user(mongo, _id)
+    if user is None:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'groups': None,
-            'total': None
-        }), err.status_code
+            'code': '404',
+            'message': "No this user",
+            "users": None
+        }), 404
+    try:
+        update_user(mongo,{'_id':ObjectId(_id)},request.json)
+    except PyMongoError as e:
+        return jsonify({
+            'code':'500',
+            'message':str(e),
+            'users':None
+        }),500
     return jsonify({
-        'code': 200,
-        'groups': groups,
-        'total': total,
-        'message': ''
-    }), 200
+        'code': '200',
+        'message': '',
+        'data': None
+    }),200
+
+@user_blueprint.route('/users/<string:_id>/events',methods=['POST'])
+def new_event(_id):
+    from run import mongo
+    try:
+        insert_event(request.json,mongo,_id)
+    except PyMongoError as e:
+        return jsonify({
+            'code': '500',
+            'message': e,
+            'event':None
+        }),500
+    return jsonify({
+        'code': '200',
+        'message': '',
+        'event':None
+    }),200
+
+
+@user_blueprint.route('/users/<string:_id>/events/<string:event_id>',methods=['GET'])
+def get_event(_id,event_id):
+    from run import mongo
+    try:
+        event=find_event(mongo,_id,event_id)
+    except PyMongoError as e:
+        return jsonify({
+            'code': '500',
+            'message':e,
+            'event': None
+        }),500
+    return jsonify({
+        'code': '200',
+        'message': '',
+        'event': event
+    }),200
+
+@user_blueprint.route('/users/<string:_id>/events/<string:event_id>',methods=['DELETE'])
+def delete_events(_id,event_id):
+    from run import mongo
+    try:
+        delete_event(mongo,_id,event_id)
+    except PyMongoError as e:
+        return jsonify({
+            'code': '500',
+            'message': e,
+            'event':None
+        }),500
+    return jsonify({
+        'code': '200',
+        'message': '',
+        'event':None
+    }),200
+
+@user_blueprint.route('/users/<string:_id>/events/<string:event_id>',methods=['PUT'])
+def change_event(_id,event_id):
+    from run import mongo
+    try:
+        update_event(mongo,_id,event_id,request.json)
+    except PyMongoError as e:
+        return jsonify({
+            'code':'500',
+            'message':e,
+            'event': None
+        }),500
+    return jsonify({
+        'code': '200',
+        'message': '',
+        'event':None
+    }),200

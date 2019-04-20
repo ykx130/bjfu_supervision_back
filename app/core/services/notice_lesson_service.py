@@ -21,12 +21,12 @@ def insert_notice_lesson(request_json):
         lesson = Lesson.query.filter(Lesson.id == lesson_id).first()
     except Exception as e:
         return False, CustomError(500, 500, str(e))
-    lesson.lesson_level = "关注课程"
+    lesson.lesson_level = '关注课程'
     db.session.add(lesson)
     notice_lesson_record = NoticeLesson.query.filter(NoticeLesson.lesson_id == lesson_id).filter(
         NoticeLesson.term == term).filter(NoticeLesson.using == True).first()
     if notice_lesson_record is not None:
-        return False, CustomError(500, 200, "lesson has been noticed")
+        return False, CustomError(500, 200, 'lesson has been noticed')
     notice_lesson = NoticeLesson()
     notice_lesson.term = term
     for key, value in request_json.items():
@@ -55,8 +55,8 @@ def insert_notice_lessons(request_json):
         notice_lesson_record = NoticeLesson.query.filter(NoticeLesson.lesson_id == lesson.lesson_id).filter(
             NoticeLesson.term == term).filter(NoticeLesson.using == True).first()
         if notice_lesson_record is not None:
-            return False, CustomError(500, 200, "lesson has been noticed")
-        lesson.lesson_level = "关注课程"
+            return False, CustomError(500, 200, 'lesson has been noticed')
+        lesson.lesson_level = '关注课程'
     assign_group = request_json.get('assign_group', None)
     if assign_group is None:
         return False, CustomError(500, 200, 'assign group should be given')
@@ -93,7 +93,7 @@ def update_page_data():
     (num, err) = get_notice_lesson_num()
     if err is not None:
         raise err
-    redis_cli.set("sys:notice_lesson_num", json.dumps(num))
+    redis_cli.set('sys:notice_lesson_num', json.dumps(num))
 
 
 def delete_notice_lesson(id):
@@ -107,7 +107,7 @@ def delete_notice_lesson(id):
         return False, CustomError(500, 500, str(e))
     if lesson is None:
         return False, CustomError(404, 404, 'lesson not found')
-    lesson.lesson_level = "自助听课"
+    lesson.lesson_level = '自助听课'
     db.session.add(lesson)
     db.session.add(notice_lesson)
     try:
@@ -130,7 +130,7 @@ def delete_notice_lessons(request_json):
     except Exception as e:
         return False, CustomError(500, 500, str(e))
     for lesson in lessons:
-        lesson.lesson_level = "关注课程"
+        lesson.lesson_level = '关注课程'
     for notice_lesson in notice_lessons:
         notice_lesson.using = False
         db.session.add(notice_lesson)
@@ -157,38 +157,10 @@ def update_notice_lesson(id, request_json):
     return True, None
 
 
-def find_notice_lesson(id):
-    notice_lesson = NoticeLesson.query.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True).first()
-    if notice_lesson is None:
-        return False, CustomError(404, 404, 'notice lesson not found')
-    return notice_lesson, None
 
 
-def find_notice_lessons(condition):
-    notice_lessons = NoticeLesson.notice_lessons(condition)
-    page = int(condition['_page'][0]) if '_page' in condition else 1
-    per_page = int(condition['_per_page'][0]) if '_per_page' in condition else 20
-    pagination = notice_lessons.paginate(page=int(page), per_page=int(per_page), error_out=False)
-    return pagination.items, pagination.total, None
 
 
-def notice_lesson_to_dict(lesson, notice_lesson):
-    try:
-        notice_lesson_dict = {
-            'id': notice_lesson.id if notice_lesson is not None else None,
-            'lesson_id': notice_lesson.lesson_id if lesson is not None else None,
-            'lesson_attribute': lesson.lesson_attribute if lesson is not None else None,
-            'lesson_state': lesson.lesson_state if lesson is not None else None,
-            'lesson_level': lesson.lesson_level if lesson is not None else None,
-            'lesson_name': lesson.lesson_name,
-            'lesson_teacher_id': lesson.lesson_teacher_id,
-            'notice_reason': notice_lesson.notice_reason,
-            'notices': lesson.notices,
-            'assign_group': notice_lesson.assign_group
-        }
-    except Exception as e:
-        return None, CustomError(500, 500, str(e))
-    return notice_lesson_dict, None
 
 
 def notice_lesson_vote(id):
@@ -269,7 +241,7 @@ def export_lesson_excel(request_json):
         frame = pandas.DataFrame(frame_dict)
         from app import basedir
         filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
-        frame.to_excel(filename, sheet_name="123", index=False, header=True)
+        frame.to_excel(filename, sheet_name='123', index=False, header=True)
     except Exception as e:
         return None, CustomError(500, 500, str(e))
     return filename, None

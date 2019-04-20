@@ -3,7 +3,7 @@ import json
 from app.core.models.user import User
 from app.streaming import sub_kafka
 
-REDIS_NOTICES_KEY = "bjfu_supervision:notices:{username}:user"
+REDIS_NOTICES_KEY = 'bjfu_supervision:notices:{username}:user'
 
 
 def get_notices_num(username):
@@ -26,8 +26,8 @@ def get_newest_notices(username):
     """
     if not redis_cli.exists(REDIS_NOTICES_KEY.format(username=username)):
         return {
-            "title": "",
-            "body": ""
+            'title': '',
+            'body': ''
         }
     else:
         notice = redis_cli.rpop(REDIS_NOTICES_KEY.format(username=username))
@@ -46,4 +46,4 @@ def push_new_message(username, notice):
 
 @sub_kafka('notice_service')
 def notice_service_server(message):
-    push_new_message(message.get("args", {}).get("username"), message.get("args", {}).get("msg"))
+    push_new_message(message.get('args', {}).get('username'), message.get('args', {}).get('msg'))
