@@ -323,11 +323,11 @@ class Form(object):
         return json_dict
 
     @classmethod
-    def get_form(cls, _id: str = None):
+    def get_form(cls, _id=None):
         from app.utils.mongodb import mongo
         if _id is None:
             raise CustomError(500, 500, '_id must be given')
-        condition = {'using': True, '_id': mongodb_url_condition.ObjectId(_id)}
+        condition = {'using': True, '_id': _id}
         try:
             data = mongo.db.form.find_one(condition)
         except Exception as e:

@@ -109,12 +109,13 @@ class LessonRecord(db.Model):
         return data
 
     @classmethod
-    def get_lesson_record(cls, id: int, unscoped: bool = False):
+    def get_lesson_record(cls, username: str, term: str, unscoped: bool = False):
         lesson_record = LessonRecord.query
         if not unscoped:
-            lesson_record = lesson_record.filter(Term.using == True)
+            lesson_record = lesson_record.filter(LessonRecord.using == True)
         try:
-            lesson_record = lesson_record.filter(LessonRecord.id == id).filter(LessonRecord.using == True).first()
+            lesson_record = lesson_record.filter(LessonRecord.username == username).filter(
+                LessonRecord.term == term).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if lesson_record is None:
@@ -252,9 +253,9 @@ class Lesson(db.Model):
     def get_lesson(cls, id: int, unscoped: bool = False):
         lesson = Lesson.query
         if not unscoped:
-            lesson = lesson.filter(Term.using == True)
+            lesson = lesson.filter(Lesson.using == True)
         try:
-            lesson = lesson.filter(Lesson.id == id).filter(Lesson.using == True).first()
+            lesson = lesson.filter(Lesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if lesson is None:
@@ -367,7 +368,7 @@ class LessonCase(db.Model):
         if not unscoped:
             lesson_case = lesson_case.filter(Term.using == True)
         try:
-            lesson_case = lesson_case.filter(LessonCase.id == id).filter(LessonCase.using == True).first()
+            lesson_case = lesson_case.filter(LessonCase.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if lesson_case is None:
@@ -480,9 +481,9 @@ class NoticeLesson(db.Model):
     def get_notice_lesson(cls, id: int, unscoped: bool = False):
         notice_lesson = NoticeLesson.query
         if not unscoped:
-            notice_lesson = notice_lesson.filter(Term.using == True)
+            notice_lesson = notice_lesson.filter(NoticeLesson.using == True)
         try:
-            notice_lesson = notice_lesson.filter(NoticeLesson.id == id).filter(NoticeLesson.using == True).first()
+            notice_lesson = notice_lesson.filter(NoticeLesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if notice_lesson is None:
@@ -602,9 +603,9 @@ class ModelLesson(db.Model):
     def get_model_lesson(cls, id: int, unscoped: bool = False):
         model_lesson = ModelLesson.query
         if not unscoped:
-            model_lesson = model_lesson.filter(Term.using == True)
+            model_lesson = model_lesson.filter(ModelLesson.using == True)
         try:
-            model_lesson = model_lesson.filter(ModelLesson.id == id).filter(ModelLesson.using == True).first()
+            model_lesson = model_lesson.filter(ModelLesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if model_lesson is None:

@@ -65,7 +65,7 @@ class FormController(object):
         lesson_id = meta.get('lesson', {}).get('lesson_id', None)
         if lesson_id is None:
             raise CustomError(500, 200, 'lesson_id should be given')
-        ifSuccess = dao.Form.insert_form(data)
+        dao.Form.insert_form(data)
         form_model = dao.Form.formatter_total(data)
         send_kafka_message(topic='form_service',
                            method='add_form',
@@ -74,7 +74,7 @@ class FormController(object):
                            form=form_model,
                            lesson_id=lesson_id)
         cls.push_new_form_message(form_model)
-        return ifSuccess
+        return True
 
     @classmethod
     def query_forms(cls, query_dict: dict = None):
@@ -83,16 +83,21 @@ class FormController(object):
         return dao.Form.query_form(query_dict)
 
     @classmethod
-    def find_form(cls, _id: str = None):
+    def find_form(cls, _id=None):
         return dao.Form.get_form(_id)
 
     @classmethod
     def delete_form(cls, where_dict: dict = None):
-        return dao.Form.delete_form(where_dict)
+        _id = where_dict.get('_id')
+        dao.Form.get_form(_id=_id)
+        dao.Form.delete_form(where_dict=where_dict)
+        return True
 
     @classmethod
     def update_form(cls, where_dict: dict = None, data: dict = None):
-        ifSuccess = dao.Form.update_form(where_dict, data)
+        _id = where_dict.get('_id')
+        dao.Form.get_form(_id=_id)
+        dao.Form.update_form(where_dict, data)
         if 'status' in data:
             form = dao.Form.get_form(where_dict.get('_id'))
             lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)
@@ -106,7 +111,7 @@ class FormController(object):
                                    method='add_form',
                                    lesson_id=lesson_id)
 
-        return ifSuccess
+        return True
 
     @classmethod
     def get_form_map(cls, meta_name):

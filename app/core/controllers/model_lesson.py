@@ -29,6 +29,10 @@ class ModelLessonController(object):
         return data
 
     @classmethod
+    def reformatter_query(cls, data: dict):
+        return data
+
+    @classmethod
     def get_model_lesson(cls, id: int, unscoped: bool = False):
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=unscoped)
         return cls.formatter(model_lesson=model_lesson)
@@ -40,7 +44,7 @@ class ModelLessonController(object):
 
     @classmethod
     def insert_model_lesson(cls, ctx: bool = True, data: dict = {}):
-        data['term'] = data['term'] if 'term' in data else dao.Term.get_now_term()['name']
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
         try:
@@ -61,7 +65,7 @@ class ModelLessonController(object):
     def insert_model_lessons(cls, ctx: bool = True, data: dict = {}):
         lesson_ids = data.get("lesson_ids", [])
         status = data.get('status', '推荐课')
-        data['term'] = data['term'] if 'term' in data else dao.Term.get_now_term()['name']
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         try:
             for lesson_id in lesson_ids:
                 dao.Lesson.get_lesson(id=lesson_id, unscoped=False)
@@ -85,7 +89,7 @@ class ModelLessonController(object):
     def update_model_lesson(cls, ctx: bool = True, id: int = 0, data: dict = {}):
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
         lesson = dao.Lesson.get_lesson(id=model_lesson['lesson_id'], unscoped=False)
-        status = lesson['lesson_model'] if 'status' not in data else data['status']
+        status = data.get('status', lesson['lesson_model'])
         data['status'] = status
         try:
             dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]}, data=data)
