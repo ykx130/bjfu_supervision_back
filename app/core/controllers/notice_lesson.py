@@ -33,6 +33,10 @@ class NoticeLessonController(object):
         return data
 
     @classmethod
+    def reformatter_query(cls, data: dict):
+        return data
+
+    @classmethod
     def get_notice_lesson(cls, id: int, unscoped: bool = False):
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=unscoped)
         return cls.formatter(notice_lesson)
@@ -44,7 +48,7 @@ class NoticeLessonController(object):
 
     @classmethod
     def insert_notice_lesson(cls, ctx: bool = True, data: dict = {}):
-        data['term'] = data['term'] if 'term' in data else dao.Term.get_now_term()['name']
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
         try:
@@ -67,7 +71,7 @@ class NoticeLessonController(object):
 
     @classmethod
     def insert_notice_lessons(cls, ctx: bool = True, data: dict = {}):
-        data['term'] = data['term'] if 'term' in data else dao.Term.get_now_term()['name']
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         lesson_ids = data.get('lesson_ids', [])
         try:
             for lesson_id in lesson_ids:

@@ -85,8 +85,7 @@ class UserController():
     @classmethod
     def update_user(cls, ctx: bool = True, username: str = '', data: dict = {}):
         try:
-            if 'term' not in data:
-                data['term'] = dao.Term.get_now_term()['name']
+            data['term'] = data.get('term', dao.Term.get_now_term()['name'])
             if username is None:
                 raise CustomError(500, 500, 'username or role_names should be given')
 
@@ -114,7 +113,7 @@ class UserController():
             elif '小组长' in new_role_names:
                 new_role_names.remove('小组长')
                 supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
-                group_name = data['group'] if 'group' in data else supervisor['group']
+                group_name = data.get('group_name', supervisor['group'])
                 (groupers, num) = dao.Supervisor.query_supervisors(
                     query_dict={'term_gte': [term], 'grouper': [True], 'group': [group_name]})
                 if num > 0:
@@ -305,7 +304,7 @@ class SupervisorController():
 
     @classmethod
     def get_supervisor_num(cls, query_dict: dict = {}):
-        term = query_dict['term'] if 'term' in query_dict else dao.Term.get_now_term()['name']
+        term = query_dict.get('term', dao.Term.get_now_term()['name'])
         (supervisors, num) = dao.Supervisor.query_supervisors(query_dict={'_per_page': [100000], 'term': [term]})
         return num
 

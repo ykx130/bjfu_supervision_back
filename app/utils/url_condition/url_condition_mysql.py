@@ -83,7 +83,7 @@ def filter_query(query, filter_map, name_map, base_table):
 
 
 def sort_limit_query(query, sort_limit_dict, name_map):
-    sort_dict = sort_limit_dict['_sort_dict'] if '_sort_dict' in sort_limit_dict else {}
+    sort_dict = sort_limit_dict.get('_sort_dict', {})
     for sort_key, sort_value in sort_dict.items():
         params = sort_key.split('.')
         table_name = params[len(params) - 2]
@@ -93,7 +93,7 @@ def sort_limit_query(query, sort_limit_dict, name_map):
             query = query.order_by(getattr(table, column_name).desc())
         else:
             query = query.order_by(getattr(table, column_name))
-    limit_num = sort_limit_dict['_limit'] if '_limit' in sort_limit_dict else None
+    limit_num = sort_limit_dict.get('_limit', None)
     if limit_num is not None:
         query = query.limit(int(limit_num))
     return query

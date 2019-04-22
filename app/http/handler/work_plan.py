@@ -1,17 +1,18 @@
 from flask import jsonify, request
 from app.http.handler import form_meta_blueprint
-import app.core.controllers as core
+import app.core.controllers as controller
+from app.utils import args_to_dict, CustomError
 
 
 @form_meta_blueprint.route('/work_plans', methods=['GET'])
 def find_work_plans():
-    (work_plans, num, err) = core.WorkPlanController.query_work_plan(request.args)
-    if err is not None:
+    try:
+        (work_plans, num) = controller.WorkPlanController.query_work_plan(query_dict=args_to_dict(request.args))
+    except CustomError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'work_plans': None,
-        }), err.status_code
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'total': num,
@@ -22,13 +23,13 @@ def find_work_plans():
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['GET'])
 def find_work_plan(id):
-    (work_plan, err) = core.WorkPlanController.get_work_plan(id)
-    if err is not None:
+    try:
+        work_plan = controller.WorkPlanController.get_work_plan(id=id)
+    except CustomError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'work_plan': None,
-        }), err.status_code
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'work_plan': work_plan,
@@ -38,13 +39,13 @@ def find_work_plan(id):
 
 @form_meta_blueprint.route('/work_plans', methods=['POST'])
 def insert_work_plan():
-    (ifSuccess, err) = core.WorkPlanController.insert_work_plan(request.json)
-    if err is not None:
+    try:
+        controller.WorkPlanController.insert_work_plan(data=request.json)
+    except CustomError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'total': None
-        }), err.status_code
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'message': ''
@@ -53,13 +54,13 @@ def insert_work_plan():
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['DELETE'])
 def delete_work_plan(id):
-    (ifSuccess, err) = core.WorkPlanController.delete_work_plan(id)
-    if err is not None:
+    try:
+        controller.WorkPlanController.delete_work_plan(id=id)
+    except CustomError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'total': None
-        }), err.status_code
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'message': ''
@@ -68,13 +69,13 @@ def delete_work_plan(id):
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['PUT'])
 def update_work_plan(id):
-    (ifSuccess, err) = core.WorkPlanController.update_work_plan(id, request.json)
-    if err is not None:
+    try:
+        controller.WorkPlanController.update_work_plan(id=id, data=request.json)
+    except CustomError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'total': None
-        }), err.status_code
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'message': ''

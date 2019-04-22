@@ -9,7 +9,7 @@ class FormMetaController(object):
         return dao.FormMeta.get_form_meta(name, version)
 
     @classmethod
-    def query_form_meta(cls, query_dict: dict = None):
+    def query_form_metas(cls, query_dict: dict = None):
         if query_dict is None:
             query_dict = {'using': [True]}
         else:
@@ -42,9 +42,9 @@ class FormMetaController(object):
     @classmethod
     def update_form_meta(cls, name: str = None, data: dict = None):
         form_meta = dao.FormMeta.get_form_meta(name)
-        ifSuccess = dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
-        ifSuccess = dao.FormMeta.insert_form_meta(data)
-        return ifSuccess
+        dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
+        dao.FormMeta.insert_form_meta(data)
+        return True
 
 
 class WorkPlanController(object):
@@ -72,7 +72,7 @@ class WorkPlanController(object):
         return [cls.formatter(work_plan) for work_plan in work_plans], num
 
     @classmethod
-    def delete_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def delete_work_plan(cls, ctx: bool = True, id: int = 0):
         dao.WorkPlan.get_work_plan(id=id, unscoped=False)
         try:
             dao.WorkPlan.delete_work_plan(ctx=False, query_dict={'id': [id]})

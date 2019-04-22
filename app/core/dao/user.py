@@ -4,7 +4,6 @@ from app.utils.mysql import db
 from app import login_manager
 from datetime import datetime
 from flask import jsonify
-from app.core.models.lesson import Term, SchoolTerm, LessonRecord
 from functools import wraps
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
 from app.utils.Error import CustomError
@@ -78,7 +77,7 @@ class User(db.Model, UserMixin):
     def get_user(cls, username: str, unscoped=False):
         user = User.query
         if not unscoped:
-            user = user.filter(Term.using == True)
+            user = user.filter(User.using == True)
         try:
             user = user.query.filter(User.username == username).first()
         except Exception as e:
@@ -111,7 +110,7 @@ class User(db.Model, UserMixin):
                 user.password = value
             if hasattr(user, key):
                 setattr(user, key, value)
-        role_names = data['role_names'] if 'role_names' in data else []
+        role_names = data.get('role_names', [])
         role_name_dict = {'教师': 'teacher', '管理员': 'admin', '领导': 'leader'}
         for role_name in role_names:
             role_name_e = role_name_dict[role_name]
@@ -208,14 +207,14 @@ class Group(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def update_group(cls, ctx=True, query_dict: dict = {}, data:dict={}):
+    def update_group(cls, ctx=True, query_dict: dict = {}, data: dict = {}):
         name_map = {'groups': Group}
         url_condition = UrlCondition(query_dict)
         groups = Group.query.filter(Group.using == True)
         try:
             (groups, total) = process_query(groups, url_condition.filter_dict,
-                                           url_condition.sort_limit_dict, url_condition.page_dict,
-                                           name_map, Group)
+                                            url_condition.sort_limit_dict, url_condition.page_dict,
+                                            name_map, Group)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for group in groups:
@@ -230,7 +229,6 @@ class Group(db.Model):
                 db.session.rollback()
                 raise CustomError(500, 500, str(e))
         return True
-
 
 
 class Supervisor(db.Model):
@@ -257,7 +255,7 @@ class Supervisor(db.Model):
 
     @classmethod
     def query_supervisors(cls, query_dict: dict, unscoped: bool = False):
-        name_map = {'supervisors': Supervisor}
+        name_map = {'supervisors': Supervisor, 'users':User}
         supervisors = Supervisor.query
         supervisors = supervisors.join(User, User.username == Supervisor.username)
         if not unscoped:
@@ -277,8 +275,7 @@ class Supervisor(db.Model):
         if not unscoped:
             supervisor = supervisor.filter(Supervisor.using == True)
         try:
-            supervisor = supervisor.filter(Supervisor.username == username).filter(
-                Supervisor.using == True).filter(Supervisor.term == term).first()
+            supervisor = supervisor.filter(Supervisor.username == username).filter(Supervisor.term == term).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if supervisor is None:
@@ -355,13 +352,111 @@ class Event(db.Model):
     timestamp = db.Column(db.TIMESTAMP, default=datetime.now)
     using = db.Column(db.Boolean, default=True)
 
-    @staticmethod
-    def events(condition):
+    @classmethod
+    def formatter(cls, event):
+        event_dict = {
+            'id': event.id,
+            'username': event.username,
+            'detail': event.detail,
+            'timestamp': str(event.timestamp),
+            'using': event.using
+        }
+        return event_dict
+
+    @classmethod
+    def reformatter_insert(cls, data: dict):
+        return data
+
+    @classmethod
+    def reformatter_update(cls, data: dict):
+        return data
+
+    @classmethod
+    def get_event(cls, id: int, unscoped: bool = False):
+        event = Event.query
+        if not unscoped:
+            event = event.filter(Event.using == True)
+        try:
+            event = event.filter(Event.id == id).filter(Event.using == True).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        if event is None:
+            raise CustomError(404, 404, 'event not found')
+        return cls.formatter(event)
+
+    @classmethod
+    def insert_event(cls, ctx: bool = True, data: dict = {}):
+        data = cls.reformatter_insert(data)
+        event = Event()
+        for key, value in data.items():
+            if hasattr(event, key):
+                setattr(event, key, value)
+        db.session.add(event)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def query_events(cls, query_dict: dict = {}, unscoped: bool = False):
         name_map = {'events': Event}
-        url_condition = UrlCondition(condition)
-        query = Event.query.filter(Event.using == True)
-        query = process_query(query, url_condition, name_map, Event)
-        return query
+        query = Event.query
+        if not unscoped:
+            query = query.filter(Event.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                           url_condition.page_dict, name_map, Event)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [cls.formatter(data) for data in query], total
+
+    @classmethod
+    def delete_event(cls, ctx: bool = True, query_dict: dict = {}):
+        name_map = {'events': Event}
+        events = Event.query.filter(Event.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            (events, total) = process_query(events, url_condition.filter_dict,
+                                            url_condition.sort_limit_dict,
+                                            url_condition.page_dict, name_map, Event)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for event in events:
+            event.using = False
+            db.session.add(event)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def update_event(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+        data = cls.reformatter_update(data)
+        name_map = {'events': Event}
+        events = Event.query.filter(Event.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            (events, total) = process_query(events, url_condition.filter_dict,
+                                            url_condition.sort_limit_dict,
+                                            url_condition.page_dict, name_map, Event)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for event in events:
+            for key, value in data.items():
+                if hasattr(event, key):
+                    setattr(event, key, value)
+            db.session.add(event)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
 
 
 def permission_required(permission):

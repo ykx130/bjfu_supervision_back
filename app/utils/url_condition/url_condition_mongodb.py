@@ -70,8 +70,8 @@ class UrlCondition(object):
 
 class Paginate(object):
     def __init__(self, _data, page_dict):
-        self.per_page = page_dict['_per_page'] if '_per_page' in page_dict else 20
-        self.page = page_dict['_page'] if '_page' in page_dict else 1
+        self.per_page = page_dict.get('_per_page', 20)
+        self.page = page_dict.get('_page', 1)
         self.total = _data.count()
         self.page_num = self.total // self.per_page + 1 if self.total % self.per_page != 0 else self.total // self.per_page
         self.prev = self.page - 1 if self.page > 1 else None
