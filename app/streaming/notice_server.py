@@ -1,4 +1,7 @@
-from app.core.services import notices_service
+from app.streaming import sub_kafka
 
-if __name__ == '__main__':
-    notices_service.notice_service_server()
+@sub_kafka('notice_service')
+def notice_service_server(message):
+    # push_new_message(message.get('args', {}).get('username'), message.get('args', {}).get('msg'))
+    # 提交
+    pass
