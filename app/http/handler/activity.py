@@ -1,7 +1,7 @@
 from app.http.handler import activity_blueprint
 from flask import request, jsonify
 from flask_login import login_required
-import app.core.controllers  as controller
+import app.core.controller  as controller
 from app.core.models.activity import ActivityUser
 from flask_login import current_user
 from app.utils import CustomError, args_to_dict
@@ -109,8 +109,8 @@ def find_activity_users(id):
     }), 200
 
 
-@login_required
 @activity_blueprint.route('/activities/<int:id>/activity_users', methods=['POST'])
+@login_required
 def insert_activity_user(id):
     try:
         controller.ActivityUserController.insert_activity_user(activity_id=id, data=request.json)
@@ -173,8 +173,8 @@ def update_activity_user(id, username):
     }), 200
 
 
-@login_required
 @activity_blueprint.route('/current_user/activities')
+@login_required
 def get_current_user_activities():
     username = request.args['username'] if 'username' in request.args else current_user.username
     try:

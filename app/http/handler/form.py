@@ -1,4 +1,4 @@
-import app.core.controllers as controller
+import app.core.controller as controller
 from flask_pymongo import ObjectId
 from flask import jsonify, request
 from flask_login import current_user, login_required
@@ -8,8 +8,8 @@ from werkzeug.datastructures import ImmutableMultiDict
 from datetime import datetime
 
 
-@login_required
 @form_blueprint.route('/forms', methods=['POST'])
+@login_required
 def new_form():
     request_json = request.json
     meta = request_json.get('meta', {})
@@ -70,7 +70,7 @@ def get_form(_id):
 @form_blueprint.route('/forms/<string:_id>', methods=['DELETE'])
 def delete_from(_id):
     try:
-        controller.FormController.delete_form(where_dict={'_id': ObjectId(_id)})
+        controller.FormController.delete_form(_id=ObjectId(_id))
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -85,7 +85,7 @@ def delete_from(_id):
 @form_blueprint.route('/forms/<string:_id>', methods=['PUT'])
 def change_form(_id):
     try:
-        controller.FormController.update_form(where_dict={'_id': ObjectId(_id)}, data=request.json)
+        controller.FormController.update_form(_id=ObjectId(_id), data=request.json)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -97,8 +97,8 @@ def change_form(_id):
     }), 200
 
 
-@login_required
 @form_blueprint.route('/my/forms')
+@login_required
 def get_my_forms():
     query_dict = args_to_dict(request.args)
     query_dict['meta.guider'] = [current_user.username]

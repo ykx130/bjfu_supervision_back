@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from app.http.handler import form_meta_blueprint
-import app.core.controllers as controller
+import app.core.controller as controller
 from app.utils import args_to_dict, CustomError
 
 

@@ -56,7 +56,9 @@ class Activity(db.Model):
         return activity_dict
 
     @classmethod
-    def insert_activity(cls, ctx: bool = True, data: dict = {}):
+    def insert_activity(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         activity = Activity()
         for key, value in data.items():
@@ -84,7 +86,9 @@ class Activity(db.Model):
         return cls.formatter(activity)
 
     @classmethod
-    def query_activities(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_activities(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'activities': Activity}
         query = Activity.query
         if not unscoped:
@@ -98,7 +102,9 @@ class Activity(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_activity(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_activity(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'activities': Activity}
         activities = Activity.query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
@@ -119,7 +125,11 @@ class Activity(db.Model):
         return True
 
     @classmethod
-    def update_activity(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_activity(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'activities': Activity}
         activities = Activity.query.filter(Activity.using == True)
@@ -175,7 +185,9 @@ class ActivityUser(db.Model):
         return activity_user_user_dict
 
     @classmethod
-    def insert_activity_user(cls, ctx: bool = True, data: dict = {}):
+    def insert_activity_user(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         activity_user = ActivityUser()
         for key, value in data.items():
@@ -195,7 +207,8 @@ class ActivityUser(db.Model):
         if not unscoped:
             activity_user = activity_user.filter(ActivityUser.using == True)
         try:
-            activity_user = activity_user.filter(ActivityUser.activity_id == activity_id).filter(ActivityUser.username == username).first()
+            activity_user = activity_user.filter(ActivityUser.activity_id == activity_id).filter(
+                ActivityUser.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if activity_user is None:
@@ -203,7 +216,9 @@ class ActivityUser(db.Model):
         return cls.formatter(activity_user)
 
     @classmethod
-    def query_activity_users(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_activity_users(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'activity_users': ActivityUser}
         query = ActivityUser.query
         if not unscoped:
@@ -217,7 +232,9 @@ class ActivityUser(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_activity_user(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_activity_user(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'activity_users': ActivityUser}
         activities = ActivityUser.query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
@@ -238,7 +255,11 @@ class ActivityUser(db.Model):
         return True
 
     @classmethod
-    def update_activity_user(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_activity_user(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'activity_users': ActivityUser}
         activities = ActivityUser.query.filter(ActivityUser.using == True)

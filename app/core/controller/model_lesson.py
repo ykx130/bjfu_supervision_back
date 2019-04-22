@@ -43,10 +43,13 @@ class ModelLessonController(object):
         return [cls.formatter(model_lesson) for model_lesson in model_lessons], num
 
     @classmethod
-    def insert_model_lesson(cls, ctx: bool = True, data: dict = {}):
+    def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
+        status = data.get('status', '推荐课')
         try:
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'id': [data['lesson_id']]}, data={'lesson_model': status})
@@ -62,7 +65,9 @@ class ModelLessonController(object):
         return True
 
     @classmethod
-    def insert_model_lessons(cls, ctx: bool = True, data: dict = {}):
+    def insert_model_lessons(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         lesson_ids = data.get("lesson_ids", [])
         status = data.get('status', '推荐课')
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
@@ -86,7 +91,9 @@ class ModelLessonController(object):
         return True
 
     @classmethod
-    def update_model_lesson(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_model_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
         lesson = dao.Lesson.get_lesson(id=model_lesson['lesson_id'], unscoped=False)
         status = data.get('status', lesson['lesson_model'])
@@ -125,7 +132,9 @@ class ModelLessonController(object):
         return True
 
     @classmethod
-    def delete_model_lessons(cls, ctx: bool = True, data: dict = {}):
+    def delete_model_lessons(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         model_lesson_ids = data.get('model_lesson_ids', [])
         try:
             for model_lesson_id in model_lesson_ids:
@@ -209,7 +218,9 @@ class ModelLessonController(object):
         return True
 
     @classmethod
-    def export_lesson_excel(cls, data: dict = {}):
+    def export_lesson_excel(cls, data: dict = None):
+        if data is None:
+            data = {}
         if 'model_lesson_ids' not in data:
             model_lessons = dao.ModelLesson.query_model_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
         else:

@@ -33,7 +33,9 @@ class ConsultTypeController(object):
         return [cls.formatter(consult_type) for consult_type in consult_types], num
 
     @classmethod
-    def insert_consult_type(cls, ctx: bool = True, data: dict = {}):
+    def insert_consult_type(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data=data)
         try:
             dao.ConsultType.insert_consult_type(ctx=False, data=data)
@@ -49,7 +51,9 @@ class ConsultTypeController(object):
         return True
 
     @classmethod
-    def update_consult_type(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_consult_type(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_update(data)
         dao.ConsultType.get_consult_type(id=id, unscoped=False)
         try:
@@ -117,7 +121,9 @@ class ConsultController(object):
         return [cls.formatter(consult) for consult in consults], num
 
     @classmethod
-    def insert_consult(cls, ctx: bool = True, data: dict = {}):
+    def insert_consult(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data=data)
         try:
             dao.Consult.insert_consult(ctx=False, data=data)
@@ -133,7 +139,9 @@ class ConsultController(object):
         return True
 
     @classmethod
-    def update_consult(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_consult(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_update(data)
         dao.Consult.get_consult(id=id, unscoped=False)
         try:
