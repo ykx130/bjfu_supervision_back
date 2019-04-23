@@ -6,7 +6,6 @@
 # -*- coding=utf-8 -*-
 
 from flask_script import Manager, Shell
-from app.core.models.fake import insert_user
 from app import app
 from app.utils.mysql import db
 from flask_migrate import Migrate, MigrateCommand
@@ -15,13 +14,11 @@ from app.utils.mongodb import mongo
 manager = Manager(app)
 migrate = Migrate(app, db)
 
-import app.core.models
 from flask import _app_ctx_stack
 
 def create_all():
     db.drop_all()
     db.create_all()
-    insert_user()
 
 
 def make_shell_context():

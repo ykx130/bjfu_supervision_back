@@ -1,6 +1,5 @@
 import app.core.dao as dao
 from app.utils import CustomError, db
-from app.streaming import send_kafka_message
 from app.utils.Error import CustomError
 import pandas
 import datetime

@@ -1,28 +1,36 @@
-from app.http.handler.notices import notices_blueprint
-from flask_pymongo import ObjectId
 from flask_login import current_user
 from flask import jsonify, request
-from sqlalchemy.exc import IntegrityError
-from app.utils.misc import convert_datetime_to_string
-from flask import url_for
-from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
-from app.core.controller.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, \
-    find_terms, change_lesson, has_lesson
-from app.core.controller import notices_controller
+from app.http.handler import notices_blueprint
+from app.core.controller import NoticeController
+from app.utils import CustomError, args_to_dict
 
 
 @notices_blueprint.route('/notices')
 def get_notices_num():
-    num = notices_controller.get_notices_num(current_user.username)
+    try:
+        num = NoticeController.get_notices_num(user=current_user.username)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
-        'total': num
-    })
+        "total": num,
+        'message': '',
+
+    }), 200
 
 
 @notices_blueprint.route('/notices/newest')
 def get_newest_notice():
-    notice = notices_controller.get_newest_notices(current_user.username)
+    try:
+        notice = NoticeController.get_newest_notices(current_user.username)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'notice': notice

@@ -19,11 +19,13 @@ def lesson_form_service_server(method, args):
     if not method:
         return
     if method == 'add_form' or method == 'repulse_form':
-        _, total, = dao.Form.query_form(query_dict={
+        _, total, = dao.Form.query_forms(query_dict={
             'meta.lesson.lesson_id': args.get("lesson_id")
         })
         dao.Lesson.update_lesson(query_dict={
             'lesson_id': args.get("lesson_id")
+        }, data={
+            "lesson_state": "已完成" if total else "未完成"
         })
 
 

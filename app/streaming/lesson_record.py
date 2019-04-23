@@ -15,24 +15,34 @@ def lesson_record_by_form_server(method, args):
 
     if method == 'add_form' or method == 'repulse_form':
         # 更新听课记录
-        # _, total = dao.Form.query_form(query_dict={
-        #     "username": args.get("username"),
-        #     "term": args.get("term"),
-        #     ""
-        # })
-        # dao.LessonRecord.update_lesson_record(
-        #     query_dict={
-        #         "username": args.get("username"),
-        #         "term": args.get("term")
-        #     },
-        #     data={
-        #         ""
-        #     }
-        # )
-        # lesson_record_service.change_user_lesson_record_num(message.get('args', {}).get('username', None),
-        #                                                     message.get('args', {}).get('term', None))
-        #
-        pass
+        _, total = dao.Form.query_forms(query_dict={
+            "username": args.get("username"),
+            "term": args.get("term")
+        })
+
+        _, has_submit = dao.Form.query_forms(query_dict={
+            "username": args.get("username"),
+            "term": args.get("term"),
+            "status": "已提交"
+        })
+
+        _, wait_submit = dao.Form.query_forms(query_dict={
+            "username": args.get("username"),
+            "term": args.get("term"),
+            "status": "未提交"
+        })
+
+        dao.LessonRecord.update_lesson_record(
+            query_dict={
+                "username": args.get("username"),
+                "term": args.get("term")
+            },
+            data={
+                "to_be_submitted": wait_submit,
+                "has_submitted": has_submit,
+                "total_times": total
+            }
+        )
 
 
 @sub_kafka('user_service')
