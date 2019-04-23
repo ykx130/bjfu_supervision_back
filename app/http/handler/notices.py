@@ -6,9 +6,9 @@ from sqlalchemy.exc import IntegrityError
 from app.utils.misc import convert_datetime_to_string
 from flask import url_for
 from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
-from app.core.controllers.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, \
+from app.core.controller.lesson_controller import update_database, find_lessons, find_lesson, find_now_term, \
     find_terms, change_lesson, has_lesson
-from app.core.controllers import notices_controller
+from app.core.controller import notices_controller
 
 
 @notices_blueprint.route('/notices')

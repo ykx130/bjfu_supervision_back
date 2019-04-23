@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
 from app.utils.Error import CustomError
 
 
@@ -62,6 +62,21 @@ class User(db.Model, UserMixin):
     @classmethod
     def reformatter_insert(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'users': User}
+        query = User.query
+        if not unscoped:
+            query = query.filter(User.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, User)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @property
     def password(self):
@@ -199,6 +214,21 @@ class Group(db.Model):
         return group_dict
 
     @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'groups': Group}
+        query = Group.query
+        if not unscoped:
+            query = query.filter(Group.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Group)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
     def get_group(cls, group_name: str):
         try:
             group = Group.query.filter(Group.using == True).filter(Group.name == group_name).first()
@@ -275,12 +305,26 @@ class Supervisor(db.Model):
         return supervisor_dict
 
     @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'supervisors': Supervisor}
+        query = Supervisor.query
+        if not unscoped:
+            query = query.filter(Supervisor.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Supervisor)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
     def query_supervisors(cls, query_dict: dict, unscoped: bool = False):
         name_map = {'supervisors': Supervisor, 'users': User}
         supervisors = Supervisor.query
-        supervisors = supervisors.join(User, User.username == Supervisor.username)
         if not unscoped:
-            supervisors = supervisors.filter(Supervisor.using == True).filter(User.using == True)
+            supervisors = supervisors.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             (supervisors, total) = process_query(supervisors, url_condition.filter_dict,
@@ -322,8 +366,7 @@ class Supervisor(db.Model):
         if query_dict is None:
             query_dict = {}
         name_map = {'supervisors': Supervisor}
-        query = Supervisor.query.join(User, User.username == Supervisor.username).filter(User.using == True).filter(
-            Supervisor.using == True)
+        query = Supervisor.query.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             (supervisors, total) = process_query(query, url_condition.filter_dict,
@@ -348,8 +391,7 @@ class Supervisor(db.Model):
         if query_dict is None:
             query_dict = {}
         name_map = {'supervisors': Supervisor}
-        query = Supervisor.query.join(User, User.username == Supervisor.username).filter(User.using == True).filter(
-            Supervisor.using == True)
+        query = Supervisor.query.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             (supervisors, total) = process_query(query, url_condition.filter_dict,
@@ -397,6 +439,21 @@ class Event(db.Model):
     @classmethod
     def reformatter_update(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'events': Event}
+        query = Event.query
+        if not unscoped:
+            query = query.filter(Event.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Event)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def get_event(cls, id: int, unscoped: bool = False):

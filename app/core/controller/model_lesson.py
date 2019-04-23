@@ -45,7 +45,7 @@ class ModelLessonController(object):
     @classmethod
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
@@ -67,7 +67,7 @@ class ModelLessonController(object):
     @classmethod
     def insert_model_lessons(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         lesson_ids = data.get("lesson_ids", [])
         status = data.get('status', '推荐课')
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
@@ -93,7 +93,7 @@ class ModelLessonController(object):
     @classmethod
     def update_model_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
         lesson = dao.Lesson.get_lesson(id=model_lesson['lesson_id'], unscoped=False)
         status = data.get('status', lesson['lesson_model'])
@@ -134,7 +134,7 @@ class ModelLessonController(object):
     @classmethod
     def delete_model_lessons(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         model_lesson_ids = data.get('model_lesson_ids', [])
         try:
             for model_lesson_id in model_lesson_ids:
@@ -220,7 +220,7 @@ class ModelLessonController(object):
     @classmethod
     def export_lesson_excel(cls, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         if 'model_lesson_ids' not in data:
             model_lessons = dao.ModelLesson.query_model_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
         else:
@@ -242,8 +242,9 @@ class ModelLessonController(object):
         try:
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
-            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
-            frame.to_excel(filename, sheet_name='123', index=False, header=True)
+            filename = '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123', index=False, header=True)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return filename

@@ -1,7 +1,7 @@
 from app.utils.mysql import db
 from sqlalchemy import text
 from datetime import datetime
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
 from app.utils.Error import CustomError
 
 
@@ -26,6 +26,21 @@ class ConsultType(db.Model):
     @classmethod
     def reformatter_update(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'consult_types': ConsultType}
+        query = ConsultType.query
+        if not unscoped:
+            query = query.filter(ConsultType.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, ConsultType)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def get_consult_type(cls, id: int, unscoped: bool = False):
@@ -167,6 +182,21 @@ class Consult(db.Model):
     @classmethod
     def reformatter_update(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'consults': Consult}
+        query = Consult.query
+        if not unscoped:
+            query = query.filter(Consult.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Consult)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def get_consult(cls, id: int, unscoped: bool = False):

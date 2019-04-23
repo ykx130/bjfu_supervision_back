@@ -79,7 +79,7 @@ class UserController():
     @classmethod
     def query_users(cls, query_dict: dict = None, unscoped=False):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         (users, num) = dao.User.query_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(user) for user in users], num
 
@@ -91,7 +91,7 @@ class UserController():
     @classmethod
     def insert_user(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data = cls.reformatter(data)
         username = data.get('username', None)
         if username is None:
@@ -124,7 +124,7 @@ class UserController():
     @classmethod
     def update_user(cls, ctx: bool = True, username: str = '', data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         try:
             data['term'] = data.get('term', dao.Term.get_now_term()['name'])
             if username is None:
@@ -208,7 +208,7 @@ class SupervisorController():
     @classmethod
     def query_supervisors(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         (supervisors, _) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
         usernames = [supervisor['username'] for supervisor in supervisors]
         (users, num) = UserController.query_users(query_dict={'username': usernames}, unscoped=unscoped)
@@ -217,7 +217,7 @@ class SupervisorController():
     @classmethod
     def query_supervisors_expire(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         term = query_dict.get('term', [])
         if len(term) == 0:
             term = [dao.Term.get_now_term()['name']]
@@ -267,7 +267,7 @@ class SupervisorController():
     @classmethod
     def insert_supervisor(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         username = data.get('username', None)
         user = dao.User.get_user(username)
         term = data.get('term', None)
@@ -323,7 +323,7 @@ class SupervisorController():
     @classmethod
     def batch_renewal(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         usernames = data.get('usrnames', None)
         term = data.get('term', None)
         if usernames is None:
@@ -354,7 +354,7 @@ class SupervisorController():
     @classmethod
     def get_supervisor_num(cls, query_dict: dict = None):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         term = query_dict.get('term', dao.Term.get_now_term()['name'])
         (supervisors, num) = dao.Supervisor.query_supervisors(query_dict={'_per_page': [100000], 'term': [term]})
         return num

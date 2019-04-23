@@ -19,7 +19,7 @@ class FormMetaController(object):
     @classmethod
     def get_history_form_meta(cls, name: str = None, query_dict: dict = None):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         if name is None:
             raise CustomError(500, 200, 'name must be given')
         if query_dict is None:
@@ -32,13 +32,13 @@ class FormMetaController(object):
     @classmethod
     def query_form_meta_history(cls, query_dict: dict = None):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         return dao.FormMeta.query_form_meta(query_dict)
 
     @classmethod
     def insert_form_meta(cls, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         return dao.FormMeta.insert_form_meta(data)
 
     @classmethod
@@ -49,7 +49,7 @@ class FormMetaController(object):
     @classmethod
     def update_form_meta(cls, name: str = None, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         form_meta = dao.FormMeta.get_form_meta(name)
         dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
         dao.FormMeta.insert_form_meta(data)
@@ -99,7 +99,7 @@ class WorkPlanController(object):
     @classmethod
     def update_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         dao.WorkPlan.get_work_plan(id=id, unscoped=False)
         try:
             dao.WorkPlan.update_work_plan(ctx=False, query_dict={'id': [id]}, data=data)
@@ -117,7 +117,7 @@ class WorkPlanController(object):
     @classmethod
     def insert_work_plan(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data = cls.reformatter_insert(data)
         (form_meta, num) = dao.FormMeta.query_form_meta(
             query_dict={'form_meta_name': [data['form_meta_name']], 'form_meta_version': [data['form_meta_version']],

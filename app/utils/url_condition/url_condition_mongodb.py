@@ -10,7 +10,7 @@ def object_to_str(dict_unserializalbe):
 
 
 def dict_serializable(dict_unserializalbe):
-    r = {}
+    r = dict()
     for k, v in dict_unserializalbe.items():
         try:
             r[k] = json.loads(v)
@@ -21,9 +21,11 @@ def dict_serializable(dict_unserializalbe):
 
 class UrlCondition(object):
     def __init__(self, url_args):
-        self.sort_limit_dict = {}
-        self.page_dict = {}
-        self.filter_dict = {}
+        if url_args is None:
+            url_args = dict()
+        self.sort_limit_dict = None
+        self.page_dict = None
+        self.filter_dict = None
         order_list = []
         sort_list = []
         filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne']
@@ -84,9 +86,9 @@ class Paginate(object):
 def sort_limit(datas, sort_limit_dict):
     dataspage = datas
     _limit = sort_limit_dict.get('_limit', None)
-    _sort_dict = sort_limit_dict.get('_sort_dict', {})
+    _sort_dict = sort_limit_dict.get('_sort_dict', None)
     if _limit is not None:
         dataspage = dataspage.limit(_limit)
-    if _sort_dict != {}:
+    if _sort_dict is not None:
         dataspage = dataspage.sort(_sort_dict)
     return dataspage

@@ -15,6 +15,8 @@ class LessonRecordController(object):
 
     @classmethod
     def reformatter_insert(cls, data: dict):
+        if 'username' not in data:
+            raise CustomError(500, 200, 'username must be given')
         return data
 
     @classmethod
@@ -100,7 +102,12 @@ class LessonRecordController(object):
         return True
 
     @classmethod
-    def insert_lesson_record(cls, ctx: bool = True, username: str = None, term: str = None):
+    def insert_lesson_record(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        data = cls.reformatter_insert(data)
+        username = data.get('username', None)
+        term = data.get('term', dao.Term.get_now_term()['name'])
         user = dao.User.get_user(username=username, unscoped=False)
         supervisor = dao.Supervisor.get_supervisor(username=username, term=term, unscoped=False)
         try:

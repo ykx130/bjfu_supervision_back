@@ -49,7 +49,7 @@ class NoticeLessonController(object):
     @classmethod
     def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
@@ -74,7 +74,7 @@ class NoticeLessonController(object):
     @classmethod
     def insert_notice_lessons(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         lesson_ids = data.get('lesson_ids', [])
         try:
@@ -109,7 +109,7 @@ class NoticeLessonController(object):
     @classmethod
     def update_notice_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
         dao.Lesson.get_lesson(id=notice_lesson['lesson_id'], unscoped=False)
         try:
@@ -147,7 +147,7 @@ class NoticeLessonController(object):
     @classmethod
     def delete_notice_lessons(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         notice_lesson_ids = data.get('notice_lesson_ids', [])
         try:
             for notice_lesson_id in notice_lesson_ids:
@@ -230,7 +230,7 @@ class NoticeLessonController(object):
     @classmethod
     def export_lesson_excel(cls, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         if 'notice_lesson_ids' not in data:
             notice_lessons = dao.NoticeLesson.query_notice_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
         else:
@@ -252,8 +252,9 @@ class NoticeLessonController(object):
         try:
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
-            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
-            frame.to_excel(filename, sheet_name='123', index=False, header=True)
+            filename = '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123', index=False, header=True)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return filename

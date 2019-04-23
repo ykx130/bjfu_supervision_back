@@ -33,6 +33,12 @@ class EventController(object):
         return [cls.formatter(event) for event in events], num
 
     @classmethod
+    def query_user_events(cls, username: str, query_dict: dict, unscoped=False):
+        query_dict['username'] = [username]
+        (events, num) = dao.Event.query_events(query_dict=query_dict, unscoped=unscoped)
+        return [cls.formatter(event) for event in events], num
+
+    @classmethod
     def insert_event(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = {}

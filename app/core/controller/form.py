@@ -60,7 +60,7 @@ class FormController(object):
     @classmethod
     def insert_form(cls, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         meta = data.get('meta', {})
         lesson_id = meta.get('lesson', {}).get('lesson_id', None)
         if lesson_id is None:
@@ -77,27 +77,33 @@ class FormController(object):
         return True
 
     @classmethod
-    def query_forms(cls, query_dict: dict = None):
+    def formatter(cls, form: dict):
+        return form
+
+    @classmethod
+    def query_forms(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = dict()
-        return dao.Form.query_form(query_dict)
+        (forms, total) = dao.Form.query_forms(query_dict=query_dict, unscoped=unscoped)
+        return [cls.formatter(form) for form in forms], total
 
     @classmethod
-    def find_form(cls, _id=None):
-        return dao.Form.get_form(_id)
+    def find_form(cls, _id=None, unscoped=False):
+        form = dao.Form.get_form(_id=_id, unscoped=unscoped)
+        return cls.formatter(form)
 
     @classmethod
-    def delete_form(cls, _id = None):
+    def delete_form(cls, _id=None):
         dao.Form.get_form(_id=_id)
-        dao.Form.delete_form(where_dict={'_id':_id})
+        dao.Form.delete_form(where_dict={'_id': _id})
         return True
 
     @classmethod
     def update_form(cls, _id=None, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         dao.Form.get_form(_id=_id)
-        dao.Form.update_form({'_id':_id}, data)
+        dao.Form.update_form({'_id': _id}, data)
         if 'status' in data:
             form = dao.Form.get_form(_id)
             lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)

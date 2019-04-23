@@ -1,5 +1,5 @@
 from app.utils.mysql import db
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
 from app.utils.Error import CustomError
 from datetime import datetime
 
@@ -30,9 +30,24 @@ class Term(db.Model):
         return data
 
     @classmethod
-    def query_terms(cls, query_dict: dict = None, unscoped: bool = False):
+    def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
+        name_map = {'terms': Term}
+        query = Term.query
+        if not unscoped:
+            query = query.filter(Term.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Term)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
+    def query_terms(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = dict()
         name_map = {'terms': Term}
         url_condition = UrlCondition(query_dict)
         query = Term.query
@@ -111,6 +126,21 @@ class LessonRecord(db.Model):
         return data
 
     @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'lesson_records': LessonRecord}
+        query = LessonRecord.query
+        if not unscoped:
+            query = query.filter(LessonRecord.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, LessonRecord)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
     def get_lesson_record(cls, username: str, term: str, unscoped: bool = False):
         lesson_record = LessonRecord.query
         if not unscoped:
@@ -127,7 +157,7 @@ class LessonRecord(db.Model):
     @classmethod
     def insert_lesson_record(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data = cls.reformatter_insert(data)
         lesson_record = LessonRecord()
         for key, value in data.items():
@@ -144,7 +174,7 @@ class LessonRecord(db.Model):
     @classmethod
     def query_lesson_records(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         name_map = {'lesson_records': LessonRecord}
         query = LessonRecord.query
         if not unscoped:
@@ -161,7 +191,7 @@ class LessonRecord(db.Model):
     @classmethod
     def delete_lesson_record(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         name_map = {'lesson_records': LessonRecord}
         lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
@@ -184,9 +214,9 @@ class LessonRecord(db.Model):
     @classmethod
     def update_lesson_record(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         data = cls.reformatter_update(data)
         name_map = {'lesson_records': LessonRecord}
         lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
@@ -262,6 +292,21 @@ class Lesson(db.Model):
         return data
 
     @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'lessons': Lesson}
+        query = Lesson.query
+        if not unscoped:
+            query = query.filter(Lesson.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Lesson)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
     def get_lesson(cls, id: int, unscoped: bool = False):
         lesson = Lesson.query
         if not unscoped:
@@ -277,7 +322,7 @@ class Lesson(db.Model):
     @classmethod
     def insert_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         data = cls.reformatter_insert(data)
         lesson = Lesson()
         for key, value in data.items():
@@ -383,6 +428,21 @@ class LessonCase(db.Model):
     @classmethod
     def reformatter_update(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'lesson_cases': LessonCase}
+        query = LessonCase.query
+        if not unscoped:
+            query = query.filter(LessonCase.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, LessonCase)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def get_lesson_case(cls, id: int, unscoped: bool = False):
@@ -508,6 +568,21 @@ class NoticeLesson(db.Model):
     @classmethod
     def reformatter_update(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'notice_lessons': NoticeLesson}
+        query = NoticeLesson.query
+        if not unscoped:
+            query = query.filter(NoticeLesson.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, NoticeLesson)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def get_notice_lesson(cls, id: int, unscoped: bool = False):
@@ -640,6 +715,21 @@ class ModelLesson(db.Model):
     @classmethod
     def reformatter_update(cls, data: dict):
         return data
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'model_lessons': ModelLesson}
+        query = ModelLesson.query
+        if not unscoped:
+            query = query.filter(ModelLesson.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, ModelLesson)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def get_model_lesson(cls, id: int, unscoped: bool = False):

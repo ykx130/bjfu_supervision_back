@@ -1,5 +1,5 @@
 from app.utils.mysql import db
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
 from app.utils.Error import CustomError
 from datetime import datetime
 
@@ -54,6 +54,21 @@ class Activity(db.Model):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return activity_dict
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'activities': Activity}
+        query = Activity.query
+        if not unscoped:
+            query = query.filter(Activity.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Activity)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def insert_activity(cls, ctx: bool = True, data: dict = None):
@@ -183,6 +198,21 @@ class ActivityUser(db.Model):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return activity_user_user_dict
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'activity_users': ActivityUser}
+        query = ActivityUser.query
+        if not unscoped:
+            query = query.filter(ActivityUser.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, ActivityUser)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
 
     @classmethod
     def insert_activity_user(cls, ctx: bool = True, data: dict = None):

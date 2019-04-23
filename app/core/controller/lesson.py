@@ -165,7 +165,7 @@ class LessonController(object):
     @classmethod
     def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         query_dict = cls.reformatter_insert(query_dict)
         (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson) for lesson in lessons], num
@@ -173,7 +173,7 @@ class LessonController(object):
     @classmethod
     def update_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
-            data = {}
+            data = dict()
         dao.Lesson.get_lesson(id=id, unscoped=False)
         try:
             dao.Lesson.update_lesson(ctx=ctx, query_dict={'id': [id]}, data=data)
@@ -206,7 +206,7 @@ class TermController(object):
     @classmethod
     def query_terms(cls, query_dict: dict = None, unscoped=False):
         if query_dict is None:
-            query_dict = {}
+            query_dict = dict()
         (terms, num) = dao.Term.query_terms(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(term) for term in terms], num
 
