@@ -10,6 +10,13 @@ from app.utils.logger import log
 
 
 def sub_kafka(topic=''):
+    """
+    订阅特定topic
+    产生特定
+    :param topic:
+    :return:
+    """
+
     def wrapper(func):
         def ex():
             consumer = KafkaConsumer(topic, bootstrap_servers=Config.KAFLKA_HOST,
@@ -18,7 +25,7 @@ def sub_kafka(topic=''):
                                      )
             for msg in consumer:
                 log.info("received msg : {}".format(msg))
-                func(msg.value)
+                func(method=msg.value.get("method"), args=msg.value.get("args"))
 
         return ex
 

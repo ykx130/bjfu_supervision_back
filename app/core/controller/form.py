@@ -1,6 +1,6 @@
 import app.core.dao as dao
 from app.utils.Error import CustomError
-from app.core.services.kafka_message import send_kafka_message, sub_kafka
+from app.utils.kafka_message import send_kafka_message
 from app import redis_cli
 import json
 
