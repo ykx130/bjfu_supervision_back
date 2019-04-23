@@ -4,6 +4,7 @@ from app.utils.mysql import db
 from app import login_manager
 from datetime import datetime
 from flask import jsonify
+from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query
 from app.utils.Error import CustomError
@@ -70,8 +71,16 @@ class User(db.Model, UserMixin):
     def password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    @classmethod
+    def login(cls, username: str, password: str):
+        user = User.query.filter(User.username == username).filter(User.using == True).first()
+        if user is None or not check_password_hash(user.password_hash, password):
+            raise CustomError(401, 401, 'username or password may be wrong')
+        login_user(user, remember=False)
+
+    @classmethod
+    def logout(cls):
+        logout_user()
 
     @classmethod
     def get_user(cls, username: str, unscoped=False):
@@ -88,6 +97,8 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def query_users(cls, query_dict: dict = None, unscoped=False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'users': User, 'groups': Group}
         query = User.query
         if not unscoped:
@@ -102,7 +113,9 @@ class User(db.Model, UserMixin):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def insert_user(cls, ctx=True, data={}):
+    def insert_user(cls, ctx=True, data=None):
+        if data is None:
+            raise CustomError(500, 200, 'data must be given')
         data = cls.reformatter_insert(data)
         user = User()
         for key, value in data.items():
@@ -145,6 +158,8 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def update_user(cls, ctx=True, username: str = None, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_update(data)
         try:
             user = User.query.filter(User.username == username).filter(User.using == True).first()
@@ -194,7 +209,9 @@ class Group(db.Model):
         return cls.formatter(group)
 
     @classmethod
-    def query_groups(cls, query_dict: dict = {}):
+    def query_groups(cls, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'groups': Group}
         url_condition = UrlCondition(query_dict)
         query = Group.query.filter(Group.using == True)
@@ -207,7 +224,11 @@ class Group(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def update_group(cls, ctx=True, query_dict: dict = {}, data: dict = {}):
+    def update_group(cls, ctx=True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         name_map = {'groups': Group}
         url_condition = UrlCondition(query_dict)
         groups = Group.query.filter(Group.using == True)
@@ -255,7 +276,7 @@ class Supervisor(db.Model):
 
     @classmethod
     def query_supervisors(cls, query_dict: dict, unscoped: bool = False):
-        name_map = {'supervisors': Supervisor, 'users':User}
+        name_map = {'supervisors': Supervisor, 'users': User}
         supervisors = Supervisor.query
         supervisors = supervisors.join(User, User.username == Supervisor.username)
         if not unscoped:
@@ -297,7 +318,9 @@ class Supervisor(db.Model):
         return True
 
     @classmethod
-    def delete_supervisor(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_supervisor(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'supervisors': Supervisor}
         query = Supervisor.query.join(User, User.username == Supervisor.username).filter(User.using == True).filter(
             Supervisor.using == True)
@@ -319,7 +342,11 @@ class Supervisor(db.Model):
         return True
 
     @classmethod
-    def update_supervisor(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_supervisor(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         name_map = {'supervisors': Supervisor}
         query = Supervisor.query.join(User, User.username == Supervisor.username).filter(User.using == True).filter(
             Supervisor.using == True)
@@ -385,7 +412,9 @@ class Event(db.Model):
         return cls.formatter(event)
 
     @classmethod
-    def insert_event(cls, ctx: bool = True, data: dict = {}):
+    def insert_event(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         event = Event()
         for key, value in data.items():
@@ -400,7 +429,9 @@ class Event(db.Model):
         return True
 
     @classmethod
-    def query_events(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_events(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'events': Event}
         query = Event.query
         if not unscoped:
@@ -414,7 +445,9 @@ class Event(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_event(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_event(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'events': Event}
         events = Event.query.filter(Event.using == True)
         url_condition = UrlCondition(query_dict)
@@ -435,7 +468,11 @@ class Event(db.Model):
         return True
 
     @classmethod
-    def update_event(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_event(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'events': Event}
         events = Event.query.filter(Event.using == True)

@@ -89,7 +89,7 @@ class FormMeta(object):
     @classmethod
     def query_form_meta(cls, query_dict: dict = None):
         if query_dict is None:
-            raise CustomError(500, 500, str('条件不可为空'))
+            query_dict = {}
         from app.utils.mongodb import mongo
         url_condition = mongodb_url_condition.UrlCondition(query_dict)
         if url_condition.filter_dict is None:
@@ -109,6 +109,8 @@ class FormMeta(object):
 
     @classmethod
     def insert_form_meta(cls, data: dict = None):
+        if data is None:
+            data = {}
         from app.utils.mongodb import mongo
         if data is None:
             data = dict()
@@ -164,7 +166,9 @@ class WorkPlan(db.Model):
         return data
 
     @classmethod
-    def insert_work_plan(cls, ctx: bool = True, data: dict = {}):
+    def insert_work_plan(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         work_plan = WorkPlan()
         for key, value in data.items():
@@ -179,7 +183,9 @@ class WorkPlan(db.Model):
         return True
 
     @classmethod
-    def query_work_plan(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_work_plan(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'work_plans': WorkPlan}
         query = WorkPlan.query
         if not unscoped:
@@ -207,7 +213,9 @@ class WorkPlan(db.Model):
         return cls.formatter(work_plan)
 
     @classmethod
-    def delete_work_plan(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_work_plan(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'work_plans': WorkPlan}
         work_plans = WorkPlan.query.filter(WorkPlan.using == True)
         url_condition = mysql_url_condition.UrlCondition(query_dict)
@@ -228,7 +236,11 @@ class WorkPlan(db.Model):
         return True
 
     @classmethod
-    def update_work_plan(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_work_plan(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'work_plans': WorkPlan}
         work_plans = WorkPlan.query.filter(WorkPlan.using == True)
@@ -362,6 +374,8 @@ class Form(object):
 
     @classmethod
     def insert_form(cls, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         from app.utils.mongodb import mongo
         if data is None:
@@ -385,6 +399,8 @@ class Form(object):
 
     @classmethod
     def update_form(cls, where_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
         from app.utils.mongodb import mongo
         if where_dict is None:
             condition = dict()

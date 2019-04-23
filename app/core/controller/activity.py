@@ -52,7 +52,9 @@ class ActivityController(object):
         return data
 
     @classmethod
-    def insert_activity(cls, ctx: bool = True, data: dict = {}):
+    def insert_activity(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data['term'] = data.get('term', dao.Term.get_now_term()['name'])
         data = cls.reformatter(data)
         try:
@@ -69,7 +71,9 @@ class ActivityController(object):
         return True
 
     @classmethod
-    def update_activity(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_activity(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         dao.Activity.get_activity(id=id, unscoped=False)
         data = cls.reformatter(data)
         try:
@@ -108,7 +112,9 @@ class ActivityController(object):
         return cls.formatter(activity)
 
     @classmethod
-    def query_activities(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_activities(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         (activities, num) = dao.Activity.query_activities(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(activity) for activity in activities], num
 
@@ -134,7 +140,9 @@ class ActivityUserController(object):
         return data
 
     @classmethod
-    def query_activity_users(cls, activity_id: int = 0, query_dict: dict = {}, unscoped: bool = False):
+    def query_activity_users(cls, activity_id: int = 0, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         query_dict['activity_id'] = [activity_id]
         (activity_users, num) = dao.ActivityUser.query_activities(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(activity_user) for activity_user in activity_users], num
@@ -146,7 +154,9 @@ class ActivityUserController(object):
         return cls.formatter(activity_user)
 
     @classmethod
-    def insert_activity_user(cls, ctx: bool = True, activity_id: int = 0, data: dict = {}):
+    def insert_activity_user(cls, ctx: bool = True, activity_id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         activity = dao.Activity.get_activity(id=activity_id, unscoped=False)
         username = data.get('username', current_user.username)
         dao.User.get_user(username=username, unscoped=False)
@@ -179,7 +189,9 @@ class ActivityUserController(object):
         return True
 
     @classmethod
-    def update_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None, data: dict = {}):
+    def update_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None, data: dict = None):
+        if data is None:
+            data = {}
         dao.User.get_user(username=username, unscoped=False)
         dao.Activity.get_activity(id=activity_id, unscoped=False)
         dao.ActivityUser.get_activity_user(activity_id=activity_id, username=username, unscoped=False)
@@ -225,7 +237,9 @@ class ActivityUserController(object):
         return True
 
     @classmethod
-    def query_current_user_activities(cls, username: str, query_dict: dict = {}):
+    def query_current_user_activities(cls, username: str, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         state = query_dict.get('state', None)
         current_user_activities = list()
 

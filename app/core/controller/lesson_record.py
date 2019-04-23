@@ -31,7 +31,9 @@ class LessonRecordController(object):
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
 
     @classmethod
-    def query_lesson_records_term(cls, term: str = None, query_dict: dict = {}, unscoped: bool = False):
+    def query_lesson_records_term(cls, term: str = None, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         if term is None:
             term = dao.Term.get_now_term()['name']
         query_dict['term'] = [term]
@@ -39,7 +41,9 @@ class LessonRecordController(object):
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
 
     @classmethod
-    def query_lesson_record_history(cls, username: str = None, query_dict: dict = {}, unscoped: bool = False):
+    def query_lesson_record_history(cls, username: str = None, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         query_dict['username'] = [username]
         (lesson_records, num) = dao.LessonRecord.query_lesson_records(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
@@ -114,10 +118,12 @@ class LessonRecordController(object):
         return True
 
     @classmethod
-    def update_lesson_record(cls,ctx:bool=True, username:str=None, term:str=None, data:dict={}):
+    def update_lesson_record(cls, ctx: bool = True, username: str = None, term: str = None, data: dict = None):
+        if data is None:
+            data = {}
         lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=False)
         try:
-            dao.LessonRecord.update_lesson_record(query_dict={'id':[lesson_record['id']]}, data=data)
+            dao.LessonRecord.update_lesson_record(query_dict={'id': [lesson_record['id']]}, data=data)
             if ctx:
                 db.session.commit()
         except Exception as e:

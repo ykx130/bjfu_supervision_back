@@ -33,7 +33,9 @@ class EventController(object):
         return [cls.formatter(event) for event in events], num
 
     @classmethod
-    def insert_event(cls, ctx: bool = True, data: dict = {}):
+    def insert_event(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data=data)
         try:
             dao.Event.insert_event(ctx=False, data=data)
@@ -49,7 +51,9 @@ class EventController(object):
         return True
 
     @classmethod
-    def update_event(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_event(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_update(data)
         dao.Event.get_event(id=id, unscoped=False)
         try:

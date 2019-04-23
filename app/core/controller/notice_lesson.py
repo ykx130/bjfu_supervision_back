@@ -47,7 +47,9 @@ class NoticeLessonController(object):
         return [cls.formatter(notice_lesson) for notice_lesson in notice_lessons], num
 
     @classmethod
-    def insert_notice_lesson(cls, ctx: bool = True, data: dict = {}):
+    def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
@@ -70,7 +72,9 @@ class NoticeLessonController(object):
         return True
 
     @classmethod
-    def insert_notice_lessons(cls, ctx: bool = True, data: dict = {}):
+    def insert_notice_lessons(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
         lesson_ids = data.get('lesson_ids', [])
         try:
@@ -103,7 +107,9 @@ class NoticeLessonController(object):
         return num
 
     @classmethod
-    def update_notice_lesson(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_notice_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
         dao.Lesson.get_lesson(id=notice_lesson['lesson_id'], unscoped=False)
         try:
@@ -139,7 +145,9 @@ class NoticeLessonController(object):
         return True
 
     @classmethod
-    def delete_notice_lessons(cls, ctx: bool = True, data: dict = {}):
+    def delete_notice_lessons(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         notice_lesson_ids = data.get('notice_lesson_ids', [])
         try:
             for notice_lesson_id in notice_lesson_ids:
@@ -220,7 +228,9 @@ class NoticeLessonController(object):
         return True
 
     @classmethod
-    def export_lesson_excel(cls, data: dict = {}):
+    def export_lesson_excel(cls, data: dict = None):
+        if data is None:
+            data = {}
         if 'notice_lesson_ids' not in data:
             notice_lessons = dao.NoticeLesson.query_notice_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
         else:

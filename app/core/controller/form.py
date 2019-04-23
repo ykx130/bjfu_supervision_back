@@ -60,7 +60,7 @@ class FormController(object):
     @classmethod
     def insert_form(cls, data: dict = None):
         if data is None:
-            data = dict()
+            data = {}
         meta = data.get('meta', {})
         lesson_id = meta.get('lesson', {}).get('lesson_id', None)
         if lesson_id is None:
@@ -87,19 +87,19 @@ class FormController(object):
         return dao.Form.get_form(_id)
 
     @classmethod
-    def delete_form(cls, where_dict: dict = None):
-        _id = where_dict.get('_id')
+    def delete_form(cls, _id = None):
         dao.Form.get_form(_id=_id)
-        dao.Form.delete_form(where_dict=where_dict)
+        dao.Form.delete_form(where_dict={'_id':_id})
         return True
 
     @classmethod
-    def update_form(cls, where_dict: dict = None, data: dict = None):
-        _id = where_dict.get('_id')
+    def update_form(cls, _id=None, data: dict = None):
+        if data is None:
+            data = {}
         dao.Form.get_form(_id=_id)
-        dao.Form.update_form(where_dict, data)
+        dao.Form.update_form({'_id':_id}, data)
         if 'status' in data:
-            form = dao.Form.get_form(where_dict.get('_id'))
+            form = dao.Form.get_form(_id)
             lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)
             if data.get('status') == '待提交':
                 send_kafka_message(topic='form_service',

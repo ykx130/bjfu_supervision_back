@@ -31,6 +31,8 @@ class Term(db.Model):
 
     @classmethod
     def query_terms(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'terms': Term}
         url_condition = UrlCondition(query_dict)
         query = Term.query
@@ -123,7 +125,9 @@ class LessonRecord(db.Model):
         return cls.formatter(lesson_record)
 
     @classmethod
-    def insert_lesson_record(cls, ctx: bool = True, data: dict = {}):
+    def insert_lesson_record(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         lesson_record = LessonRecord()
         for key, value in data.items():
@@ -138,7 +142,9 @@ class LessonRecord(db.Model):
         return True
 
     @classmethod
-    def query_lesson_records(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_lesson_records(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'lesson_records': LessonRecord}
         query = LessonRecord.query
         if not unscoped:
@@ -153,7 +159,9 @@ class LessonRecord(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_lesson_record(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_lesson_record(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'lesson_records': LessonRecord}
         lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
@@ -174,7 +182,11 @@ class LessonRecord(db.Model):
         return True
 
     @classmethod
-    def update_lesson_record(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_lesson_record(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'lesson_records': LessonRecord}
         lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
@@ -263,7 +275,9 @@ class Lesson(db.Model):
         return cls.formatter(lesson)
 
     @classmethod
-    def insert_lesson(cls, ctx: bool = True, data: dict = {}):
+    def insert_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         lesson = Lesson()
         for key, value in data.items():
@@ -278,7 +292,9 @@ class Lesson(db.Model):
         return True
 
     @classmethod
-    def query_lessons(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'lessons': Lesson}
         query = Lesson.query
         if not unscoped:
@@ -292,7 +308,9 @@ class Lesson(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_lesson(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_lesson(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'lessons': Lesson}
         lessons = Lesson.query.filter(Lesson.using == True)
         url_condition = UrlCondition(query_dict)
@@ -312,7 +330,11 @@ class Lesson(db.Model):
         return True
 
     @classmethod
-    def update_lesson(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_lesson(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'lessons': Lesson}
         lessons = Lesson.query.filter(Lesson.using == True)
@@ -376,7 +398,9 @@ class LessonCase(db.Model):
         return cls.formatter(lesson_case)
 
     @classmethod
-    def insert_lesson_case(cls, ctx: bool = True, data: dict = {}):
+    def insert_lesson_case(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         lesson_case = LessonCase()
         for key, value in data.items():
@@ -391,7 +415,9 @@ class LessonCase(db.Model):
         return True
 
     @classmethod
-    def query_lesson_cases(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_lesson_cases(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'lesson_cases': LessonCase}
         query = LessonCase.query
         if not unscoped:
@@ -405,7 +431,9 @@ class LessonCase(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_lesson_case(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_lesson_case(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'lesson_cases': LessonCase}
         lesson_cases = LessonCase.query.filter(LessonCase.using == True)
         url_condition = UrlCondition(query_dict)
@@ -426,7 +454,11 @@ class LessonCase(db.Model):
         return True
 
     @classmethod
-    def update_lesson_case(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_lesson_case(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'lesson_cases': LessonCase}
         lesson_cases = LessonCase.query.filter(LessonCase.using == True)
@@ -491,7 +523,9 @@ class NoticeLesson(db.Model):
         return cls.formatter(notice_lesson)
 
     @classmethod
-    def insert_notice_lesson(cls, ctx: bool = True, data: dict = {}):
+    def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         notice_lesson = NoticeLesson()
         for key, value in data.items():
@@ -506,7 +540,9 @@ class NoticeLesson(db.Model):
         return True
 
     @classmethod
-    def query_notice_lessons(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_notice_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'notice_lessons': NoticeLesson}
         query = NoticeLesson.query
         if not unscoped:
@@ -520,7 +556,9 @@ class NoticeLesson(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_notice_lesson(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_notice_lesson(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'notice_lessons': NoticeLesson}
         notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
@@ -541,7 +579,11 @@ class NoticeLesson(db.Model):
         return True
 
     @classmethod
-    def update_notice_lesson(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_notice_lesson(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'notice_lessons': NoticeLesson}
         notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True)
@@ -613,7 +655,9 @@ class ModelLesson(db.Model):
         return cls.formatter(model_lesson)
 
     @classmethod
-    def insert_model_lesson(cls, ctx: bool = True, data: dict = {}):
+    def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         model_lesson = ModelLesson()
         for key, value in data.items():
@@ -628,7 +672,9 @@ class ModelLesson(db.Model):
         return True
 
     @classmethod
-    def query_model_lessons(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_model_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'model_lessons': ModelLesson}
         query = ModelLesson.query
         if not unscoped:
@@ -642,7 +688,9 @@ class ModelLesson(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_model_lesson(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_model_lesson(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'model_lessons': ModelLesson}
         model_lessons = ModelLesson.query.filter(ModelLesson.using == True)
         url_condition = UrlCondition(query_dict)
@@ -663,7 +711,11 @@ class ModelLesson(db.Model):
         return True
 
     @classmethod
-    def update_model_lesson(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_model_lesson(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'model_lessons': ModelLesson}
         model_lessons = ModelLesson.query.filter(ModelLesson.using == True)

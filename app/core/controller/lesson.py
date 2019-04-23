@@ -32,7 +32,8 @@ def week_to_date(term_begin_time, week, weekday):
 
 class LessonController(object):
     @classmethod
-    def formatter(cls, lesson: dict = {}):
+    def formatter(cls, lesson: dict = None):
+
         lesson_id = lesson.get('id', 0)
         lesson_cases = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id], '_per_page': [100000]},
                                                          unscoped=False)
@@ -48,7 +49,7 @@ class LessonController(object):
         return data
 
     @classmethod
-    def update_database(cls, ctx: bool = True, info: dict = {}):
+    def update_database(cls, ctx: bool = True, info: dict = None):
         host = info.get("host", "localhost")
         user = info.get("user", "root")
         passwd = info.get("passwd", "wshwoaini")
@@ -162,13 +163,17 @@ class LessonController(object):
         return cls.formatter(lesson)
 
     @classmethod
-    def query_lessons(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         query_dict = cls.reformatter_insert(query_dict)
         (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson) for lesson in lessons], num
 
     @classmethod
-    def update_lesson(cls, ctx: bool = True, id: int = 0, data: dict = {}):
+    def update_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
         dao.Lesson.get_lesson(id=id, unscoped=False)
         try:
             dao.Lesson.update_lesson(ctx=ctx, query_dict={'id': [id]}, data=data)
@@ -199,7 +204,9 @@ class TermController(object):
         return cls.formatter(term)
 
     @classmethod
-    def query_terms(cls, query_dict: dict = {}, unscoped=False):
+    def query_terms(cls, query_dict: dict = None, unscoped=False):
+        if query_dict is None:
+            query_dict = {}
         (terms, num) = dao.Term.query_terms(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(term) for term in terms], num
 

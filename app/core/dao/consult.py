@@ -41,7 +41,9 @@ class ConsultType(db.Model):
         return cls.formatter(consult_type)
 
     @classmethod
-    def insert_consult_type(cls, ctx: bool = True, data: dict = {}):
+    def insert_consult_type(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         consult_type = ConsultType()
         for key, value in data.items():
@@ -56,7 +58,9 @@ class ConsultType(db.Model):
         return True
 
     @classmethod
-    def query_consult_types(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_consult_types(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'consult_types': ConsultType}
         query = ConsultType.query
         if not unscoped:
@@ -70,7 +74,9 @@ class ConsultType(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_consult_type(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_consult_type(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'consult_types': ConsultType}
         consult_types = ConsultType.query.filter(ConsultType.using == True)
         url_condition = UrlCondition(query_dict)
@@ -91,7 +97,11 @@ class ConsultType(db.Model):
         return True
 
     @classmethod
-    def update_consult_type(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_consult_type(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'consult_types': ConsultType}
         consult_types = ConsultType.query.filter(ConsultType.using == True)
@@ -172,7 +182,9 @@ class Consult(db.Model):
         return cls.formatter(consult)
 
     @classmethod
-    def insert_consult(cls, ctx: bool = True, data: dict = {}):
+    def insert_consult(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
         data = cls.reformatter_insert(data)
         consult = Consult()
         for key, value in data.items():
@@ -187,7 +199,9 @@ class Consult(db.Model):
         return True
 
     @classmethod
-    def query_consults(cls, query_dict: dict = {}, unscoped: bool = False):
+    def query_consults(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'consults': Consult}
         query = Consult.query
         if not unscoped:
@@ -201,7 +215,9 @@ class Consult(db.Model):
         return [cls.formatter(data) for data in query], total
 
     @classmethod
-    def delete_consult(cls, ctx: bool = True, query_dict: dict = {}):
+    def delete_consult(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
         name_map = {'consults': Consult}
         consults = Consult.query.filter(Consult.using == True)
         url_condition = UrlCondition(query_dict)
@@ -221,7 +237,11 @@ class Consult(db.Model):
         return True
 
     @classmethod
-    def update_consult(cls, ctx: bool = True, query_dict: dict = {}, data: dict = {}):
+    def update_consult(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
         data = cls.reformatter_update(data)
         name_map = {'consults': Consult}
         consults = Consult.query.filter(Consult.using == True)
