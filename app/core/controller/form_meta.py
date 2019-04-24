@@ -108,7 +108,7 @@ class WorkPlanController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if isinstance(e, CustomError) == CustomError:
+            if isinstance(e, CustomError):
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
@@ -131,7 +131,7 @@ class WorkPlanController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if isinstance(e, CustomError) == CustomError:
+            if isinstance(e, CustomError):
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
