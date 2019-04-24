@@ -84,13 +84,13 @@ def update_work_plan(id):
 
 @form_meta_blueprint.route('/work_plan/details/<string:term>', methods=['GET'])
 def find_work_plans_detail(term):
-    (work_plans, total, err) = form_meta_controller.find_work_plan_detail(term)
-    if err is not None:
+    try:
+        (work_plans, total) = controller.WorkPlanController.query_work_plan_detail(term)
+    except CustomError as e:
         return jsonify({
-            'code': err.code,
-            'message': err.err_info,
-            'total': None
-        }), err.status_code
+            'code': e.code,
+            'message': e.err_info,
+        }), e.status_code
     return jsonify({
         'code': 200,
         'work_plans': work_plans,

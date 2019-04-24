@@ -136,3 +136,16 @@ class WorkPlanController(object):
             else:
                 raise CustomError(500, 500, str(e))
         return True
+
+    @classmethod
+    def query_work_plan_detail(cls, term: str = None, unscoped=False):
+        if term is None:
+            term = dao.Term.get_now_term()['name']
+        (work_plans, num) = dao.WorkPlan.query_work_plan(query_dict={'term': [term]})
+        results = list()
+        for work_plan in work_plans:
+            form_meta = dao.FormMeta.get_form_meta(name=work_plan['form_meta_name'],
+                                                   version=work_plan['form_meta_version'], unscoped=unscoped)
+            work_plan['form_meta'] = form_meta
+            results.append(work_plan)
+        return results, num
