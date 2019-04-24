@@ -103,7 +103,7 @@ class User(db.Model, UserMixin):
         if not unscoped:
             user = user.filter(User.using == True)
         try:
-            user = user.query.filter(User.username == username).first()
+            user = user.filter(User.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if user is None:
