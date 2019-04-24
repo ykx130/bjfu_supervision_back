@@ -17,7 +17,7 @@ class FormMeta(object):
             new_item = {'item_type_name': None,
                         'item_detail': None,
                         'using': True}
-            for item_key, item_value in item:
+            for item_key, item_value in item.items():
                 new_item[item_key] = item_value
             items.append(new_item)
         return items
@@ -94,7 +94,7 @@ class FormMeta(object):
         if not unscoped:
             query_dict['using'] = [True]
         url_condition = mongodb_url_condition.UrlCondition(query_dict)
-        if url_condition.filter_dict is None:
+        if len(url_condition.filter_dict) == 0:
             try:
                 datas = mongo.db.form_meta.find()
             except Exception as e:
@@ -284,7 +284,7 @@ class Form(object):
                 'value': None,
                 'pyload': dict()
             }
-            for item_key, item_value in item:
+            for item_key, item_value in item.items():
                 new_item[item_key] = item_value
             values.append(new_item)
         return values
@@ -366,7 +366,7 @@ class Form(object):
         if not unscoped:
             query_dict['using'] = [True]
         url_condition = mongodb_url_condition.UrlCondition(query_dict)
-        if url_condition.filter_dict is None:
+        if len(url_condition.filter_dict) == 0:
             try:
                 datas = mongo.db.form.find()
             except Exception as e:
@@ -382,7 +382,7 @@ class Form(object):
         datas = mongodb_url_condition.sort_limit(datas, url_condition.sort_limit_dict)
         paginate = mongodb_url_condition.Paginate(datas, url_condition.page_dict)
         datas = paginate.data_page
-        return datas, paginate.total
+        return [cls.formatter_simple(data=data) for data in datas], paginate.total
 
     @classmethod
     def insert_form(cls, data: dict = None):

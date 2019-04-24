@@ -23,9 +23,9 @@ class UrlCondition(object):
     def __init__(self, url_args):
         if url_args is None:
             url_args = dict()
-        self.sort_limit_dict = None
-        self.page_dict = None
-        self.filter_dict = None
+        self.sort_limit_dict = dict()
+        self.page_dict = dict()
+        self.filter_dict = dict()
         order_list = []
         sort_list = []
         filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne']
@@ -59,9 +59,9 @@ class UrlCondition(object):
                         else:
                             self.filter_dict[key]['$in'].append(v)
         if len(order_list) == len(sort_list):
-            self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, order_list))
+            self.sort_limit_dict['_sort_dict'] = [(order_list[i], sort_list[i]) for i in range(len(sort_list))]
         elif len(order_list) == 0:
-            self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, [1 for i in range(len(sort_list))]))
+            self.sort_limit_dict['_sort_dict'] = [(sort_list[i], 1) for i in range(len(sort_list))]
 
 
 # 将请求的url_args分解成三个字典
@@ -86,9 +86,9 @@ class Paginate(object):
 def sort_limit(datas, sort_limit_dict):
     dataspage = datas
     _limit = sort_limit_dict.get('_limit', None)
-    _sort_dict = sort_limit_dict.get('_sort_dict', None)
+    _sort_dict = sort_limit_dict.get('_sort_dict', [])
     if _limit is not None:
         dataspage = dataspage.limit(_limit)
-    if _sort_dict is not None:
+    if len(_sort_dict)>0:
         dataspage = dataspage.sort(_sort_dict)
     return dataspage

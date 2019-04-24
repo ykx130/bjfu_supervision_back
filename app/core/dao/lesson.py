@@ -108,7 +108,7 @@ class LessonRecord(db.Model):
                 'username': lesson_record.username,
                 'name': lesson_record.name,
                 'term': lesson_record.term,
-                'group_name': lesson_record.group,
+                'group_name': lesson_record.group_name,
                 'to_be_submitted': lesson_record.to_be_submitted,
                 'has_submitted': lesson_record.has_submitted,
                 'total_times': lesson_record.total_times
@@ -307,12 +307,12 @@ class Lesson(db.Model):
         return total
 
     @classmethod
-    def get_lesson(cls, id: int, unscoped: bool = False):
+    def get_lesson(cls, lesson_id: str, unscoped: bool = False):
         lesson = Lesson.query
         if not unscoped:
             lesson = lesson.filter(Lesson.using == True)
         try:
-            lesson = lesson.filter(Lesson.id == id).first()
+            lesson = lesson.filter(Lesson.lesson_id == lesson_id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if lesson is None:
@@ -548,7 +548,7 @@ class NoticeLesson(db.Model):
     lesson_id = db.Column(db.String(32), default=-1)
     assign_group = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
-    notice_reason = db.Column(db.String(128), default='')
+    lesson_attention_reason = db.Column(db.String(128), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -556,7 +556,7 @@ class NoticeLesson(db.Model):
         notice_lesson_dict = {
             'id': notice_lesson.id,
             'lesson_id': notice_lesson.lesson_id,
-            'notice_reason': notice_lesson.notice_reason,
+            'lesson_attention_reason': notice_lesson.lesson_attention_reason,
             'assign_group': notice_lesson.assign_group
         }
         return notice_lesson_dict

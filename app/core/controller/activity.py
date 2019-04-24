@@ -132,10 +132,8 @@ class ActivityUserController(object):
 
     @classmethod
     def reformatter(cls, data):
-        if 'apply_state' not in data:
-            raise CustomError(500, 200, 'apply_state must be given')
-        if 'remainder_num' not in data:
-            raise CustomError(500, 200, 'remainder_num must be given')
+        if 'fin_state' not in data:
+            raise CustomError(500, 200, 'fin_state must be given')
         data['state'] = '已报名'
         return data
 
@@ -144,7 +142,7 @@ class ActivityUserController(object):
         if query_dict is None:
             query_dict = {}
         query_dict['activity_id'] = [activity_id]
-        (activity_users, num) = dao.ActivityUser.query_activities(query_dict=query_dict, unscoped=unscoped)
+        (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(activity_user) for activity_user in activity_users], num
 
     @classmethod
@@ -161,17 +159,17 @@ class ActivityUserController(object):
         username = data.get('username', current_user.username)
         dao.User.get_user(username=username, unscoped=False)
         if activity['apply_state'] in ['报名未开始', '报名已结束']:
-            raise CustomError(500, 200, activity.state)
+            raise CustomError(500, 200, activity['apply_state'])
         if activity['remainder_num'] <= 0:
             raise CustomError(500, 200, 'remain number is zero')
         data['activity_id'] = activity_id
         data['username'] = username
         data = cls.reformatter(data)
         remainder_num = activity['remainder_num'] - 1
-        attend_num = activity['attend_num'] - 1
+        attend_num = activity['attend_num'] + 1
         (_, num) = dao.ActivityUser.query_activity_users(
             query_dict={'activity_id': [activity_id], 'username': [username]}, unscoped=False)
-        if num >= 0:
+        if num > 0:
             raise CustomError(500, 200, 'activity_user has existed')
         try:
             dao.Activity.update_activity(ctx=False, query_dict={'id': [activity_id]},
@@ -240,12 +238,15 @@ class ActivityUserController(object):
     def query_current_user_activities(cls, username: str, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        state = query_dict.get('state', None)
+        state = query_dict.get('state', [])
+        if len(state) > 0:
+            state = state[0]
+
         current_user_activities = list()
 
         if state == 'hasAttended':
-            activity_users = dao.ActivityUser.query_activity_users(
-                query_dict={'username': [username], '_per_page': [100000]}, unscoped=False)
+            (activity_users, _) = dao.ActivityUser.query_activity_users(
+                query_dict={'username': [username], '_per_page': [100000], 'state_ne': ['未报名']}, unscoped=False)
             for activity_user in activity_users:
                 activity = dao.Activity.get_activity(id=activity_user['activity_id'], unscoped=False)
                 current_user_activity = {
@@ -259,11 +260,11 @@ class ActivityUserController(object):
             return current_user_activities, len(current_user_activities)
 
         elif state == 'canAttend':
-            has_attend_activity_users = dao.ActivityUser.query_activity_users(
+            (has_attend_activity_users, _) = dao.ActivityUser.query_activity_users(
                 query_dict={'username': [username], '_per_page': [100000], 'state_ne': ['未报名']}, unscoped=False)
             has_attend_activity_ids = [has_attend_activity_user['activity_id'] for has_attend_activity_user in
                                        has_attend_activity_users]
-            all_can_attend_activities = dao.Activity.query_activities(
+            (all_can_attend_activities, _) = dao.Activity.query_activities(
                 query_dict={'apply_state': ['报名进行中'], 'remainder_num_gte': [0], 'id_ne': has_attend_activity_ids})
             for activity in all_can_attend_activities:
                 current_user_activity = {

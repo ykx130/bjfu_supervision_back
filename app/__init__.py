@@ -1,11 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import os
+from app.utils.mongodb import mongo
 from app.config import config
 from flask_login import LoginManager
 from app.utils.reids import get_redis_con
 from app.utils.mysql import db
-from app.utils.mongodb import mongo
 from flask_pymongo import PyMongo
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -16,13 +16,12 @@ redis_cli = get_redis_con(config['default'].REDIS_URL)
 
 
 def create_app(config_name):
-    global app , mongo
     app = Flask(__name__, static_folder=basedir + '/static')
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     db.init_app(app)
+    mongo.init_app(app)
     login_manager.init_app(app)
-    mongo = PyMongo(app)
 
     from app.http.handler.form_meta import form_meta_blueprint
     app.register_blueprint(form_meta_blueprint)

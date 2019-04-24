@@ -158,8 +158,8 @@ class LessonController(object):
         return True
 
     @classmethod
-    def get_lesson(cls, id: int, unscoped: bool = False):
-        lesson = dao.Lesson.get_lesson(id=id, unscoped=unscoped)
+    def get_lesson(cls, lesson_id: str, unscoped: bool = False):
+        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
         return cls.formatter(lesson)
 
     @classmethod
@@ -171,12 +171,21 @@ class LessonController(object):
         return [cls.formatter(lesson) for lesson in lessons], num
 
     @classmethod
-    def update_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
+    def update_lesson(cls, ctx: bool = True, lesson_id: str = 0, data: dict = None):
+        from app.core.controller import NoticeLessonController
         if data is None:
             data = dict()
-        dao.Lesson.get_lesson(id=id, unscoped=False)
+        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+        lesson_level = data.get('lesson_level', None)
+        if lesson_level is not None and lesson_level == '关注课程':
+            notice_lesson_data = dict()
+            notice_lesson_data['term'] = lesson['term']
+            notice_lesson_data['assign_group'] = data['assign_group']
+            notice_lesson_data['lesson_attention_reason'] = data['lesson_attention_reason']
+            notice_lesson_data['lesson_id'] = lesson['lesson_id']
+            NoticeLessonController.insert_notice_lesson(ctx=False, data=notice_lesson_data)
         try:
-            dao.Lesson.update_lesson(ctx=ctx, query_dict={'id': [id]}, data=data)
+            dao.Lesson.update_lesson(ctx=ctx, query_dict={'lesson_id': [lesson_id]}, data=data)
             if ctx:
                 db.session.commit()
         except Exception as e:

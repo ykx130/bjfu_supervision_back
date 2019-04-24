@@ -191,7 +191,8 @@ class ActivityUser(db.Model):
             activity_user_user_dict = {
                 'id': activity_user_user.id,
                 'username': activity_user_user.username,
-                'activity_user_id': activity_user_user.activity_user_id,
+                'activity_id':activity_user_user.activity_id,
+                'activity_user_id': activity_user_user.id,
                 'state': activity_user_user.state,
                 'fin_state': activity_user_user.fin_state
             }
