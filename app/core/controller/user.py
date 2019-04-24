@@ -52,7 +52,7 @@ class UserController():
                           'is_guider': '督导'}
         role_names = ['教师']
         for role_name_e, role_name_c in role_list_dict.items():
-            if user[role_name_e] is True:
+            if user.get(role_name_e, False):
                 role_names.append(role_name_c)
         if user['is_guider']:
             supervisor = dao.Supervisor.get_supervisor(user['username'], term)
