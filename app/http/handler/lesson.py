@@ -41,7 +41,7 @@ def get_lessons():
 @lesson_blueprint.route('/lessons/<string:lesson_id>')
 def get_lesson(lesson_id):
     try:
-        lesson = controller.LessonController.get_lesson(id=lesson_id)
+        lesson = controller.LessonController.get_lesson(lesson_id=lesson_id)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -54,10 +54,10 @@ def get_lesson(lesson_id):
     }), 200
 
 
-@lesson_blueprint.route('/lessons/<int:id>', methods=['PUT'])
-def update_lesson(id):
+@lesson_blueprint.route('/lessons/<string:lesson_id>', methods=['PUT'])
+def update_lesson(lesson_id):
     try:
-        controller.LessonController.update_lesson(id=id, data=request.json)
+        controller.LessonController.update_lesson(lesson_id=lesson_id, data=request.json)
     except CustomError as e:
         return jsonify({
             'code': e.code,

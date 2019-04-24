@@ -52,7 +52,7 @@ class User(db.Model, UserMixin):
     @classmethod
     def reformatter_update(cls, data: dict):
         allow_change_list = ['name', 'sex', 'password', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
-                             'skill', 'group', 'work_state', 'term']
+                             'skill', 'group', 'work_state', 'term', 'admin', 'leader', 'guider']
         update_data = dict()
         for key, value in data.items():
             if key in allow_change_list:
@@ -286,6 +286,7 @@ class Supervisor(db.Model):
     __tablename__ = 'supervisors'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default='')
+    name = db.Column(db.String(64), default='')
     group = db.Column(db.String(16), default='')
     work_state = db.Column(db.String(8), default='')
     term = db.Column(db.String(32), default='')
@@ -297,6 +298,7 @@ class Supervisor(db.Model):
     def formatter(cls, supervisor):
         supervisor_dict = {
             'group': supervisor.group,
+            'username': supervisor.username,
             'is_grouper': supervisor.grouper,
             'is_main_grouper': supervisor.main_grouper,
             'work_state': supervisor.work_state,

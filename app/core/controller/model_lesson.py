@@ -9,7 +9,7 @@ class ModelLessonController(object):
 
     @classmethod
     def formatter(cls, model_lesson):
-        lesson = dao.Lesson.get_lesson(id=model_lesson.get('lesson_id', 0), unscoped=True)
+        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson.get('lesson_id', 0), unscoped=True)
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
                        'lesson_teacher_id', 'notices', 'term']
         for lesson_key in lesson_keys:
@@ -45,9 +45,10 @@ class ModelLessonController(object):
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
+        term = data.get('term', dao.Term.get_now_term()['name'])
+        data['term'] = term
         data = cls.reformatter_insert(data=data)
-        dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
+        dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
         status = data.get('status', '推荐课')
         try:
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
@@ -69,10 +70,10 @@ class ModelLessonController(object):
             data = dict()
         lesson_ids = data.get("lesson_ids", [])
         status = data.get('status', '推荐课')
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
         try:
             for lesson_id in lesson_ids:
-                dao.Lesson.get_lesson(id=lesson_id, unscoped=False)
+                dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
                 data['lesson_id'] = lesson_id
                 data = cls.reformatter_insert(data=data)
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
@@ -94,7 +95,7 @@ class ModelLessonController(object):
         if data is None:
             data = dict()
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
-        lesson = dao.Lesson.get_lesson(id=model_lesson['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
         status = data.get('status', lesson['lesson_model'])
         data['status'] = status
         try:
@@ -114,7 +115,7 @@ class ModelLessonController(object):
     @classmethod
     def delete_model_lesson(cls, ctx: bool = True, id: int = 0):
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
-        dao.Lesson.get_lesson(id=id, unscoped=False)
+        dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
         try:
             dao.ModelLesson.delete_model_lesson(ctx=False, query_dict={'id': [id]})
             dao.Lesson.update_lesson(ctx=False, query_dict={'id': [model_lesson['lesson_id']]},
@@ -138,7 +139,7 @@ class ModelLessonController(object):
         try:
             for model_lesson_id in model_lesson_ids:
                 model_lesson = dao.ModelLesson.get_model_lesson(id=model_lesson_id, unscoped=False)
-                dao.Lesson.get_lesson(id=model_lesson['lesson_id'], unscoped=False)
+                dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
                 dao.ModelLesson.delete_model_lesson(ctx=False, query_dict={'id': [model_lesson_id]})
                 dao.Lesson.update_lesson(ctx=False, query_dict={'id': [model_lesson['lesson_id']]},
                                          data={'lesson_model': ''})
@@ -156,7 +157,7 @@ class ModelLessonController(object):
     @classmethod
     def model_lesson_vote(cls, ctx: bool = True, id: int = 0, vote: bool = True):
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
-        lesson = dao.Lesson.get_lesson(id=id, unscoped=False)
+        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
         try:
             if vote:
                 dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]},
@@ -231,7 +232,7 @@ class ModelLessonController(object):
                        '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
         frame_dict = dict()
         for model_lesson in model_lessons:
-            lesson = dao.Lesson.get_lesson(id=model_lesson['lesson_id'], unscoped=True)
+            lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=True)
             for key, value in column_dict.items():
                 excel_value = lesson[value] if value in lesson else model_lesson.get(value, "")
                 if key not in frame_dict:

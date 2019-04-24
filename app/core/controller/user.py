@@ -1,5 +1,6 @@
 import app.core.dao as dao
 from app.utils import CustomError, db
+from app.utils.kafka import send_kafka_message
 from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -57,7 +58,7 @@ class UserController():
         if user['is_guider']:
             supervisor = dao.Supervisor.get_supervisor(user['username'], term)
             for role_name_e, role_name_c in role_list_dict.items():
-                if supervisor[role_name_e] is True:
+                if supervisor.get(role_name_e, False):
                     role_names.append(role_name_c)
         return role_names
 
@@ -210,6 +211,8 @@ class SupervisorController():
             query_dict = dict()
         (supervisors, _) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
         usernames = [supervisor['username'] for supervisor in supervisors]
+        if not len(usernames):
+            return [], 0
         (users, num) = UserController.query_users(query_dict={'username': usernames}, unscoped=unscoped)
         return users, num
 
@@ -270,18 +273,29 @@ class SupervisorController():
         username = data.get('username', None)
         user = dao.User.get_user(username)
         term = data.get('term', None)
+        data['name'] = user['name']
         if username is None:
             raise CustomError(500, 200, 'username should be given')
         if term is None:
             term = dao.Term.get_now_term()['name']
         try:
+            grouper = data.get('grouper', False)
+            main_grouper = data.get('main_grouper', False)
+            if grouper:
+                dao.Supervisor.update_supervisor(
+                    query_dict={'group': [data.get('group')], 'term_gte': [term], 'grouper': [True]},
+                    data={'grouper': False})
+            if main_grouper:
+                dao.Supervisor.update_supervisor(
+                    query_dict={'term_gte': [term], 'main_grouper': [True]},
+                    data={'main_grouper': False})
             dao.User.update_user(ctx=False, username=username, data={'guider': True})
             school_term = SchoolTerm(term)
             for i in range(0, 4):
                 data['term'] = school_term.term_name
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
                 school_term = school_term + 1
-                lesson_record_data = {'username': username, 'term': term, 'group_name': data['group_name'],
+                lesson_record_data = {'username': username, 'term': term, 'group_name': data['group'],
                                       'name': user['name']}
                 dao.LessonRecord.insert_lesson_record(ctx=False, data=lesson_record_data)
             if ctx:
@@ -331,6 +345,7 @@ class SupervisorController():
             term = dao.Term.get_now_term()['name']
         try:
             for username in usernames:
+                user = dao.User.get_user(username=username)
                 school_term = SchoolTerm(term)
                 supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
                 for i in range(0, 4):
@@ -338,6 +353,7 @@ class SupervisorController():
                     data['term'] = school_term.term_name
                     data['username'] = username
                     data['group'] = supervisor['group']
+                    data['name'] = user['name']
                     dao.Supervisor.insert_supervisor(ctx=False, data=data)
             if ctx:
                 db.session.commit()

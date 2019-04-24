@@ -144,15 +144,15 @@ class Consult(db.Model):
     __tablename__ = 'consults'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     type = db.Column(db.String(16), nullable=False, default='')
-    requester_consult_typename = db.Column(db.String(16), nullable=False, default='')
     submit_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now)
     answer_time = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now, server_default=text('NOW()'))
     term = db.Column(db.String(16), default='')
     state = db.Column(db.String(16), default='')
     meta_description = db.Column(db.String(255), default='')
     phone = db.Column(db.String(24), default='')
-    responsor_consult_typename = db.Column(db.String(16), default='')
     content = db.Column(db.String(255), default=-1)
+    requester_username = db.Column(db.String(16), default='')
+    responsor_username = db.Column(db.String(16), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod

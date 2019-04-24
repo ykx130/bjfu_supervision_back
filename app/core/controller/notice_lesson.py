@@ -11,7 +11,7 @@ import json
 class NoticeLessonController(object):
     @classmethod
     def formatter(cls, notice_lesson):
-        lesson = dao.Lesson.get_lesson(id=notice_lesson.get('lesson_id', 0), unscoped=True)
+        lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson.get('lesson_id', 0), unscoped=True)
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_name', 'lesson_teacher_id',
                        'notices']
         for lesson_key in lesson_keys:
@@ -24,7 +24,7 @@ class NoticeLessonController(object):
             raise CustomError(500, 200, 'lesson id should be given')
         if 'assign_group' not in data:
             raise CustomError(500, 200, 'assign group should be given')
-        if 'notice_reason' not in data:
+        if 'lesson_attention_reason' not in data:
             raise CustomError(500, 200, 'notice reason should be given')
         return data
 
@@ -50,16 +50,17 @@ class NoticeLessonController(object):
     def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
         data = cls.reformatter_insert(data=data)
-        dao.Lesson.get_lesson(id=data['lesson_id'], unscoped=False)
+        dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
         try:
-            dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
-            dao.Lesson.update_lesson(ctx=False, query_dict={'id': [data['lesson_id']]}, data={'lesson_level': '关注课程'})
-            notice_lesson_records, num = dao.NoticeLesson.query_notice_lessons(
+            (notice_lesson_records, num) = dao.NoticeLesson.query_notice_lessons(
                 query_dict={'lesson_id': [data['lesson_id']], 'term': [data['term']]}, unscoped=False)
             if num > 0:
                 raise CustomError(500, 200, 'lesson has been noticed')
+            dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
+            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
+                                     data={'lesson_level': '关注课程'})
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -75,11 +76,11 @@ class NoticeLessonController(object):
     def insert_notice_lessons(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'] )
+        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
         lesson_ids = data.get('lesson_ids', [])
         try:
             for lesson_id in lesson_ids:
-                dao.Lesson.get_lesson(id=lesson_id, unscoped=False)
+                dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
                 data['lesson_id'] = lesson_id
                 data = cls.reformatter_insert(data)
                 dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
@@ -111,7 +112,7 @@ class NoticeLessonController(object):
         if data is None:
             data = dict()
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
-        dao.Lesson.get_lesson(id=notice_lesson['lesson_id'], unscoped=False)
+        dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
         try:
             dao.NoticeLesson.update_notice_lesson(ctx=False, query_dict={'id': [id]}, data=data)
             if ctx:
@@ -129,7 +130,7 @@ class NoticeLessonController(object):
     def delete_notice_lesson(cls, ctx: bool = True, id: int = 0):
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
         try:
-            dao.Lesson.get_lesson(id=notice_lesson['lesson_id'], unscoped=False)
+            dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
             dao.NoticeLesson.delete_notice_lesson(ctx=False, query_dict={'id': [id]})
             dao.Lesson.update_lesson(ctx=False, query_dict={'id': [notice_lesson['lesson_id']]},
                                      data={'lesson_level': '自主听课'})
@@ -152,7 +153,7 @@ class NoticeLessonController(object):
         try:
             for notice_lesson_id in notice_lesson_ids:
                 notice_lesson = dao.NoticeLesson.get_notice_lesson(id=notice_lesson_id, unscoped=False)
-                dao.Lesson.get_lesson(id=notice_lesson['lesson_id'], unscoped=False)
+                dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
                 dao.NoticeLesson.delete_notice_lesson(ctx=False, query_dict={'id': [notice_lesson_id]})
                 dao.Lesson.update_lesson(ctx=False, query_dict={'id': [notice_lesson['lesson_id']]},
                                          data={'lesson_level': '自助听课'})
@@ -197,7 +198,7 @@ class NoticeLessonController(object):
             raise CustomError(500, 200, 'file must be given')
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                       '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'notices'}
+                       '指定小组': 'assign_group', '关注原因': 'lesson_attention_reason', '关注次数': 'notices'}
         filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute',
                        'lesson_grade']
         row_num = df.shape[0]
@@ -239,10 +240,10 @@ class NoticeLessonController(object):
                 query_dict={'_per_page': [100000], 'id': notice_lesson_ids})
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                       '指定小组': 'assign_group', '关注原因': 'notice_reason', '关注次数': 'notices'}
+                       '指定小组': 'assign_group', '关注原因': 'lesson_attention_reason', '关注次数': 'notices'}
         frame_dict = dict()
         for notice_lesson in notice_lessons:
-            lesson = dao.Lesson.get_lesson(id=notice_lesson['lesson_id'], unscoped=True)
+            lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=True)
             for key, value in column_dict.items():
                 excel_value = lesson[value] if value in lesson else notice_lesson.get(value, "")
                 if key not in frame_dict:
