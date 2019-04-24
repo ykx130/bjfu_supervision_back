@@ -210,7 +210,7 @@ class WorkPlan(db.Model):
         if not unscoped:
             work_plan = work_plan.filter(WorkPlan.using == True)
         try:
-            work_plan = work_plan.query.filter(WorkPlan.id == int(id)).first()
+            work_plan = work_plan.filter(WorkPlan.id == int(id)).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if work_plan is None:
