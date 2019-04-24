@@ -8,3 +8,6 @@ from app.core.controller.lesson_record import *
 from app.core.controller.model_lesson import *
 from app.core.controller.notice_lesson import *
 from app.core.controller.user import *
+from app.core.controller.notices import *
+from app.core.controller.page_data import *
+

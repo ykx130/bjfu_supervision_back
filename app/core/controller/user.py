@@ -1,6 +1,5 @@
 import app.core.dao as dao
 from app.utils import CustomError, db
-from app.streaming import send_kafka_message
 from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 

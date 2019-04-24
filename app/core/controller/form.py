@@ -1,6 +1,8 @@
 import app.core.dao as dao
 from app.utils.Error import CustomError
-from app.utils.kafka_message import send_kafka_message
+from app.utils.kafka import send_kafka_message
+from app.core.services import NoticeService
+
 from app import redis_cli
 import json
 
@@ -40,9 +42,9 @@ class FormController(object):
         :return:
         """
         tmpl = '问卷 课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被打回， 评价者{guider}, 督导小组{group}.'
-        send_kafka_message(topic='notice_service', method='send_msg',
+        NoticeService.push_new_message(
                            username=form_model.get('meta', {}).get('guider'),
-                           msg={
+                           notice={
                                'title': '问卷打回',
                                'body': tmpl.format(
                                    lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),

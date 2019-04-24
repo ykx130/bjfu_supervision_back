@@ -14,7 +14,7 @@ class FormMetaController(object):
             query_dict = {'using': [True]}
         else:
             query_dict['using'] = [True]
-        return dao.FormMeta.query_form_meta(query_dict)
+        return dao.FormMeta.query_form_metas(query_dict)
 
     @classmethod
     def get_history_form_meta(cls, name: str = None, query_dict: dict = None):
@@ -26,7 +26,7 @@ class FormMetaController(object):
             query_dict = {'name': [name]}
         else:
             query_dict['name'] = [name]
-        (form_metas, total) = dao.FormMeta.query_form_meta(query_dict)
+        (form_metas, total) = dao.FormMeta.query_form_metas(query_dict)
         return form_metas, total
 
     @classmethod
@@ -119,7 +119,7 @@ class WorkPlanController(object):
         if data is None:
             data = dict()
         data = cls.reformatter_insert(data)
-        (form_meta, num) = dao.FormMeta.query_form_meta(
+        (form_meta, num) = dao.FormMeta.query_form_metas(
             query_dict={'form_meta_name': [data['form_meta_name']], 'form_meta_version': [data['form_meta_version']],
                         'using': [True]})
         if num == 0:

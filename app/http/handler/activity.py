@@ -2,7 +2,6 @@ from app.http.handler import activity_blueprint
 from flask import request, jsonify
 from flask_login import login_required
 import app.core.controller  as controller
-from app.core.models.activity import ActivityUser
 from flask_login import current_user
 from app.utils import CustomError, args_to_dict
 
