@@ -222,10 +222,10 @@ class ModelLessonController(object):
         if data is None:
             data = dict()
         if 'model_lesson_ids' not in data:
-            model_lessons = dao.ModelLesson.query_model_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
+            (model_lessons, _) = dao.ModelLesson.query_model_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
         else:
             model_lesson_ids = data.get('model_lesson_ids')
-            model_lessons = dao.ModelLesson.query_model_lessons(
+            (model_lessons, _) = dao.ModelLesson.query_model_lessons(
                 query_dict={'_per_page': [100000], 'id': model_lesson_ids})
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',

@@ -272,7 +272,7 @@ class Lesson(db.Model):
                        'lesson_teacher_unit': lesson.lesson_teacher_unit, 'lesson_unit': lesson.lesson_unit,
                        'lesson_year': lesson.lesson_year, 'lesson_type': lesson.lesson_type,
                        'lesson_class': lesson.lesson_class, 'lesson_grade': lesson.lesson_grade,
-                       'lesson_model': lesson.lesson_model, 'term': lesson.term}
+                       'lesson_model': lesson.lesson_model, 'term': lesson.term, 'notices': lesson.notices}
         return lesson_dict
 
     @classmethod
