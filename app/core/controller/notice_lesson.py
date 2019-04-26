@@ -210,7 +210,7 @@ class NoticeLessonController(object):
                     notice_lesson_data[col_name_e] = str(df.iloc[i][col_name_c])
                     if col_name_e in filter_list:
                         lesson_filter[col_name_e] = str(df.iloc[i][col_name_c])
-                lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
+                (lessons, total) = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
                     raise CustomError(404, 404, 'lesson not found')
                 lesson_id = lessons[0]['id']
@@ -233,10 +233,10 @@ class NoticeLessonController(object):
         if data is None:
             data = dict()
         if 'notice_lesson_ids' not in data:
-            notice_lessons = dao.NoticeLesson.query_notice_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
+            (notice_lessons, _) = dao.NoticeLesson.query_notice_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
         else:
             notice_lesson_ids = data.get('notice_lesson_ids')
-            notice_lessons = dao.NoticeLesson.query_notice_lessons(
+            (notice_lessons, _) = dao.NoticeLesson.query_notice_lessons(
                 query_dict={'_per_page': [100000], 'id': notice_lesson_ids})
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',

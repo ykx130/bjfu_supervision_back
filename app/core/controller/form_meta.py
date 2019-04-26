@@ -120,7 +120,7 @@ class WorkPlanController(object):
             data = dict()
         data = cls.reformatter_insert(data)
         (form_meta, num) = dao.FormMeta.query_form_metas(
-            query_dict={'form_meta_name': [data['form_meta_name']], 'form_meta_version': [data['form_meta_version']],
+            query_dict={'name': [data['form_meta_name']], 'version': [data['form_meta_version']],
                         'using': [True]})
         if num == 0:
             raise CustomError(404, 404, 'form_meta not found')
