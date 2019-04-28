@@ -95,7 +95,7 @@ def get_supervisors():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': supervisors,
+        'supervisors': supervisors,
         'msg': ''
     }), 200
 
@@ -113,7 +113,7 @@ def find_supervisors_expire():
     return jsonify({
         'code': 200,
         'total': total,
-        'users': supervisors,
+        'supervisors': supervisors,
         'msg': ''
     }), 200
 
