@@ -11,13 +11,13 @@ def find_work_plans():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
         'total': num,
         'work_plans': work_plans,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -28,12 +28,12 @@ def find_work_plan(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
         'work_plan': work_plan,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -44,11 +44,11 @@ def insert_work_plan():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -59,11 +59,11 @@ def delete_work_plan(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -74,11 +74,11 @@ def update_work_plan(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -89,7 +89,7 @@ def find_work_plans_detail(term):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,

@@ -13,13 +13,13 @@ def find_activities():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
         'total': total,
         'activities': activities,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -30,11 +30,11 @@ def insert_activity():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -48,11 +48,11 @@ def find_activity(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'activity': activity,
         'activity_users': activity_users
     }), 200
@@ -65,11 +65,11 @@ def delete_activity(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -80,11 +80,11 @@ def update_activity(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -98,11 +98,11 @@ def find_activity_users(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'activity': activity,
         'activity_users': activity_users
     }), 200
@@ -116,11 +116,11 @@ def insert_activity_user(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -132,11 +132,11 @@ def find_activity_user(id, username):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'activity': activity,
         'activity_users': activity_user
     }), 200
@@ -149,11 +149,11 @@ def delete_activity_user(id, username):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -164,11 +164,11 @@ def update_activity_user(id, username):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -183,11 +183,11 @@ def get_current_user_activities():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'total': total,
         'activities': activities
     }), 200

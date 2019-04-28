@@ -14,11 +14,11 @@ def login():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         "code": 200,
-        "message": "success"
+        "msg": "success"
     }), 200
 
 
@@ -30,11 +30,11 @@ def logout():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         "code": 200,
-        "message": "success"
+        "msg": "success"
     }), 200
 
 
@@ -46,10 +46,10 @@ def get_current():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'current_user': user
     }), 200

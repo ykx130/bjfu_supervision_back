@@ -13,11 +13,11 @@ def new_lesson():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -28,11 +28,11 @@ def get_lessons():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'lessons': lessons,
         'total': num,
     }), 200
@@ -45,11 +45,11 @@ def get_lesson(lesson_id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'lesson': lesson
     }), 200
 
@@ -61,11 +61,11 @@ def update_lesson(lesson_id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -76,13 +76,13 @@ def get_terms():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
         'terms': terms,
         'total': total,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -93,7 +93,7 @@ def get_term_now():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
