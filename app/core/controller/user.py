@@ -206,15 +206,41 @@ class UserController():
 
 class SupervisorController():
     @classmethod
+    def get_supervisor(cls, username: str = None, term: str = None, unscoped: bool = False):
+        supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
+        user = dao.User.get_user(username=username, unscoped=unscoped)
+        supervisor['user'] = user
+        return supervisor
+
+    @classmethod
     def query_supervisors(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = dict()
-        (supervisors, _) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
-        usernames = [supervisor['username'] for supervisor in supervisors]
-        if not len(usernames):
-            return [], 0
-        (users, num) = UserController.query_users(query_dict={'username': usernames}, unscoped=unscoped)
-        return users, num
+        (supervisors, num) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
+        for supervisor in supervisors:
+            username = supervisor.get("username")
+            user = dao.User.get_user(username=username, unscoped=False)
+            supervisor['user'] = user
+        return supervisors, num
+
+    @classmethod
+    def update_supervisor(cls, ctx: bool = True, username: str = None, term: str = None, data: dict = None):
+        if data is None:
+            data = dict()
+        if term is None:
+            term = dao.Term.get_now_term()['name']
+        try:
+            dao.Supervisor.update_supervisor(query_dict={'username': [username], 'term_gte': [term]}, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
 
     @classmethod
     def query_supervisors_expire(cls, query_dict: dict = None, unscoped: bool = False):
@@ -245,8 +271,12 @@ class SupervisorController():
 
         expire_usernames = list(set(all_usernames) - set(can_usernames))
         query_dict['username'] = expire_usernames
-        (users, num) = UserController.query_users(query_dict=query_dict, unscoped=False)
-        return users, num
+        (supervisors, num) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=False)
+        for supervisor in supervisors:
+            username = supervisor.get('username')
+            user = dao.User.get_user(username=username, unscoped=False)
+            supervisor['user'] = user
+        return supervisors, num
 
     @classmethod
     def delete_supervisor(cls, ctx: bool = True, username: str = '', term: str = None):

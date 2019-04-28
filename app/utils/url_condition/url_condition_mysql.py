@@ -1,5 +1,6 @@
 import json
 
+
 def init_filter_dict(filter_list):
     filter_dict = dict()
     for filter_item in filter_list:
@@ -18,7 +19,7 @@ class UrlCondition(object):
         for key, value in url_args.items():
             for v in value:
                 try:
-                    v = json.loads(v)
+                    v = str(v)
                 except:
                     v = v
                 if key == '_per_page' or key == '_page':
