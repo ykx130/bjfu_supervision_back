@@ -160,7 +160,7 @@ class UserController():
                 if num > 0:
                     grouper = groupers[0]
                     SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
-                                                        group_name=group_name, role_name='小组长', add=False)
+                                                        group_name=group_name, role_name='grouper', add=False)
                 SupervisorController.update_grouper(ctx=False, username=username, term=term, group_name=group_name,
                                                     role_name='grouper', add=True)
             if '大组长' in del_role_names:
@@ -170,7 +170,7 @@ class UserController():
             elif '大组长' in new_role_names:
                 new_role_names.remove('大组长')
                 (groupers, num) = dao.Supervisor.query_supervisors(
-                    query_dict={'term_gte': [term], 'grouper': [True], 'main_grouper': [True]})
+                    query_dict={'term_gte': [term], 'main_grouper': [True]})
                 if num > 0:
                     grouper = groupers[0]
                     SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
@@ -224,10 +224,41 @@ class SupervisorController():
         return supervisors, num
 
     @classmethod
-    def update_supervisor(cls, id:int, ctx: bool = True, data: dict = None):
+    def update_supervisor(cls, id: int, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
+        term = data.get('term', dao.Term.get_now_term()['name'])
+        supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
+        username = supervisor['username']
+        group = data.get('group', supervisor['group'])
+        grouper = supervisor.get('grouper')
+        main_grouper = supervisor.get('main_grouper')
+        is_grouper = data.get('is_grouper', False)
+        is_main_grouper = data.get('is_main_grouper', False)
         try:
+            if grouper and not is_grouper:
+                cls.update_grouper(ctx=False, username=username, term=term, group_name=group, role_name='grouper',
+                                   add=False)
+            if not grouper and is_grouper:
+                (groupers, num) = dao.Supervisor.query_supervisors(
+                    query_dict={'term_gte': [term], 'grouper': [True], 'group': [group]})
+                if num > 0:
+                    grouper = groupers[0]
+                    cls.update_grouper(ctx=False, username=grouper['username'], term=term, group_name=group,
+                                       role_name='grouper', add=False)
+                cls.update_grouper(ctx=False, username=username, term=term, group_name=group, role_name='grouper',
+                                   add=True)
+            if main_grouper and not is_main_grouper:
+                cls.update_grouper(ctx=False, username=username, term=term, role_name='main_grouper', add=False)
+            if not main_grouper and is_main_grouper:
+                (groupers, num) = dao.Supervisor.query_supervisors(
+                    query_dict={'term_gte': [term], 'main_grouper': [True]})
+                if num > 0:
+                    grouper = groupers[0]
+                    cls.update_grouper(ctx=False, username=grouper['username'], term=term, role_name='main_grouper',
+                                       add=False)
+                cls.update_grouper(ctx=False, username=username, term=term, role_name='main_grouper',
+                                   add=True)
             dao.Supervisor.update_supervisor(query_dict={'id': [id]}, data=data)
             if ctx:
                 db.session.commit()
@@ -338,14 +369,18 @@ class SupervisorController():
         return True
 
     @classmethod
-    def update_grouper(cls, ctx: bool = True, username: str = '', term: str = '', group_name: str = '',
-                       role_name: str = '', add: bool = False):
+    def update_grouper(cls, ctx: bool = True, username: str = None, term: str = None, group_name: str = None,
+                       role_name: str = None, add: bool = False):
         (supervisors, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term_gte': [term]})
         if num == 0:
             raise CustomError(500, 200, 'user must be supervisor')
         try:
-            dao.Supervisor.update_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]},
-                                             data={role_name: add, 'group': group_name})
+            if group_name is None:
+                dao.Supervisor.update_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]},
+                                                 data={role_name: add})
+            else:
+                dao.Supervisor.update_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]},
+                                                 data={role_name: add, 'group': group_name})
             if add:
                 dao.Group.update_group(ctx=False, query_dict={'name': [group_name]}, data={'leader_name': [username]})
             else:
@@ -365,7 +400,7 @@ class SupervisorController():
     def batch_renewal(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        usernames = data.get('usrnames', None)
+        usernames = data.get('usernames', None)
         term = data.get('term', None)
         if usernames is None:
             raise CustomError(500, 500, 'usernames should be given')
