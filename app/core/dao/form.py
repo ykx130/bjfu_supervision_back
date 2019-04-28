@@ -154,8 +154,8 @@ class WorkPlan(db.Model):
             work_plan_dict = {
                 'id': work_plan.id,
                 'term': work_plan.term,
-                'meta_name': work_plan.form_meta_name,
-                'meta_version': work_plan.form_meta_version,
+                'form_meta_name': work_plan.form_meta_name,
+                'form_meta_version': work_plan.form_meta_version,
                 'status': work_plan.status
             }
         except Exception as e:
