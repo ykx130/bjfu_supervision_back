@@ -231,8 +231,8 @@ class SupervisorController():
         supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
         username = supervisor['username']
         group = data.get('group', supervisor['group'])
-        grouper = supervisor.get('grouper')
-        main_grouper = supervisor.get('main_grouper')
+        grouper = supervisor.get('is_grouper')
+        main_grouper = supervisor.get('is_main_grouper')
         is_grouper = data.get('is_grouper', False)
         is_main_grouper = data.get('is_main_grouper', False)
         try:
@@ -331,15 +331,18 @@ class SupervisorController():
             data = dict()
         username = data.get('username', None)
         user = dao.User.get_user(username)
-        term = data.get('term', None)
+        term = data.get('term', dao.Term.get_now_term()['name'])
         data['name'] = user['name']
+        (_, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term': [term]}, unscoped=False)
+        if num != 0:
+            raise CustomError(500, 200, 'user has been supervisor')
         if username is None:
             raise CustomError(500, 200, 'username should be given')
         if term is None:
             term = dao.Term.get_now_term()['name']
         try:
-            grouper = data.get('grouper', False)
-            main_grouper = data.get('main_grouper', False)
+            grouper = data.get('is_grouper', False)
+            main_grouper = data.get('is_main_grouper', False)
             if grouper:
                 dao.Supervisor.update_supervisor(
                     query_dict={'group': [data.get('group')], 'term_gte': [term], 'grouper': [True]},
@@ -350,6 +353,8 @@ class SupervisorController():
                     data={'main_grouper': False})
             dao.User.update_user(ctx=False, username=username, data={'guider': True})
             school_term = SchoolTerm(term)
+            data['grouper'] = grouper
+            data['main_grouper'] = main_grouper
             for i in range(0, 4):
                 data['term'] = school_term.term_name
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
