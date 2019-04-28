@@ -148,7 +148,7 @@ def insert_supervisor():
     }), 200
 
 
-@user_blueprint.route('/supervisors/<int:id>')
+@user_blueprint.route('/supervisors/<int:id>', methods=['GET',])
 def get_supervisor(id):
     try:
         supervisor = controller.SupervisorController.get_supervisor(id=id)

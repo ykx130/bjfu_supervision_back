@@ -228,7 +228,7 @@ class SupervisorController():
         if data is None:
             data = dict()
         try:
-            dao.Supervisor.update_supervisor(query_dict={'id':id}, data=data)
+            dao.Supervisor.update_supervisor(query_dict={'id': [id]}, data=data)
             if ctx:
                 db.session.commit()
         except Exception as e:

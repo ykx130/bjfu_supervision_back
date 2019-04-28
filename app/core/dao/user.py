@@ -356,7 +356,7 @@ class Supervisor(db.Model):
         if not unscoped:
             supervisor = supervisor.filter(Supervisor.using == True)
         try:
-            supervisor = supervisor.filter(Supervisor.username == id).first()
+            supervisor = supervisor.filter(Supervisor.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         if supervisor is None:
