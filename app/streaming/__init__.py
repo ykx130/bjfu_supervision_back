@@ -6,8 +6,7 @@
 import json
 from kafka import KafkaConsumer, KafkaProducer
 from app.config import Config
-from app.utils.logger import log
-
+from flask import current_app
 
 def sub_kafka(topic=''):
     """
@@ -24,7 +23,7 @@ def sub_kafka(topic=''):
                                      group_id=func.__name__ + '_group'
                                      )
             for msg in consumer:
-                log.info("received msg : {}".format(msg))
+                current_app.logger.info("received msg : {}".format(msg))
                 func(method=msg.value.get("method"), args=msg.value.get("args"))
 
         return ex
