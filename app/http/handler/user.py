@@ -148,10 +148,10 @@ def insert_supervisor():
     }), 200
 
 
-@user_blueprint.route('/supervisors/<string:username>/term/<string:term>')
-def get_supervisor(username, term):
+@user_blueprint.route('/supervisors/<int:id>')
+def get_supervisor(id):
     try:
-        supervisor = controller.SupervisorController.get_supervisor(username=username, term=term)
+        supervisor = controller.SupervisorController.get_supervisor(id=id)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -164,10 +164,10 @@ def get_supervisor(username, term):
     }), 200
 
 
-@user_blueprint.route('/supervisors/<string:username>/term/<string:term>', methods=['PUT'])
-def update_supervisor(username, term):
+@user_blueprint.route('/supervisors/<int:id>', methods=['PUT'])
+def update_supervisor(id):
     try:
-        controller.SupervisorController.update_supervisor(username=username, data=request.json)
+        controller.SupervisorController.update_supervisor(id=id, data=request.json)
     except CustomError as e:
         return jsonify({
             'code': e.code,

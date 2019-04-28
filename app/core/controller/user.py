@@ -206,9 +206,9 @@ class UserController():
 
 class SupervisorController():
     @classmethod
-    def get_supervisor(cls, username: str = None, term: str = None, unscoped: bool = False):
-        supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
-        user = dao.User.get_user(username=username, unscoped=unscoped)
+    def get_supervisor(cls, id, unscoped: bool = False):
+        supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
+        user = dao.User.get_user(username=supervisor['username'], unscoped=unscoped)
         supervisor['user'] = user
         return supervisor
 
@@ -224,13 +224,11 @@ class SupervisorController():
         return supervisors, num
 
     @classmethod
-    def update_supervisor(cls, ctx: bool = True, username: str = None, term: str = None, data: dict = None):
+    def update_supervisor(cls, id:int, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        if term is None:
-            term = dao.Term.get_now_term()['name']
         try:
-            dao.Supervisor.update_supervisor(query_dict={'username': [username], 'term_gte': [term]}, data=data)
+            dao.Supervisor.update_supervisor(query_dict={'id':id}, data=data)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -401,7 +399,7 @@ class SupervisorController():
         if query_dict is None:
             query_dict = dict()
         term = query_dict.get('term', dao.Term.get_now_term()['name'])
-        (supervisors, num) = dao.Supervisor.query_supervisors(query_dict={'_per_page': [100000], 'term': [term]})
+        num = dao.Supervisor.count(query_dict={'_per_page': [100000], 'term': [term]})
         return num
 
 

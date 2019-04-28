@@ -350,6 +350,19 @@ class Supervisor(db.Model):
         return cls.formatter(supervisor)
 
     @classmethod
+    def get_supervisor_by_id(cls, id: int, unscoped: bool = False):
+        supervisor = Supervisor.query
+        if not unscoped:
+            supervisor = supervisor.filter(Supervisor.using == True)
+        try:
+            supervisor = supervisor.filter(Supervisor.username == id).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        if supervisor is None:
+            raise CustomError(404, 404, 'user not found')
+        return cls.formatter(supervisor)
+
+    @classmethod
     def insert_supervisor(cls, ctx=True, data=None):
         supervisor = Supervisor()
         for key, value in data.items():
