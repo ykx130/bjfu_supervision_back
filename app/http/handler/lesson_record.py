@@ -14,11 +14,11 @@ def find_term_lesson_records():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'lesson_records': lesson_records,
         'total': num
     }), 200
@@ -32,11 +32,11 @@ def find_lesson_records_history():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'lesson_records': lesson_records,
         'total': num
     }), 200
@@ -51,11 +51,11 @@ def find_lesson_record_history(username):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'lesson_records': lesson_records,
         'total': num
     }), 200
@@ -68,11 +68,11 @@ def find_lesson_record(username, term):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'lesson_record': lesson_record,
     }), 200
 
@@ -84,11 +84,11 @@ def insert_lesson_record():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -99,11 +99,11 @@ def delete_lesson_record(username, term):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -114,9 +114,9 @@ def update_lesson_record(username, term):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200

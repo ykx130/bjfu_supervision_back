@@ -20,11 +20,11 @@ def insert_form_meta():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -35,11 +35,11 @@ def find_form_metas():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'form_metas': form_metas,
         'total': total,
     }), 200
@@ -52,11 +52,11 @@ def find_form_meta_name(name):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'form_meta': form_meta
     }), 200
 
@@ -68,11 +68,11 @@ def find_history_form_metas():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'total': num,
         'form_metas': form_metas
     }), 200
@@ -86,11 +86,11 @@ def find_history_form_meta_by_name(name):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'form_metas': form_metas,
         'total': total,
     }), 200
@@ -103,11 +103,11 @@ def get_form_meta(name, version):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'form_meta': form_meta
     }), 200
 
@@ -119,11 +119,11 @@ def delete_form_meta(name):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'form_meta': None
     }), 200
 
@@ -135,10 +135,10 @@ def change_form_meta(name):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'form_meta': None
     }), 200

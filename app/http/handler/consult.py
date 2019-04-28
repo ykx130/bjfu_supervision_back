@@ -11,11 +11,11 @@ def new_consult():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -26,11 +26,11 @@ def get_consults():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'total': total,
         'consults': consults
     }), 200
@@ -43,11 +43,11 @@ def get_consult(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'consult': consult
     }), 200
 
@@ -59,11 +59,11 @@ def del_consult(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -74,11 +74,11 @@ def change_consult(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': '200',
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -89,11 +89,11 @@ def new_consult_type():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -105,11 +105,11 @@ def get_consult_types():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'consult_types': consult_types,
         'total': total
     }), 200
@@ -122,11 +122,11 @@ def get_consult_type(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'consult_type': consult_type
     }), 200
 
@@ -138,11 +138,11 @@ def del_consult_type(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -153,9 +153,9 @@ def change_consult_type(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': '200',
-        'message': '',
+        'msg': '',
     }), 200

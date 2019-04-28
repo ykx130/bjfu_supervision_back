@@ -11,11 +11,11 @@ def new_event():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     })
 
 
@@ -26,11 +26,11 @@ def get_events():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'events': events,
         'total': total
     }), 200
@@ -44,11 +44,11 @@ def get_user_events(username):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'events': events,
         'total': total
     }), 200
@@ -61,11 +61,11 @@ def get_user(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'event': event
     }), 200
 
@@ -77,11 +77,11 @@ def del_event(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
     }), 200
 
 
@@ -92,9 +92,9 @@ def change_event(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': '200',
-        'message': '',
+        'msg': '',
     }), 200

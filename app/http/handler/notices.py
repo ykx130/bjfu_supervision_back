@@ -12,12 +12,12 @@ def get_notices_num():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
         "total": num,
-        'message': '',
+        'msg': '',
 
     }), 200
 
@@ -29,7 +29,7 @@ def get_newest_notice():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,

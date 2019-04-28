@@ -12,13 +12,13 @@ def find_model_lessons():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
         'total': total,
         'model_lessons': model_lessons,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -29,11 +29,11 @@ def insert_model_lesson():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -44,11 +44,11 @@ def insert_model_lessons():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -59,11 +59,11 @@ def find_model_lesson(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'model_lesson': model_lesson
     }), 200
 
@@ -75,11 +75,11 @@ def delete_model_lesson(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -90,11 +90,11 @@ def delete_model_lessons():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -105,11 +105,11 @@ def update_model_lesson(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -120,11 +120,11 @@ def model_lesson_vote(id):
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -135,11 +135,11 @@ def import_lesson_excel():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': ''
+        'msg': ''
     }), 200
 
 
@@ -150,10 +150,10 @@ def export_lesson_excel():
     except CustomError as e:
         return jsonify({
             'code': e.code,
-            'message': e.err_info,
+            'msg': e.err_info,
         }), e.status_code
     return jsonify({
         'code': 200,
-        'message': '',
+        'msg': '',
         'filename': filename
     }), 200
