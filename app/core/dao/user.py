@@ -297,6 +297,7 @@ class Supervisor(db.Model):
     @classmethod
     def formatter(cls, supervisor):
         supervisor_dict = {
+            "id": supervisor.id,
             'group': supervisor.group,
             'username': supervisor.username,
             'is_grouper': supervisor.grouper,
