@@ -1,6 +1,5 @@
 import json
 
-
 def init_filter_dict(filter_list):
     filter_dict = dict()
     for filter_item in filter_list:
