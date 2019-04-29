@@ -35,7 +35,7 @@ class LessonController(object):
     def formatter(cls, lesson: dict = None):
 
         lesson_id = lesson.get('id', 0)
-        lesson_cases = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id], '_per_page': [100000]},
+        (lesson_cases,_) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id], '_per_page': [100000]},
                                                          unscoped=False)
         lesson['lesson_cases'] = lesson_cases
         return lesson

@@ -17,10 +17,6 @@ class UrlCondition(object):
         sort_list = []
         for key, value in url_args.items():
             for v in value:
-                try:
-                    v = json.loads(v)
-                except:
-                    v = v
                 if key == '_per_page' or key == '_page':
                     self.page_dict[key] = v
                 elif key == '_sort':
