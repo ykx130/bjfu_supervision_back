@@ -19,7 +19,7 @@ class UrlCondition(object):
         for key, value in url_args.items():
             for v in value:
                 try:
-                    v = str(v)
+                    v = json.loads(v)
                 except:
                     v = v
                 if key == '_per_page' or key == '_page':
