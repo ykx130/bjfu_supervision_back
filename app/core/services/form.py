@@ -27,7 +27,7 @@ class FormService:
                     if not item_map.get(v['item_name']):
                         # 初始化
                         point = {o['value']: {"option": o, "num": 0} for o in v.get("payload", {}).get("options", [])}
-                        if v.get('value'):
+                        if point.get('value'):
                             point['value']['num'] = point[v['value']]['num'] + 1
                         item_map[v['item_name']] = {
                             "item_name": v['item_name'],
