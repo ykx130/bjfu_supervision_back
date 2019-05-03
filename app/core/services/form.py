@@ -18,7 +18,7 @@ class FormService:
             return
         item_map = {}
         word_cloud = {}
-        forms = dao.Form.query_forms(query_dict={"bind_meta_name": meta_name, '_per_page': [1000000]})
+        forms, _ = dao.Form.query_forms(query_dict={"bind_meta_name": [meta_name], 'status': ['已完成'], '_per_page': [1000000]})
 
         for form in forms:
             for item in form.get("values", []):
@@ -81,4 +81,5 @@ class FormService:
 
         redis_cli.set("form_service:{}:word_cloud".format(meta_name), json.dumps(word_cloud))
         redis_cli.set("form_service:{}:map".format(meta_name), json.dumps(list(item_map.values())))
+        print("计算完成")
 

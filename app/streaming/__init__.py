@@ -19,7 +19,7 @@ def sub_kafka(topic=''):
     """
     ctx = app.app_context()
     ctx.push()
-    print("start")
+
     def wrapper(func):
         def ex():
             consumer = KafkaConsumer(topic, bootstrap_servers=Config.KAFLKA_HOST,
@@ -27,7 +27,7 @@ def sub_kafka(topic=''):
                                      group_id=func.__name__ + '_group'
                                      )
             for msg in consumer:
-                print("received msg : {}".format(msg))
+                current_app.logger.info("received msg : {}".format(msg))
                 func(method=msg.value.get("method"), args=msg.value.get("args"))
 
         return ex
