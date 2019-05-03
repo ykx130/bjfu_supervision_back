@@ -28,6 +28,7 @@ def sub_kafka(topic=''):
                                      )
             for msg in consumer:
                 current_app.logger.info("received msg : {}".format(msg))
+                print("FUNC {} RECEIVED MSG : {}".format(func.__name__, msg))
                 func(method=msg.value.get("method"), args=msg.value.get("args"))
 
         return ex
