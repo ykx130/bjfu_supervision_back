@@ -3,7 +3,7 @@ from app.utils import CustomError, db
 from app.utils.kafka import send_kafka_message
 from datetime import datetime
 from flask_login import current_user
-
+import app.core.services as service
 
 class ActivityController(object):
     @classmethod
@@ -55,7 +55,7 @@ class ActivityController(object):
     def insert_activity(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = {}
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         data['term'] = term
         (_, num) = dao.Activity.query_activities(query_dict={'name': [data.get('name', '')]}, unscoped=False)
         if num != 0:

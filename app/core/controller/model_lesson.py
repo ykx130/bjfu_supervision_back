@@ -3,6 +3,8 @@ from app.utils import CustomError, db
 from app.utils.Error import CustomError
 import pandas
 import datetime
+import app.core.services as service
+
 
 
 class ModelLessonController(object):
@@ -45,7 +47,7 @@ class ModelLessonController(object):
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         data['term'] = term
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
@@ -77,7 +79,7 @@ class ModelLessonController(object):
             data = dict()
         lesson_ids = data.get("lesson_ids", [])
         status = data.get('status', '推荐课')
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+        data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         try:
             for lesson_id in lesson_ids:
                 dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)

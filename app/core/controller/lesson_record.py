@@ -6,6 +6,8 @@ from app.utils.Error import CustomError
 import pandas
 import datetime
 import json
+import app.core.services as service
+
 
 
 class LessonRecordController(object):
@@ -37,7 +39,7 @@ class LessonRecordController(object):
         if query_dict is None:
             query_dict = {}
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         query_dict['term'] = [term]
         (lesson_records, num) = dao.LessonRecord.query_lesson_records(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
@@ -53,14 +55,14 @@ class LessonRecordController(object):
     @classmethod
     def get_lesson_record(cls, username: str = None, term: str = None, unscoped: bool = False):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=unscoped)
         return cls.formatter(lesson_record)
 
     @classmethod
     def delete_lesson_record(cls, ctx: bool = True, username: str = None, term: str = None):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=False)
         try:
             dao.LessonRecord.delete_lesson_record(ctx=False, query_dict={'id': [lesson_record['id']]})
@@ -77,7 +79,7 @@ class LessonRecordController(object):
 
     @classmethod
     def update_lesson_records(cls, ctx: bool = True, usernames: list = []):
-        term = dao.Term.get_now_term()['name']
+        term = service.TermService.get_now_term()['name']
         try:
             for username in usernames:
                 supervisor_query_dict = {'term': [term], 'username': [username]}
@@ -107,7 +109,7 @@ class LessonRecordController(object):
             data = {}
         data = cls.reformatter_insert(data)
         username = data.get('username', None)
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         user = dao.User.get_user(username=username, unscoped=False)
         supervisor = dao.Supervisor.get_supervisor(username=username, term=term, unscoped=False)
         try:

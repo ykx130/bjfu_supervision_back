@@ -3,6 +3,8 @@ from app.utils import CustomError, db
 from flask_login import current_user
 from datetime import datetime
 from app.utils.Error import CustomError
+import app.core.services as service
+
 
 
 class ConsultTypeController(object):
@@ -93,7 +95,7 @@ class ConsultController(object):
 
     @classmethod
     def reformatter_insert(cls, data: dict):
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+        data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         data['state'] = data.get('state', '待协调')
         data['requester_username'] = data.get('requester_username', current_user.username)
         data['submit_time'] = data.get('submit_time', datetime.now())

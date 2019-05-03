@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import pymysql
 import json
 import re
+import app.core.services as service
 
 
 def lesson_week_list(lesson_week):
@@ -223,5 +224,5 @@ class TermController(object):
 
     @classmethod
     def get_now_term(cls):
-        term = dao.Term.get_now_term()
+        term = service.TermService.get_now_term()
         return cls.formatter(term)

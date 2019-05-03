@@ -3,6 +3,7 @@ from app.utils import CustomError, db
 from app.utils.kafka import send_kafka_message
 from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import app.core.services as service
 
 
 class SchoolTerm():
@@ -64,7 +65,7 @@ class UserController():
 
     @classmethod
     def formatter(cls, user: dict):
-        term = dao.Term.get_now_term()['name']
+        term = service.TermService.get_now_term()['name']
         role_names = cls.role_list(user, term)
         user['role_names'] = role_names
         if user['is_guider']:
@@ -126,7 +127,7 @@ class UserController():
         if data is None:
             data = dict()
         try:
-            data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+            data['term'] = data.get('term', service.TermService.get_now_term()['name'])
             if username is None:
                 raise CustomError(500, 500, 'username or role_names should be given')
 
@@ -227,7 +228,7 @@ class SupervisorController():
     def update_supervisor(cls, id: int, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
         username = supervisor['username']
         group = data.get('group', supervisor['group'])
@@ -277,7 +278,7 @@ class SupervisorController():
             query_dict = dict()
         term = query_dict.get('term', [])
         if len(term) == 0:
-            term = [dao.Term.get_now_term()['name']]
+            term = [service.TermService.get_now_term()['name']]
         if 'term' in query_dict:
             del query_dict['term']
         new_term = [(SchoolTerm(term[0]) + 1).term_name]
@@ -308,7 +309,7 @@ class SupervisorController():
     @classmethod
     def delete_supervisor(cls, ctx: bool = True, username: str = '', term: str = None):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         try:
             dao.User.update_user(ctx=False, username=username, data={'guider': False})
             dao.Supervisor.delete_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]})
@@ -329,7 +330,7 @@ class SupervisorController():
             data = dict()
         username = data.get('username', None)
         user = dao.User.get_user(username)
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         data['name'] = user['name']
         (_, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term': [term]}, unscoped=False)
         if num != 0:
@@ -337,7 +338,7 @@ class SupervisorController():
         if username is None:
             raise CustomError(500, 200, 'username should be given')
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         try:
             grouper = data.get('is_grouper', False)
             main_grouper = data.get('is_main_grouper', False)
@@ -411,7 +412,7 @@ class SupervisorController():
         if usernames is None:
             raise CustomError(500, 500, 'usernames should be given')
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         try:
             for username in usernames:
                 user = dao.User.get_user(username=username)
@@ -447,7 +448,7 @@ class SupervisorController():
     def get_supervisor_num(cls, query_dict: dict = None):
         if query_dict is None:
             query_dict = dict()
-        term = query_dict.get('term', dao.Term.get_now_term()['name'])
+        term = query_dict.get('term', service.TermService.get_now_term()['name'])
         num = dao.Supervisor.count(query_dict={'term': [term]})
         return num
 

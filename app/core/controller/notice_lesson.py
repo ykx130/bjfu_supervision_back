@@ -5,6 +5,7 @@ from app.utils.kafka import send_kafka_message
 from app.utils.Error import CustomError
 import pandas
 import datetime
+import app.core.services as service
 import json
 
 
@@ -50,7 +51,7 @@ class NoticeLessonController(object):
     def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+        data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
         try:
@@ -76,7 +77,7 @@ class NoticeLessonController(object):
     def insert_notice_lessons(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+        data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         lesson_ids = data.get('lesson_ids', [])
         try:
             for lesson_id in lesson_ids:
@@ -103,7 +104,7 @@ class NoticeLessonController(object):
     @classmethod
     def update_page_data(cls, term: str = None, unscoped=False):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         (_, num) = dao.NoticeLesson.query_notice_lessons(query_dict={'term': [term]}, unscoped=False)
         try:
             redis_cli.set('sys:notice_lesson_num', json.dumps(num))

@@ -1,5 +1,6 @@
 import app.core.dao as dao
 from app.utils import CustomError, db
+import app.core.services as service
 
 
 class FormMetaController(object):
@@ -144,7 +145,7 @@ class WorkPlanController(object):
     @classmethod
     def query_work_plan_detail(cls, term: str = None, unscoped=False):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         (work_plans, num) = dao.WorkPlan.query_work_plan(query_dict={'term': [term]})
         results = list()
         for work_plan in work_plans:
