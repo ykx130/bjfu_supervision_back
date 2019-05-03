@@ -1,5 +1,6 @@
 import json
 
+
 def init_filter_dict(filter_list):
     filter_dict = dict()
     for filter_item in filter_list:
@@ -11,7 +12,7 @@ class UrlCondition(object):
     def __init__(self, url_args):
         filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne', '_like', '_eq']
         self.filter_dict = dict()
-        self.page_dict = {'_per_page': 20, '_page': 1}
+        self.page_dict = dict()
         self.sort_limit_dict = dict()
         order_list = []
         sort_list = []
@@ -94,8 +95,11 @@ def sort_limit_query(query, sort_limit_dict, name_map):
 
 
 def page_query(query, page_dict):
-    page = int(page_dict['_page']) if '_page' in page_dict else 1
-    per_page = int(page_dict['_per_page']) if '_per_page' in page_dict else 20
+    if '_page' not in page_dict or '_per_page' not in page_dict:
+        data = query.all()
+        return data, len(data)
+    page = int(page_dict['_page'])
+    per_page = int(page_dict['_per_page'])
     pagination = query.paginate(page=int(page), per_page=int(per_page), error_out=False)
     return pagination.items, pagination.total
 

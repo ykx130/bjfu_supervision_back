@@ -35,8 +35,7 @@ class LessonController(object):
     def formatter(cls, lesson: dict = None):
 
         lesson_id = lesson.get('id', 0)
-        (lesson_cases,_) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id], '_per_page': [100000]},
-                                                         unscoped=False)
+        (lesson_cases, _) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
         lesson['lesson_cases'] = lesson_cases
         return lesson
 
@@ -67,6 +66,8 @@ class LessonController(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for data in datas:
+            if '补考' in data['lesson_name']:
+                continue
             teacher_name = data['lesson_teacher_name']
             teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
             data['lesson_teacher_name'] = teachers
@@ -75,6 +76,7 @@ class LessonController(object):
             teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
             data['lesson_teacher_unit'] = teacher_units
             lesson_id = data['lesson_id']
+            data['raw_lesson_id'] = lesson_id
             data['lesson_id'] = [lesson_id + teacher_id for teacher_id in teacher_ids]
             term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
             term, err = dao.Term.get_term(term_name=term_name)

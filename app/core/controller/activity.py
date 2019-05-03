@@ -250,7 +250,7 @@ class ActivityUserController(object):
 
         if state == 'hasAttended':
             (activity_users, _) = dao.ActivityUser.query_activity_users(
-                query_dict={'username': [username], '_per_page': [100000], 'state_ne': ['未报名']}, unscoped=False)
+                query_dict={'username': [username],  'state_ne': ['未报名']}, unscoped=False)
             for activity_user in activity_users:
                 activity = dao.Activity.get_activity(id=activity_user['activity_id'], unscoped=False)
                 current_user_activity = {
@@ -265,7 +265,7 @@ class ActivityUserController(object):
 
         elif state == 'canAttend':
             (has_attend_activity_users, _) = dao.ActivityUser.query_activity_users(
-                query_dict={'username': [username], '_per_page': [100000], 'state_ne': ['未报名']}, unscoped=False)
+                query_dict={'username': [username], 'state_ne': ['未报名']}, unscoped=False)
             has_attend_activity_ids = [has_attend_activity_user['activity_id'] for has_attend_activity_user in
                                        has_attend_activity_users]
             (all_can_attend_activities, _) = dao.Activity.query_activities(

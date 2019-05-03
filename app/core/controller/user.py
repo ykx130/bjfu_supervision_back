@@ -284,7 +284,6 @@ class SupervisorController():
 
         all_query_dict = query_dict
         all_query_dict['term'] = term
-        all_query_dict['_per_page'] = [100000]
         all_usernames = list()
         (all_supervisors, num) = dao.Supervisor.query_supervisors(query_dict=all_query_dict, unscoped=unscoped)
         for supervisor in all_supervisors:
@@ -292,7 +291,6 @@ class SupervisorController():
 
         can_query_dict = query_dict
         can_query_dict['term'] = new_term
-        can_query_dict['_per_page'] = [100000]
         can_usernames = list()
         (can_supervisors, num) = dao.Supervisor.query_supervisors(query_dict=can_query_dict, unscoped=unscoped)
         for supervisor in can_supervisors:
@@ -357,6 +355,9 @@ class SupervisorController():
             data['main_grouper'] = main_grouper
             for i in range(0, 4):
                 data['term'] = school_term.term_name
+                (_, num) = dao.Term.query_terms(query_dict={'name': [school_term.term_name]})
+                if num == 0:
+                    dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
                 school_term = school_term + 1
                 lesson_record_data = {'username': username, 'term': term, 'group_name': data['group'],
@@ -419,6 +420,14 @@ class SupervisorController():
                 for i in range(0, 4):
                     school_term = school_term + 1
                     data['term'] = school_term.term_name
+                    (_, num) = dao.Term.query_terms(query_dict={'name': [school_term.term_name]})
+                    if num == 0:
+                        dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
+                    (_, num) = dao.Supervisor.query_supervisors(
+                        query_dict={'username': [username], 'term': [data['term']]},
+                        unscoped=False)
+                    if num != 0:
+                        continue
                     data['username'] = username
                     data['group'] = supervisor['group']
                     data['name'] = user['name']
@@ -439,7 +448,7 @@ class SupervisorController():
         if query_dict is None:
             query_dict = dict()
         term = query_dict.get('term', dao.Term.get_now_term()['name'])
-        num = dao.Supervisor.count(query_dict={'_per_page': [100000], 'term': [term]})
+        num = dao.Supervisor.count(query_dict={'term': [term]})
         return num
 
 

@@ -50,9 +50,16 @@ class ModelLessonController(object):
         data = cls.reformatter_insert(data=data)
         dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
         status = data.get('status', '推荐课')
+        lesson_id = data.get('lesson_id', None)
+        if lesson_id is None:
+            raise CustomError(500, 200, 'lesson_id must be given')
         try:
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
-            dao.Lesson.update_lesson(ctx=False, query_dict={'id': [data['lesson_id']]}, data={'lesson_model': status})
+            (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
+            if num != 0:
+                raise CustomError(500, 200, 'lesson has been model lesson')
+            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
+                                     data={'lesson_model': status})
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -74,10 +81,14 @@ class ModelLessonController(object):
         try:
             for lesson_id in lesson_ids:
                 dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+                (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
+                if num != 0:
+                    continue
                 data['lesson_id'] = lesson_id
                 data = cls.reformatter_insert(data=data)
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
-                dao.Lesson.update_lesson(ctx=False, query_dict={'id': [lesson_id]}, data={'lesson_model': status})
+                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                                         data={'lesson_model': status})
 
             if ctx:
                 db.session.commit()
@@ -100,7 +111,8 @@ class ModelLessonController(object):
         data['status'] = status
         try:
             dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]}, data=data)
-            dao.Lesson.update_lesson(ctx=False, query_dict={'id': [model_lesson['id']]}, data={'lesson_model': status})
+            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [model_lesson['lesson_id']]},
+                                     data={'lesson_model': status})
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -118,7 +130,7 @@ class ModelLessonController(object):
         dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
         try:
             dao.ModelLesson.delete_model_lesson(ctx=False, query_dict={'id': [id]})
-            dao.Lesson.update_lesson(ctx=False, query_dict={'id': [model_lesson['lesson_id']]},
+            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [model_lesson['lesson_id']]},
                                      data={'lesson_model': ''})
             if ctx:
                 db.session.commit()
@@ -141,7 +153,7 @@ class ModelLessonController(object):
                 model_lesson = dao.ModelLesson.get_model_lesson(id=model_lesson_id, unscoped=False)
                 dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
                 dao.ModelLesson.delete_model_lesson(ctx=False, query_dict={'id': [model_lesson_id]})
-                dao.Lesson.update_lesson(ctx=False, query_dict={'id': [model_lesson['lesson_id']]},
+                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [model_lesson['lesson_id']]},
                                          data={'lesson_model': ''})
             if ctx:
                 db.session.commit()
@@ -162,7 +174,7 @@ class ModelLessonController(object):
             if vote:
                 dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]},
                                                     data={'votes': int(model_lesson['votes']) + 1})
-            dao.Lesson.update_lesson(ctx=False, query_dict={'id': model_lesson['lesson_id']},
+            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': model_lesson['lesson_id']},
                                      data={'notices': int(lesson['notices'] + 1)})
             if ctx:
                 db.session.commit()
@@ -202,8 +214,11 @@ class ModelLessonController(object):
                 lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
                     raise CustomError(404, 404, 'lesson not found')
-                lesson_id = lessons[0]['id']
+                lesson_id = lessons[0]['lesson_id']
                 model_lesson_data['lesson_id'] = lesson_id
+                (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
+                if num != 0:
+                    continue
                 model_lesson_data['term'] = '_'.join([str(df.iloc[i]['开课学年']), str(df.iloc[i]['开课学期'])])
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
             if ctx:
@@ -222,11 +237,10 @@ class ModelLessonController(object):
         if data is None:
             data = dict()
         if 'model_lesson_ids' not in data:
-            (model_lessons, _) = dao.ModelLesson.query_model_lessons(query_dict={'_per_page': [100000]}, unscoped=False)
+            (model_lessons, _) = dao.ModelLesson.query_model_lessons(query_dict={}, unscoped=False)
         else:
             model_lesson_ids = data.get('model_lesson_ids')
-            (model_lessons, _) = dao.ModelLesson.query_model_lessons(
-                query_dict={'_per_page': [100000], 'id': model_lesson_ids})
+            (model_lessons, _) = dao.ModelLesson.query_model_lessons(query_dict={'id': model_lesson_ids})
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                        '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}

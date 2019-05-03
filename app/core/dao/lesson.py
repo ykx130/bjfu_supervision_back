@@ -2,6 +2,7 @@ from app.utils.mysql import db
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
 from app.utils.Error import CustomError
 from datetime import datetime
+from app.utils.misc import convert_string_to_datetime
 
 
 class Term(db.Model):
@@ -23,6 +24,26 @@ class Term(db.Model):
 
     @classmethod
     def reformatter_insert(cls, data):
+        name = data.get('name', None)
+        if name is None:
+            raise CustomError(500, 200, 'name must be given')
+        parts = name.split('-')
+        if len(parts) != 3:
+            raise CustomError(500, 200, 'name is wrong')
+        year = int(parts[0])
+        term_num = int(parts[2])
+        if term_num == 1:
+            begin_year = year
+            end_year = year
+            begin_date = '08-01'
+            end_date = '02-15'
+        else:
+            begin_year = year
+            end_year = year + 1
+            begin_date = '02-15'
+            end_date = '08-01'
+        data['begin_time'] = convert_string_to_datetime(str(begin_year) + '-' + begin_date)
+        data['end_time'] = convert_string_to_datetime(str(end_year) + '-' + end_date)
         return data
 
     @classmethod
@@ -78,14 +99,21 @@ class Term(db.Model):
         return cls.formatter(term)
 
     @classmethod
-    def get_now_term(cls):
-        try:
-            term = Term.query.order_by(Term.name.desc()).filter(Term.using == True).first()
-        except Exception as e:
-            raise CustomError(500, 500, str(e))
-        if term is None:
-            raise CustomError(404, 404, 'term not found')
-        return cls.formatter(term)
+    def insert_term(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        data = cls.reformatter_insert(data)
+        term = Term()
+        for key, value in data.items():
+            if hasattr(term, key):
+                setattr(term, key, value)
+        db.session.add(term)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
 
 
 class LessonRecord(db.Model):
@@ -243,7 +271,7 @@ class LessonRecord(db.Model):
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)  # lesson_notice id 关注课程id
-    raw_id = db.Column(db.String(32), default='')
+    raw_lesson_id = db.Column(db.String(32), default='')
     lesson_id = db.Column(db.String(32), default='')  # 被关注课程的id
     lesson_attribute = db.Column(db.String(8), default='')
     lesson_state = db.Column(db.String(8), default='')
