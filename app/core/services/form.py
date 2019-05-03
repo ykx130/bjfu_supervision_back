@@ -21,52 +21,53 @@ class FormService:
         forms = dao.Form.query_forms(query_dict={"bind_meta_name": meta_name, '_per_page': [1000000]})
 
         for form in forms:
-            for v in form.get("values"):
-                if v.get('item_type') == "radio_option":
+            for item in form.get("values", []):
+
+                if item.get('item_type') == "radio_option":
                     # 处理单选
-                    if not item_map.get(v['item_name']):
+                    if not item_map.get(item['item_name']):
                         # 初始化
-                        point = {o['value']: {"option": o, "num": 0} for o in v.get("payload", {}).get("options", [])}
+                        point = {o['value']: {"option": o, "num": 0} for o in item.get("payload", {}).get("options", [])}
                         if point.get('value'):
-                            point['value']['num'] = point[v['value']]['num'] + 1
-                        item_map[v['item_name']] = {
-                            "item_name": v['item_name'],
+                            point['value']['num'] = point[item['value']]['num'] + 1
+                        item_map[item['item_name']] = {
+                            "item_name": item['item_name'],
                             "point": list(point.values())
                         }
                     else:
                         # 存在直接+1
-                        point = item_map[v['item_name']]["point"]
+                        point = item_map[item['item_name']]["point"]
                         for p in point:
-                            if p['option']['value'] == v['value']:
+                            if p['option']['value'] == item['value']:
                                 p['num'] = p['num'] + 1
-                if v.get("item_type") == "checkbox_option":
+                if item.get("item_type") == "checkbox_option":
                     # 处理多选
-                    if not item_map.get(v['item_name']):
-                        point = {o['value']: {"option": o, "num": 0} for o in v.get("payload", {}).get("options", [])}
-                        for value in v["value"]:
+                    if not item_map.get(item['item_name']):
+                        point = {o['value']: {"option": o, "num": 0} for o in item.get("payload", {}).get("options", [])}
+                        for value in item["value"]:
                             point[value]["num"] = point[value]["num"] + 1
-                        item_map[v['item_name']] = {
-                            "item_name": v['item_name'],
+                        item_map[item['item_name']] = {
+                            "item_name": item['item_name'],
                             "point": list(point.values())
                         }
                     else:
-                        point = item_map[v['item_name']]["point"]
+                        point = item_map[item['item_name']]["point"]
                         for p in point:
-                            if p['option']['value'] in v['value']:
+                            if p['option']['value'] in item['value']:
                                 p['num'] = p['num'] + 1
-                if v.get("item_type") == "raw_text":
+                if item.get("item_type") == "raw_text":
                     # 处理文本分词
-                    if not word_cloud.get(v['item_name']):
+                    if not word_cloud.get(item['item_name']):
                         # 首次
-                        value = v['value']
+                        value = item['value']
                         if value:
                             res = jieba.cut(value)
-                            word_cloud[v['item_name']] = list(res)
+                            word_cloud[item['item_name']] = list(res)
                     else:
-                        value = v['value']
+                        value = item['value']
                         if value:
                             res = jieba.cut(value)
-                            word_cloud[v['item_name']] = word_cloud[v['item_name']] + list(res)
+                            word_cloud[item['item_name']] = word_cloud[item['item_name']] + list(res)
 
         # word_cloud 转成数组新式
         word_cloud = [{"item_name": k,
