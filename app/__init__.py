@@ -75,4 +75,5 @@ if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers.extend(gunicorn_logger.handlers)
     app.logger.addHandler(fileHandler)
+    app.logger.addHandler(consoleHandler)
     app.logger.setLevel(gunicorn_logger.level)
