@@ -1,6 +1,7 @@
 import json
 import jieba
 from collections import Counter
+from app.core import dao
 from app import redis_cli
 
 
@@ -17,8 +18,7 @@ class FormService:
             return
         item_map = {}
         word_cloud = {}
-        from app.utils.mongodb import mongo
-        forms = mongo.db.form.find({"bind_meta_name": meta_name})
+        forms = dao.Form.query_forms(query_dict={"bind_meta_name": meta_name, '_per_page': [1000000]})
 
         for form in forms:
             for v in form.get("values"):
