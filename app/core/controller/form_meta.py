@@ -47,9 +47,9 @@ class FormMetaController(object):
         return dao.FormMeta.insert_form_meta(data)
 
     @classmethod
-    def delete_form_meta(cls, name: str = None):
-        dao.FormMeta.get_form_meta(name=name)
-        return dao.FormMeta.delete_form_meta({'name': name})
+    def delete_form_meta(cls, name: str = None, version: str = None):
+        dao.FormMeta.get_form_meta(name=name, version=version)
+        return dao.FormMeta.delete_form_meta({'name': name, 'version': version})
 
     @classmethod
     def update_form_meta(cls, name: str = None, data: dict = None):

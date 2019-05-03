@@ -430,6 +430,22 @@ class Lesson(db.Model):
                 raise CustomError(500, 500, str(e))
         return True
 
+    @classmethod
+    def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        name_map = {'lessons': Lesson}
+        query = Lesson.query.with_entities(Lesson.lesson_teacher_name).distinct()
+        if not unscoped:
+            query = query.filter(Lesson.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                           url_condition.page_dict, name_map, Lesson)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [data.lesson_teacher_name for data in query], total
+
 
 class LessonCase(db.Model):
     __tablename__ = 'lesson_cases'

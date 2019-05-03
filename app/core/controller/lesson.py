@@ -200,6 +200,13 @@ class LessonController(object):
                 raise CustomError(500, 500, str(e))
         return True
 
+    @classmethod
+    def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        (teacher_names, num) = dao.Lesson.query_teacher_names(query_dict=query_dict, unscoped=unscoped)
+        return teacher_names, num
+
 
 class TermController(object):
     @classmethod

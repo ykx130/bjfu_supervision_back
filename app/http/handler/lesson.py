@@ -69,6 +69,24 @@ def update_lesson(lesson_id):
     }), 200
 
 
+@lesson_blueprint.route('/teacher_names', methods=['GET'])
+def get_teacher_names():
+    try:
+        (teacher_names, total) = controller.LessonController.query_teacher_names(query_dict=args_to_dict(request.args),
+                                                                                 unscoped=False)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'teacher_names': teacher_names,
+        'total': total
+    }), 200
+
+
 @lesson_blueprint.route('/terms')
 def get_terms():
     try:
