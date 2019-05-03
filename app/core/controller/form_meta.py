@@ -39,6 +39,10 @@ class FormMetaController(object):
     def insert_form_meta(cls, data: dict = None):
         if data is None:
             data = dict()
+        name = data.get('name', '')
+        (_, num) = dao.FormMeta.query_form_metas(query_dict={'name': name}, unscoped=False)
+        if num != 0:
+            raise CustomError(500, 200, 'name has been used')
         return dao.FormMeta.insert_form_meta(data)
 
     @classmethod

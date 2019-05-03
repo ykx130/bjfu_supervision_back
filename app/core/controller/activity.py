@@ -55,7 +55,11 @@ class ActivityController(object):
     def insert_activity(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = {}
-        data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', dao.Term.get_now_term()['name'])
+        data['term'] = term
+        (_, num) = dao.Activity.query_activities(query_dict={'name': [data.get('name', '')]}, unscoped=False)
+        if num != 0:
+            raise CustomError(500, 200, 'name has been used')
         data = cls.reformatter(data)
         try:
             dao.Activity.insert_activity(ctx=False, data=data)

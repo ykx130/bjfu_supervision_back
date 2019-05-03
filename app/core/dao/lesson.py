@@ -243,6 +243,7 @@ class LessonRecord(db.Model):
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)  # lesson_notice id 关注课程id
+    raw_id = db.Column(db.String(32), default='')
     lesson_id = db.Column(db.String(32), default='')  # 被关注课程的id
     lesson_attribute = db.Column(db.String(8), default='')
     lesson_state = db.Column(db.String(8), default='')
