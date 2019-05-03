@@ -6,7 +6,9 @@
 import json
 from kafka import KafkaConsumer, KafkaProducer
 from app.config import Config
+from app import app
 from flask import current_app
+
 
 def sub_kafka(topic=''):
     """
@@ -15,6 +17,8 @@ def sub_kafka(topic=''):
     :param topic:
     :return:
     """
+    ctx = app.app_context()
+    ctx.push()
 
     def wrapper(func):
         def ex():
@@ -24,10 +28,9 @@ def sub_kafka(topic=''):
                                      )
             for msg in consumer:
                 current_app.logger.info("received msg : {}".format(msg))
+                print("FUNC {} RECEIVED MSG : {}".format(func.__name__, msg))
                 func(method=msg.value.get("method"), args=msg.value.get("args"))
 
         return ex
 
     return wrapper
-
-

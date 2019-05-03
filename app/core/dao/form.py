@@ -319,7 +319,8 @@ class Form(object):
                 'status': data.get('status'),
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
-                'bind_meta_version': data.get('bind_meta_version', None)
+                'bind_meta_version': data.get('bind_meta_version', None),
+                'values': data.get('values', [])
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))

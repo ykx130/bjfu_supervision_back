@@ -71,6 +71,7 @@ def create_app(config_name):
 app = create_app('default')
 app.logger.addHandler(consoleHandler)
 
+
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers.extend(gunicorn_logger.handlers)

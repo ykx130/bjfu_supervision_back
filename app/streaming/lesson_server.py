@@ -30,6 +30,7 @@ def lesson_form_service_server(method, args):
 
 
 if __name__ == '__main__':
+
     processes = [
         Process(target=lesson_service_server),
         Process(target=lesson_form_service_server)
