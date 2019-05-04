@@ -5,8 +5,11 @@ import time
 from datetime import datetime, timedelta
 
 
-def convert_string_to_datetime(string):
+def convert_string_to_date(string):
     return datetime.strptime(string, "%Y-%m-%d")
+
+def convert_string_to_datetime(string):
+    return datetime.strptime(string, "%Y-%m-%d %H:%M:%S")
 
 
 def convert_datetime_to_timestamp(datetime):

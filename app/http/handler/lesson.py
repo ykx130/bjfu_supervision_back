@@ -9,7 +9,7 @@ from app.utils import CustomError, args_to_dict
 @lesson_blueprint.route('/lessons', methods=['POST'])
 def new_lesson():
     try:
-        controller.LessonController.update_database()
+        controller.LessonController.update_database(info=request.json)
     except CustomError as e:
         return jsonify({
             'code': e.code,
