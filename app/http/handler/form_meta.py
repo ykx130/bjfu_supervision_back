@@ -112,10 +112,10 @@ def get_form_meta(name, version):
     }), 200
 
 
-@form_meta_blueprint.route('/form_metas/<name>', methods=['DELETE'])
-def delete_form_meta(name):
+@form_meta_blueprint.route('/form_metas/<string:name>/version/<string:version>', methods=['DELETE'])
+def delete_form_meta(name, version):
     try:
-        controller.FormMetaController.delete_form_meta(name)
+        controller.FormMetaController.delete_form_meta(name, version)
     except CustomError as e:
         return jsonify({
             'code': e.code,

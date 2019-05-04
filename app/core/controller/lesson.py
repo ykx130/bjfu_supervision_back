@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import pymysql
 import json
 import re
+import app.core.services as service
 
 
 def lesson_week_list(lesson_week):
@@ -35,8 +36,7 @@ class LessonController(object):
     def formatter(cls, lesson: dict = None):
 
         lesson_id = lesson.get('id', 0)
-        (lesson_cases,_) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id], '_per_page': [100000]},
-                                                         unscoped=False)
+        (lesson_cases, _) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
         lesson['lesson_cases'] = lesson_cases
         return lesson
 
@@ -67,6 +67,8 @@ class LessonController(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for data in datas:
+            if '补考' in data['lesson_name']:
+                continue
             teacher_name = data['lesson_teacher_name']
             teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
             data['lesson_teacher_name'] = teachers
@@ -75,6 +77,7 @@ class LessonController(object):
             teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
             data['lesson_teacher_unit'] = teacher_units
             lesson_id = data['lesson_id']
+            data['raw_lesson_id'] = lesson_id
             data['lesson_id'] = [lesson_id + teacher_id for teacher_id in teacher_ids]
             term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
             term, err = dao.Term.get_term(term_name=term_name)
@@ -197,6 +200,13 @@ class LessonController(object):
                 raise CustomError(500, 500, str(e))
         return True
 
+    @classmethod
+    def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        (teacher_names, num) = dao.Lesson.query_teacher_names(query_dict=query_dict, unscoped=unscoped)
+        return teacher_names, num
+
 
 class TermController(object):
     @classmethod
@@ -221,5 +231,5 @@ class TermController(object):
 
     @classmethod
     def get_now_term(cls):
-        term = dao.Term.get_now_term()
+        term = service.TermService.get_now_term()
         return cls.formatter(term)

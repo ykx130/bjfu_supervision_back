@@ -1,5 +1,6 @@
 import app.core.dao as dao
 from app.utils import CustomError, db
+import app.core.services as service
 
 
 class FormMetaController(object):
@@ -39,12 +40,16 @@ class FormMetaController(object):
     def insert_form_meta(cls, data: dict = None):
         if data is None:
             data = dict()
+        name = data.get('name', '')
+        (_, num) = dao.FormMeta.query_form_metas(query_dict={'name': name}, unscoped=False)
+        if num != 0:
+            raise CustomError(500, 200, 'name has been used')
         return dao.FormMeta.insert_form_meta(data)
 
     @classmethod
-    def delete_form_meta(cls, name: str = None):
-        dao.FormMeta.get_form_meta(name=name)
-        return dao.FormMeta.delete_form_meta({'name': name})
+    def delete_form_meta(cls, name: str = None, version: str = None):
+        dao.FormMeta.get_form_meta(name=name, version=version)
+        return dao.FormMeta.delete_form_meta({'name': name, 'version': version})
 
     @classmethod
     def update_form_meta(cls, name: str = None, data: dict = None):
@@ -140,7 +145,7 @@ class WorkPlanController(object):
     @classmethod
     def query_work_plan_detail(cls, term: str = None, unscoped=False):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         (work_plans, num) = dao.WorkPlan.query_work_plan(query_dict={'term': [term]})
         results = list()
         for work_plan in work_plans:

@@ -3,6 +3,7 @@ from app.utils import CustomError, db
 from app.utils.kafka import send_kafka_message
 from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import app.core.services as service
 
 
 class SchoolTerm():
@@ -64,7 +65,7 @@ class UserController():
 
     @classmethod
     def formatter(cls, user: dict):
-        term = dao.Term.get_now_term()['name']
+        term = service.TermService.get_now_term()['name']
         role_names = cls.role_list(user, term)
         user['role_names'] = role_names
         if user['is_guider']:
@@ -126,7 +127,7 @@ class UserController():
         if data is None:
             data = dict()
         try:
-            data['term'] = data.get('term', dao.Term.get_now_term()['name'])
+            data['term'] = data.get('term', service.TermService.get_now_term()['name'])
             if username is None:
                 raise CustomError(500, 500, 'username or role_names should be given')
 
@@ -227,7 +228,7 @@ class SupervisorController():
     def update_supervisor(cls, id: int, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
         username = supervisor['username']
         group = data.get('group', supervisor['group'])
@@ -277,14 +278,13 @@ class SupervisorController():
             query_dict = dict()
         term = query_dict.get('term', [])
         if len(term) == 0:
-            term = [dao.Term.get_now_term()['name']]
+            term = [service.TermService.get_now_term()['name']]
         if 'term' in query_dict:
             del query_dict['term']
         new_term = [(SchoolTerm(term[0]) + 1).term_name]
 
         all_query_dict = query_dict
         all_query_dict['term'] = term
-        all_query_dict['_per_page'] = [100000]
         all_usernames = list()
         (all_supervisors, num) = dao.Supervisor.query_supervisors(query_dict=all_query_dict, unscoped=unscoped)
         for supervisor in all_supervisors:
@@ -292,7 +292,6 @@ class SupervisorController():
 
         can_query_dict = query_dict
         can_query_dict['term'] = new_term
-        can_query_dict['_per_page'] = [100000]
         can_usernames = list()
         (can_supervisors, num) = dao.Supervisor.query_supervisors(query_dict=can_query_dict, unscoped=unscoped)
         for supervisor in can_supervisors:
@@ -310,7 +309,7 @@ class SupervisorController():
     @classmethod
     def delete_supervisor(cls, ctx: bool = True, username: str = '', term: str = None):
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         try:
             dao.User.update_user(ctx=False, username=username, data={'guider': False})
             dao.Supervisor.delete_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]})
@@ -331,7 +330,7 @@ class SupervisorController():
             data = dict()
         username = data.get('username', None)
         user = dao.User.get_user(username)
-        term = data.get('term', dao.Term.get_now_term()['name'])
+        term = data.get('term', service.TermService.get_now_term()['name'])
         data['name'] = user['name']
         (_, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term': [term]}, unscoped=False)
         if num != 0:
@@ -339,7 +338,7 @@ class SupervisorController():
         if username is None:
             raise CustomError(500, 200, 'username should be given')
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         try:
             grouper = data.get('is_grouper', False)
             main_grouper = data.get('is_main_grouper', False)
@@ -357,6 +356,9 @@ class SupervisorController():
             data['main_grouper'] = main_grouper
             for i in range(0, 4):
                 data['term'] = school_term.term_name
+                (_, num) = dao.Term.query_terms(query_dict={'name': [school_term.term_name]})
+                if num == 0:
+                    dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
                 school_term = school_term + 1
                 lesson_record_data = {'username': username, 'term': term, 'group_name': data['group'],
@@ -410,7 +412,7 @@ class SupervisorController():
         if usernames is None:
             raise CustomError(500, 500, 'usernames should be given')
         if term is None:
-            term = dao.Term.get_now_term()['name']
+            term = service.TermService.get_now_term()['name']
         try:
             for username in usernames:
                 user = dao.User.get_user(username=username)
@@ -419,6 +421,14 @@ class SupervisorController():
                 for i in range(0, 4):
                     school_term = school_term + 1
                     data['term'] = school_term.term_name
+                    (_, num) = dao.Term.query_terms(query_dict={'name': [school_term.term_name]})
+                    if num == 0:
+                        dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
+                    (_, num) = dao.Supervisor.query_supervisors(
+                        query_dict={'username': [username], 'term': [data['term']]},
+                        unscoped=False)
+                    if num != 0:
+                        continue
                     data['username'] = username
                     data['group'] = supervisor['group']
                     data['name'] = user['name']
@@ -438,8 +448,8 @@ class SupervisorController():
     def get_supervisor_num(cls, query_dict: dict = None):
         if query_dict is None:
             query_dict = dict()
-        term = query_dict.get('term', dao.Term.get_now_term()['name'])
-        num = dao.Supervisor.count(query_dict={'_per_page': [100000], 'term': [term]})
+        term = query_dict.get('term', service.TermService.get_now_term()['name'])
+        num = dao.Supervisor.count(query_dict={'term': [term]})
         return num
 
 
