@@ -9,7 +9,7 @@ import pymysql
 import json
 import re
 import app.core.services as service
-
+from app.utils.misc import convert_string_to_datetime
 
 def lesson_week_list(lesson_week):
     lesson_weeks = list()
@@ -26,7 +26,7 @@ def lesson_week_list(lesson_week):
 
 
 def week_to_date(term_begin_time, week, weekday):
-    time = term_begin_time
+    time = convert_string_to_datetime(term_begin_time)
     date = time + timedelta((int(week) - 1) * 7 + int(weekday) - 1)
     return date
 
@@ -50,10 +50,12 @@ class LessonController(object):
 
     @classmethod
     def update_database(cls, ctx: bool = True, info: dict = None):
+        if info is None:
+            info = {}
         host = info.get("host", "localhost")
         user = info.get("user", "root")
         passwd = info.get("passwd", "wshwoaini")
-        database = info.get("db", "lesson")
+        database = info.get("db", "lessons")
         charset = info.get("charset", "utf8")
         try:
             lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
@@ -67,7 +69,7 @@ class LessonController(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for data in datas:
-            if '补考' in data['lesson_name']:
+            if '补考' in data['lesson_class']:
                 continue
             teacher_name = data['lesson_teacher_name']
             teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
@@ -78,17 +80,24 @@ class LessonController(object):
             data['lesson_teacher_unit'] = teacher_units
             lesson_id = data['lesson_id']
             data['raw_lesson_id'] = lesson_id
-            data['lesson_id'] = [lesson_id + teacher_id for teacher_id in teacher_ids]
             term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
-            term, err = dao.Term.get_term(term_name=term_name)
-            if err is not None:
-                continue
+            try:
+                term = dao.Term.get_term(term_name=term_name)
+            except Exception as e:
+                if isinstance(e, CustomError):
+                    if e.code == 404:
+                        continue
+                    else:
+                        raise e
+                else:
+                    raise CustomError(500, 500, str(e))
+            data['lesson_id'] = [lesson_id + teacher_id + term_name.replace('-', '') for teacher_id in teacher_ids]
             if term is None:
                 continue
-            term_begin_time = term.begin_time
-            try:
-                for index in range(len(teachers)):
-                    lesson_id = data['lesson_id'][index]
+            term_begin_time = term['begin_time']
+
+            for index in range(len(teachers)):
+                new_lesson_id = data['lesson_id'][index]
                 lesson_data = dict()
                 lesson_data['term'] = term_name
                 for k, v in data.items():
@@ -102,7 +111,8 @@ class LessonController(object):
                         lesson_data[k] = v[index]
                     else:
                         lesson_data[k] = v
-                dao.Lesson.insert_lesson(ctx=False, data=lesson_data)
+                dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
+                new_lesson = dao.Lesson.get_lesson(lesson_id=new_lesson_id)
                 cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
                                             ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
                 lesson_cases = cursor.fetchall()
@@ -112,7 +122,7 @@ class LessonController(object):
                                    '12': '12'}
                 for lesson_case in lesson_cases:
                     if lesson_case['lesson_week'] == '':
-                        lesson_case_data = {'lesson_id': lesson_id}
+                        lesson_case_data = {'lesson_id': new_lesson['id']}
                         for k, v in lesson_case.items():
                             try:
                                 v = json.loads(v)
@@ -121,7 +131,7 @@ class LessonController(object):
                             if v is None or v is '':
                                 continue
                             lesson_case_data[k] = v
-                        dao.LessonCase.insert_lesson_case(ctx=False, data=lesson_case_data)
+                        dao.LessonCase.insert_lesson_case(ctx=True, data=lesson_case_data)
                     else:
                         weeks = lesson_week_list(lesson_case['lesson_week'])
                         for week in weeks:
@@ -131,7 +141,7 @@ class LessonController(object):
                             for lesson_time_beg in lesson_times_beg:
                                 lesson_time_set.add(lesson_time_map[lesson_time_beg])
                             for lesson_time in lesson_time_set:
-                                lesson_case_data = {'lesson_id': lesson_id}
+                                lesson_case_data = {'lesson_id':  new_lesson['id']}
                                 for k, v in lesson_case.items():
                                     try:
                                         v = json.loads(v)
@@ -146,66 +156,61 @@ class LessonController(object):
                                         lesson_case_data['lesson_time'] = lesson_time
                                         continue
                                     lesson_case_data[k] = v
-                                    dao.LessonCase.insert_lesson_case(ctx=False, data=lesson_case_data)
-                                date = week_to_date(term_begin_time, week, lesson_case.lesson_weekday)
+                                date = week_to_date(term_begin_time, week, lesson_case_data['lesson_weekday'])
                                 lesson_case_data['lesson_date'] = date
-                if ctx:
-                    db.session.commit()
-            except Exception as e:
-                if ctx:
-                    db.session.rollback()
-                if isinstance(e, CustomError):
-                    raise e
-                else:
-                    raise CustomError(500, 500, str(e))
+                                dao.LessonCase.insert_lesson_case(ctx=True, data=lesson_case_data)
         return True
 
-    @classmethod
-    def get_lesson(cls, lesson_id: str, unscoped: bool = False):
-        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
-        return cls.formatter(lesson)
 
-    @classmethod
-    def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
-        if query_dict is None:
-            query_dict = dict()
-        query_dict = cls.reformatter_insert(query_dict)
-        (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
-        return [cls.formatter(lesson) for lesson in lessons], num
+@classmethod
+def get_lesson(cls, lesson_id: str, unscoped: bool = False):
+    lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
+    return cls.formatter(lesson)
 
-    @classmethod
-    def update_lesson(cls, ctx: bool = True, lesson_id: str = 0, data: dict = None):
-        from app.core.controller import NoticeLessonController
-        if data is None:
-            data = dict()
-        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
-        lesson_level = data.get('lesson_level', None)
-        if lesson_level is not None and lesson_level == '关注课程':
-            notice_lesson_data = dict()
-            notice_lesson_data['term'] = lesson['term']
-            notice_lesson_data['assign_group'] = data['assign_group']
-            notice_lesson_data['lesson_attention_reason'] = data['lesson_attention_reason']
-            notice_lesson_data['lesson_id'] = lesson['lesson_id']
-            NoticeLessonController.insert_notice_lesson(ctx=False, data=notice_lesson_data)
-        try:
-            dao.Lesson.update_lesson(ctx=ctx, query_dict={'lesson_id': [lesson_id]}, data=data)
-            if ctx:
-                db.session.commit()
-        except Exception as e:
-            if ctx:
-                db.session.rollback()
-            if isinstance(e, CustomError):
-                raise e
-            else:
-                raise CustomError(500, 500, str(e))
-        return True
 
-    @classmethod
-    def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
-        if query_dict is None:
-            query_dict = {}
-        (teacher_names, num) = dao.Lesson.query_teacher_names(query_dict=query_dict, unscoped=unscoped)
-        return teacher_names, num
+@classmethod
+def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+    if query_dict is None:
+        query_dict = dict()
+    query_dict = cls.reformatter_insert(query_dict)
+    (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
+    return [cls.formatter(lesson) for lesson in lessons], num
+
+
+@classmethod
+def update_lesson(cls, ctx: bool = True, lesson_id: str = 0, data: dict = None):
+    from app.core.controller import NoticeLessonController
+    if data is None:
+        data = dict()
+    lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+    lesson_level = data.get('lesson_level', None)
+    if lesson_level is not None and lesson_level == '关注课程':
+        notice_lesson_data = dict()
+        notice_lesson_data['term'] = lesson['term']
+        notice_lesson_data['assign_group'] = data['assign_group']
+        notice_lesson_data['lesson_attention_reason'] = data['lesson_attention_reason']
+        notice_lesson_data['lesson_id'] = lesson['lesson_id']
+        NoticeLessonController.insert_notice_lesson(ctx=False, data=notice_lesson_data)
+    try:
+        dao.Lesson.update_lesson(ctx=ctx, query_dict={'lesson_id': [lesson_id]}, data=data)
+        if ctx:
+            db.session.commit()
+    except Exception as e:
+        if ctx:
+            db.session.rollback()
+        if isinstance(e, CustomError):
+            raise e
+        else:
+            raise CustomError(500, 500, str(e))
+    return True
+
+
+@classmethod
+def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
+    if query_dict is None:
+        query_dict = {}
+    (teacher_names, num) = dao.Lesson.query_teacher_names(query_dict=query_dict, unscoped=unscoped)
+    return teacher_names, num
 
 
 class TermController(object):

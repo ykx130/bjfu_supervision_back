@@ -2,7 +2,7 @@ from app.utils.mysql import db
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
 from app.utils.Error import CustomError
 from datetime import datetime
-from app.utils.misc import convert_string_to_datetime
+from app.utils.misc import convert_string_to_date
 
 
 class Term(db.Model):
@@ -42,8 +42,8 @@ class Term(db.Model):
             end_year = year + 1
             begin_date = '02-15'
             end_date = '08-01'
-        data['begin_time'] = convert_string_to_datetime(str(begin_year) + '-' + begin_date)
-        data['end_time'] = convert_string_to_datetime(str(end_year) + '-' + end_date)
+        data['begin_time'] = convert_string_to_date(str(begin_year) + '-' + begin_date)
+        data['end_time'] = convert_string_to_date(str(end_year) + '-' + end_date)
         return data
 
     @classmethod
