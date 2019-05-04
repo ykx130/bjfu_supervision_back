@@ -301,7 +301,8 @@ class Lesson(db.Model):
                        'lesson_teacher_unit': lesson.lesson_teacher_unit, 'lesson_unit': lesson.lesson_unit,
                        'lesson_year': lesson.lesson_year, 'lesson_type': lesson.lesson_type,
                        'lesson_class': lesson.lesson_class, 'lesson_grade': lesson.lesson_grade,
-                       'lesson_model': lesson.lesson_model, 'term': lesson.term, 'notices': lesson.notices}
+                       'lesson_model': lesson.lesson_model, 'term': lesson.term, 'notices': lesson.notices,
+                       'raw_lesson_id': lesson.raw_lesson_id}
         return lesson_dict
 
     @classmethod
@@ -309,7 +310,7 @@ class Lesson(db.Model):
         allow_column = ['lesson_id', 'lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_name',
                         'lesson_teacher_id', 'lesson_teacher_letter', 'lesson_teacher_name', 'lesson_teacher_unit',
                         'lesson_unit', 'lesson_year', 'lesson_semester', 'lesson_class', 'lesson_type', 'lesson_grade',
-                        'lesson_model', 'term', 'notices']
+                        'lesson_model', 'term', 'notices', 'raw_lesson_id']
         new_data = dict()
         for key, value in data.items():
             if key in allow_column:
