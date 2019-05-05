@@ -39,7 +39,7 @@ class LessonController(object):
 
     @classmethod
     def formatter_with_cases(cls, lesson: dict = None):
-        lesson_id = lesson.get['id']
+        lesson_id = lesson.get('id')
         (lesson_cases, _) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
         lesson['lesson_cases'] = lesson_cases
         return lesson
