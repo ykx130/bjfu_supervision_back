@@ -1,5 +1,5 @@
 from app.utils.mysql import db
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
 from datetime import datetime
 
@@ -59,13 +59,12 @@ class Activity(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'activities': Activity}
         query = Activity.query
         if not unscoped:
             query = query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Activity)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -104,29 +103,26 @@ class Activity(db.Model):
     def query_activities(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'activities': Activity}
         query = Activity.query
         if not unscoped:
             query = query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, Activity)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            (activities, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(activity) for activity in activities], total
 
     @classmethod
     def delete_activity(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'activities': Activity}
-        activities = Activity.query.filter(Activity.using == True)
+        query = Activity.query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (activities, total) = process_query(activities, url_condition.filter_dict,
-                                                url_condition.sort_limit_dict,
-                                                url_condition.page_dict, name_map, Activity)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            (activities, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for activity in activities:
@@ -146,13 +142,11 @@ class Activity(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'activities': Activity}
-        activities = Activity.query.filter(Activity.using == True)
+        query = Activity.query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (activities, total) = process_query(activities, url_condition.filter_dict,
-                                                url_condition.sort_limit_dict,
-                                                url_condition.page_dict, name_map, Activity)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            (activities, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for activity in activities:
@@ -191,7 +185,7 @@ class ActivityUser(db.Model):
             activity_user_user_dict = {
                 'id': activity_user_user.id,
                 'username': activity_user_user.username,
-                'activity_id':activity_user_user.activity_id,
+                'activity_id': activity_user_user.activity_id,
                 'activity_user_id': activity_user_user.id,
                 'state': activity_user_user.state,
                 'fin_state': activity_user_user.fin_state
@@ -204,13 +198,12 @@ class ActivityUser(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'activity_users': ActivityUser}
         query = ActivityUser.query
         if not unscoped:
             query = query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, ActivityUser)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -250,32 +243,29 @@ class ActivityUser(db.Model):
     def query_activity_users(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'activity_users': ActivityUser}
         query = ActivityUser.query
         if not unscoped:
             query = query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, ActivityUser)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            (activity_users, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(activity_user) for activity_user in activity_users], total
 
     @classmethod
     def delete_activity_user(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'activity_users': ActivityUser}
-        activities = ActivityUser.query.filter(ActivityUser.using == True)
+        query = ActivityUser.query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (activities, total) = process_query(activities, url_condition.filter_dict,
-                                                url_condition.sort_limit_dict,
-                                                url_condition.page_dict, name_map, ActivityUser)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            (activity_users, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        for activity_user in activities:
+        for activity_user in activity_users:
             activity_user.using = False
             db.session.add(activity_user)
         if ctx:
@@ -292,16 +282,14 @@ class ActivityUser(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'activity_users': ActivityUser}
-        activities = ActivityUser.query.filter(ActivityUser.using == True)
+        query = ActivityUser.query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (activities, total) = process_query(activities, url_condition.filter_dict,
-                                                url_condition.sort_limit_dict,
-                                                url_condition.page_dict, name_map, ActivityUser)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            (activity_users, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        for activity_user in activities:
+        for activity_user in activity_users:
             for key, value in data.items():
                 if hasattr(activity_user, key):
                     setattr(activity_user, key, value)

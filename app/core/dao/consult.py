@@ -1,7 +1,7 @@
 from app.utils.mysql import db
 from sqlalchemy import text
 from datetime import datetime
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
 
 
@@ -31,13 +31,12 @@ class ConsultType(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'consult_types': ConsultType}
         query = ConsultType.query
         if not unscoped:
             query = query.filter(ConsultType.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, ConsultType)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ConsultType)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -76,29 +75,26 @@ class ConsultType(db.Model):
     def query_consult_types(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'consult_types': ConsultType}
         query = ConsultType.query
         if not unscoped:
             query = query.filter(ConsultType.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, ConsultType)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ConsultType)
+            (consult_types, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(consult_type) for consult_type in consult_types], total
 
     @classmethod
     def delete_consult_type(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'consult_types': ConsultType}
-        consult_types = ConsultType.query.filter(ConsultType.using == True)
+        query = ConsultType.query.filter(ConsultType.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (consult_types, total) = process_query(consult_types, url_condition.filter_dict,
-                                                   url_condition.sort_limit_dict,
-                                                   url_condition.page_dict, name_map, ConsultType)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ConsultType)
+            (consult_types, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for consult_type in consult_types:
@@ -118,13 +114,11 @@ class ConsultType(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'consult_types': ConsultType}
-        consult_types = ConsultType.query.filter(ConsultType.using == True)
+        query = ConsultType.query.filter(ConsultType.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (consult_types, total) = process_query(consult_types, url_condition.filter_dict,
-                                                   url_condition.sort_limit_dict,
-                                                   url_condition.page_dict, name_map, ConsultType)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ConsultType)
+            (consult_types, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for consult_type in consult_types:
@@ -187,13 +181,12 @@ class Consult(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'consults': Consult}
         query = Consult.query
         if not unscoped:
             query = query.filter(Consult.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Consult)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Consult)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -232,28 +225,26 @@ class Consult(db.Model):
     def query_consults(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'consults': Consult}
         query = Consult.query
         if not unscoped:
             query = query.filter(Consult.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, Consult)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Consult)
+            (consults, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(consult) for consult in consults], total
 
     @classmethod
     def delete_consult(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'consults': Consult}
-        consults = Consult.query.filter(Consult.using == True)
+        query = Consult.query.filter(Consult.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (consults, total) = process_query(consults, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                              url_condition.page_dict, name_map, Consult)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Consult)
+            (consults, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for consult in consults:
@@ -273,12 +264,11 @@ class Consult(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'consults': Consult}
-        consults = Consult.query.filter(Consult.using == True)
+        query = Consult.query.filter(Consult.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (consults, total) = process_query(consults, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                              url_condition.page_dict, name_map, Consult)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Consult)
+            (consults, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for consult in consults:
