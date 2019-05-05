@@ -78,19 +78,23 @@ class LessonController(object):
             lesson_id = data['lesson_id']
             data['raw_lesson_id'] = lesson_id
             term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
-            try:
-                term = dao.Term.get_term(term_name=term_name)
-            except Exception as e:
-                if isinstance(e, CustomError):
-                    if e.code == 404:
-                        continue
-                    else:
-                        raise e
-                else:
-                    raise CustomError(500, 500, str(e))
+            term = dao.Term.get_term(term_name=term_name)
             data['lesson_id'] = [lesson_id + teacher_id + term_name.replace('-', '') for teacher_id in teacher_ids]
             if term is None:
-                continue
+                parts = term_name.split('-')
+                if int(parts[2]) == 1:
+                    begin_year = parts[0]
+                    end_year = parts[1]
+                    begin_time = begin_year + '-09-01'
+                    end_time = end_year + '-02-14'
+                else:
+                    begin_year = parts[1]
+                    end_year = parts[1]
+                    begin_time = begin_year + '-02-14'
+                    end_time = end_year + '-09-01'
+                term_data = {'name': term_name, 'begin_time': begin_time, 'end_time': end_time}
+                dao.Term.insert_term(ctx=True, data=term_data)
+                term = dao.Term.get_term(term_name=term_name)
             term_begin_time = term['begin_time']
 
             for index in range(len(teachers)):
