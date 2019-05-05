@@ -162,55 +162,55 @@ class LessonController(object):
         return True
 
 
-@classmethod
-def get_lesson(cls, lesson_id: str, unscoped: bool = False):
-    lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
-    return cls.formatter(lesson)
+    @classmethod
+    def get_lesson(cls, lesson_id: str, unscoped: bool = False):
+        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
+        return cls.formatter(lesson)
 
 
-@classmethod
-def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
-    if query_dict is None:
-        query_dict = dict()
-    query_dict = cls.reformatter_insert(query_dict)
-    (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
-    return [cls.formatter(lesson) for lesson in lessons], num
+    @classmethod
+    def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = dict()
+        query_dict = cls.reformatter_insert(query_dict)
+        (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
+        return [cls.formatter(lesson) for lesson in lessons], num
 
 
-@classmethod
-def update_lesson(cls, ctx: bool = True, lesson_id: str = 0, data: dict = None):
-    from app.core.controller import NoticeLessonController
-    if data is None:
-        data = dict()
-    lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
-    lesson_level = data.get('lesson_level', None)
-    if lesson_level is not None and lesson_level == '关注课程':
-        notice_lesson_data = dict()
-        notice_lesson_data['term'] = lesson['term']
-        notice_lesson_data['assign_group'] = data['assign_group']
-        notice_lesson_data['lesson_attention_reason'] = data['lesson_attention_reason']
-        notice_lesson_data['lesson_id'] = lesson['lesson_id']
-        NoticeLessonController.insert_notice_lesson(ctx=False, data=notice_lesson_data)
-    try:
-        dao.Lesson.update_lesson(ctx=ctx, query_dict={'lesson_id': [lesson_id]}, data=data)
-        if ctx:
-            db.session.commit()
-    except Exception as e:
-        if ctx:
-            db.session.rollback()
-        if isinstance(e, CustomError):
-            raise e
-        else:
-            raise CustomError(500, 500, str(e))
-    return True
+    @classmethod
+    def update_lesson(cls, ctx: bool = True, lesson_id: str = 0, data: dict = None):
+        from app.core.controller import NoticeLessonController
+        if data is None:
+            data = dict()
+        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+        lesson_level = data.get('lesson_level', None)
+        if lesson_level is not None and lesson_level == '关注课程':
+            notice_lesson_data = dict()
+            notice_lesson_data['term'] = lesson['term']
+            notice_lesson_data['assign_group'] = data['assign_group']
+            notice_lesson_data['lesson_attention_reason'] = data['lesson_attention_reason']
+            notice_lesson_data['lesson_id'] = lesson['lesson_id']
+            NoticeLessonController.insert_notice_lesson(ctx=False, data=notice_lesson_data)
+        try:
+            dao.Lesson.update_lesson(ctx=ctx, query_dict={'lesson_id': [lesson_id]}, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
 
 
-@classmethod
-def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
-    if query_dict is None:
-        query_dict = {}
-    (teacher_names, num) = dao.Lesson.query_teacher_names(query_dict=query_dict, unscoped=unscoped)
-    return teacher_names, num
+    @classmethod
+    def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        (teacher_names, num) = dao.Lesson.query_teacher_names(query_dict=query_dict, unscoped=unscoped)
+        return teacher_names, num
 
 
 class TermController(object):
