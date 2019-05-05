@@ -38,6 +38,12 @@ class LessonController(object):
         return lesson
 
     @classmethod
+    def formatter_with_cases(cls, lesson: dict = None):
+        lesson_id = lesson.get['id']
+        (lesson_cases, _) = dao.LessonCase.query_lesson_cases(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
+        lesson['lesson_cases'] = lesson_cases
+        return lesson
+    @classmethod
     def reformatter_insert(cls, data: dict):
         return data
 
@@ -172,6 +178,14 @@ class LessonController(object):
         query_dict = cls.reformatter_insert(query_dict)
         (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson) for lesson in lessons], num
+
+    @classmethod
+    def query_lessons_with_cases(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = dict()
+        query_dict = cls.reformatter_insert(query_dict)
+        (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
+        return [cls.formatter_with_cases(lesson) for lesson in lessons], num
 
     @classmethod
     def update_lesson(cls, ctx: bool = True, lesson_id: str = 0, data: dict = None):
