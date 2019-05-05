@@ -7,7 +7,10 @@ class FormMetaController(object):
 
     @classmethod
     def get_form_meta(cls, name: str = None, version: str = None):
-        return dao.FormMeta.get_form_meta(name, version)
+        form_meta = dao.FormMeta.get_form_meta(name, version)
+        if form_meta is None:
+            raise CustomError(404, 404, 'form_meta not found')
+        return form_meta
 
     @classmethod
     def query_form_metas(cls, query_dict: dict = None):
@@ -34,7 +37,7 @@ class FormMetaController(object):
     def query_form_meta_history(cls, query_dict: dict = None):
         if query_dict is None:
             query_dict = dict()
-        return dao.FormMeta.query_form_meta(query_dict)
+        return dao.FormMeta.query_form_metas(query_dict)
 
     @classmethod
     def insert_form_meta(cls, data: dict = None):
@@ -48,7 +51,9 @@ class FormMetaController(object):
 
     @classmethod
     def delete_form_meta(cls, name: str = None, version: str = None):
-        dao.FormMeta.get_form_meta(name=name, version=version)
+        form_meta = dao.FormMeta.get_form_meta(name=name, version=version)
+        if form_meta is None:
+            raise CustomError(404, 404, 'form_meta not found')
         return dao.FormMeta.delete_form_meta({'name': name, 'version': version})
 
     @classmethod
@@ -56,6 +61,8 @@ class FormMetaController(object):
         if data is None:
             data = dict()
         form_meta = dao.FormMeta.get_form_meta(name)
+        if form_meta is None:
+            raise CustomError(404, 404, 'form_meta not found')
         dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
         dao.FormMeta.insert_form_meta(data)
         return True
@@ -78,6 +85,8 @@ class WorkPlanController(object):
     @classmethod
     def get_work_plan(cls, id: int, unscoped: bool = False):
         work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=unscoped)
+        if work_plan is None:
+            raise CustomError(404, 404, 'work_plan not found')
         return cls.formatter(work_plan)
 
     @classmethod
@@ -87,7 +96,9 @@ class WorkPlanController(object):
 
     @classmethod
     def delete_work_plan(cls, ctx: bool = True, id: int = 0):
-        dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        if work_plan is None:
+            raise CustomError(404, 404, 'work_plan not found')
         try:
             dao.WorkPlan.delete_work_plan(ctx=False, query_dict={'id': [id]})
             if ctx:
@@ -105,7 +116,9 @@ class WorkPlanController(object):
     def update_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
             data = dict()
-        dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        if work_plan is None:
+            raise CustomError(404, 404, 'work_plan not found')
         try:
             dao.WorkPlan.update_work_plan(ctx=False, query_dict={'id': [id]}, data=data)
             if ctx:
@@ -151,6 +164,8 @@ class WorkPlanController(object):
         for work_plan in work_plans:
             form_meta = dao.FormMeta.get_form_meta(name=work_plan['form_meta_name'],
                                                    version=work_plan['form_meta_version'], unscoped=unscoped)
+            if form_meta is None:
+                raise CustomError(404, 404, 'form_meta not found')
             work_plan['form_meta'] = form_meta
             results.append(work_plan)
         return results, num

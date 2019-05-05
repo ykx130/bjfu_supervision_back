@@ -31,6 +31,8 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def formatter(cls, user):
+        if user is None:
+            return None
         user_dict = {
             'id': user.id,
             'username': user.username,
@@ -105,8 +107,6 @@ class User(db.Model, UserMixin):
             user = user.filter(User.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         return cls.formatter(user)
 
     @classmethod
@@ -156,8 +156,6 @@ class User(db.Model, UserMixin):
             user = User.query.filter(User.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         user.using = False
         db.session.add(user)
         if ctx:
@@ -177,8 +175,6 @@ class User(db.Model, UserMixin):
             user = User.query.filter(User.username == username).filter(User.using == True).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         for key, value in data.items():
             if hasattr(user, key):
                 setattr(user, key, value)
@@ -204,6 +200,8 @@ class Group(db.Model):
 
     @classmethod
     def formatter(cls, group):
+        if group is None:
+            return None
         group_dict = {
             'name': group.name,
             'leader_name': group.leader_name
@@ -230,8 +228,6 @@ class Group(db.Model):
             group = Group.query.filter(Group.using == True).filter(Group.name == group_name).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if group is None:
-            raise CustomError(404, 404, 'group not found')
         return cls.formatter(group)
 
     @classmethod
@@ -288,6 +284,8 @@ class Supervisor(db.Model):
 
     @classmethod
     def formatter(cls, supervisor):
+        if supervisor is None:
+            return None
         supervisor_dict = {
             "id": supervisor.id,
             'group': supervisor.group,
@@ -335,8 +333,6 @@ class Supervisor(db.Model):
             supervisor = supervisor.filter(Supervisor.username == username).filter(Supervisor.term == term).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if supervisor is None:
-            raise CustomError(404, 404, 'user not found')
         return cls.formatter(supervisor)
 
     @classmethod
@@ -348,8 +344,6 @@ class Supervisor(db.Model):
             supervisor = supervisor.filter(Supervisor.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if supervisor is None:
-            raise CustomError(404, 404, 'user not found')
         return cls.formatter(supervisor)
 
     @classmethod
@@ -424,6 +418,8 @@ class Event(db.Model):
 
     @classmethod
     def formatter(cls, event):
+        if event is None:
+            return None
         event_dict = {
             'id': event.id,
             'username': event.username,
@@ -464,8 +460,6 @@ class Event(db.Model):
             event = event.filter(Event.id == id).filter(Event.using == True).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if event is None:
-            raise CustomError(404, 404, 'event not found')
         return cls.formatter(event)
 
     @classmethod

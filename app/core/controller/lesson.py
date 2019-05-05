@@ -161,6 +161,8 @@ class LessonController(object):
     @classmethod
     def get_lesson(cls, lesson_id: str, unscoped: bool = False):
         lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
+        if lesson is None:
+            raise CustomError(404, 404, 'lesson not found')
         return cls.formatter(lesson)
 
     @classmethod
@@ -177,6 +179,8 @@ class LessonController(object):
         if data is None:
             data = dict()
         lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+        if lesson is None:
+            raise CustomError(404, 404, 'lesson not found')
         lesson_level = data.get('lesson_level', None)
         if lesson_level is not None and lesson_level == '关注课程':
             notice_lesson_data = dict()
@@ -229,6 +233,8 @@ class TermController(object):
     @classmethod
     def get_term(cls, term_name: str, unscoped=False):
         term = dao.Term.get_term(term_name=term_name, unscoped=unscoped)
+        if term is None:
+            raise CustomError(404, 404, 'term not found')
         return cls.formatter(term)
 
     @classmethod

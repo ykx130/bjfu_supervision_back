@@ -42,6 +42,8 @@ class FormMeta(object):
 
     @classmethod
     def formatter_simple(cls, data):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -55,6 +57,8 @@ class FormMeta(object):
 
     @classmethod
     def formatter_total(cls, data: dict):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -82,8 +86,6 @@ class FormMeta(object):
             data = mongo.db.form_meta.find_one(condition)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if data is None:
-            raise CustomError(404, 404, 'form meta not found')
         return cls.formatter_total(data)
 
     @classmethod
@@ -150,6 +152,8 @@ class WorkPlan(db.Model):
 
     @classmethod
     def formatter(cls, work_plan):
+        if work_plan is None:
+            return None
         try:
             work_plan_dict = {
                 'id': work_plan.id,
@@ -212,8 +216,6 @@ class WorkPlan(db.Model):
             work_plan = work_plan.filter(WorkPlan.id == int(id)).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if work_plan is None:
-            raise CustomError(404, 404, 'work plan not found')
         return cls.formatter(work_plan)
 
     @classmethod
@@ -309,6 +311,8 @@ class Form(object):
 
     @classmethod
     def formatter_simple(cls, data: dict):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -325,6 +329,8 @@ class Form(object):
 
     @classmethod
     def formatter_total(cls, data: dict):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -352,8 +358,6 @@ class Form(object):
             data = mongo.db.form.find_one(condition)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if data is None:
-            raise CustomError(404, 404, 'form not found')
         return cls.formatter_total(data)
 
     @classmethod

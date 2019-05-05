@@ -92,11 +92,15 @@ class FormController(object):
     @classmethod
     def find_form(cls, _id=None, unscoped=False):
         form = dao.Form.get_form(_id=_id, unscoped=unscoped)
+        if form is None:
+            raise CustomError(404, 404, 'form not found')
         return cls.formatter(form)
 
     @classmethod
     def delete_form(cls, _id=None):
-        dao.Form.get_form(_id=_id)
+        form = dao.Form.get_form(_id=_id)
+        if form is None:
+            raise CustomError(404, 404, 'form not found')
         dao.Form.delete_form(where_dict={'_id': _id})
         return True
 
@@ -104,10 +108,14 @@ class FormController(object):
     def update_form(cls, _id=None, data: dict = None):
         if data is None:
             data = dict()
-        dao.Form.get_form(_id=_id)
+        form = dao.Form.get_form(_id=_id)
+        if form is None:
+            raise CustomError(404, 404, 'form not found')
         dao.Form.update_form({'_id': _id}, data)
         if 'status' in data:
             form = dao.Form.get_form(_id)
+            if form is None:
+                raise CustomError(404, 404, 'form not found')
             lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)
             if data.get('status') == '待提交':
                 send_kafka_message(topic='form_service',

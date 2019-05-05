@@ -13,6 +13,8 @@ class NoticeLessonController(object):
     @classmethod
     def formatter(cls, notice_lesson):
         lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson.get('lesson_id', 0), unscoped=True)
+        if lesson is None:
+            raise  CustomError(404, 404, 'lesson not found')
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_name', 'lesson_teacher_id',
                        'notices']
         for lesson_key in lesson_keys:
@@ -40,6 +42,8 @@ class NoticeLessonController(object):
     @classmethod
     def get_notice_lesson(cls, id: int, unscoped: bool = False):
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=unscoped)
+        if notice_lesson is None:
+            raise CustomError(404, 404, 'notice_lesson not found')
         return cls.formatter(notice_lesson)
 
     @classmethod
@@ -53,7 +57,9 @@ class NoticeLessonController(object):
             data = dict()
         data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         data = cls.reformatter_insert(data=data)
-        dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
+        if lesson is None:
+            raise CustomError(404, 404, 'lesson not found')
         try:
             (notice_lesson_records, num) = dao.NoticeLesson.query_notice_lessons(
                 query_dict={'lesson_id': [data['lesson_id']], 'term': [data['term']]}, unscoped=False)
@@ -81,7 +87,9 @@ class NoticeLessonController(object):
         lesson_ids = data.get('lesson_ids', [])
         try:
             for lesson_id in lesson_ids:
-                dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+                lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+                if lesson is None:
+                    raise CustomError(404, 404, 'lesson not found')
                 (_, num) = dao.NoticeLesson.query_notice_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
                     continue
@@ -117,7 +125,9 @@ class NoticeLessonController(object):
         if data is None:
             data = dict()
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
-        dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+        if lesson is None:
+            raise CustomError(404, 404, 'lesson not found')
         try:
             dao.NoticeLesson.update_notice_lesson(ctx=False, query_dict={'id': [id]}, data=data)
             if ctx:
@@ -134,8 +144,12 @@ class NoticeLessonController(object):
     @classmethod
     def delete_notice_lesson(cls, ctx: bool = True, id: int = 0):
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
+        if notice_lesson is None:
+            raise CustomError(404, 404, 'notice_lesson not found')
         try:
-            dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+            lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+            if lesson is None:
+                raise CustomError(404, 404, 'lesson not found')
             dao.NoticeLesson.delete_notice_lesson(ctx=False, query_dict={'id': [id]})
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [notice_lesson['lesson_id']]},
                                      data={'lesson_level': '自主听课'})
@@ -158,7 +172,11 @@ class NoticeLessonController(object):
         try:
             for notice_lesson_id in notice_lesson_ids:
                 notice_lesson = dao.NoticeLesson.get_notice_lesson(id=notice_lesson_id, unscoped=False)
-                dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+                if notice_lesson is None:
+                    raise CustomError(404, 404, 'notice_lesson not found')
+                lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+                if lesson is None:
+                    raise CustomError(404, 404, 'lesson not found')
                 dao.NoticeLesson.delete_notice_lesson(ctx=False, query_dict={'id': [notice_lesson_id]})
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [notice_lesson['lesson_id']]},
                                          data={'lesson_level': '自助听课'})
@@ -176,7 +194,11 @@ class NoticeLessonController(object):
     @classmethod
     def notice_lesson_vote(cls, ctx: bool = True, id: int = 0):
         notice_lesson = dao.NoticeLesson.get_notice_lesson(id=id, unscoped=False)
-        lesson = dao.Lesson.get_lesson(id=id, unscoped=False)
+        if notice_lesson is None:
+            raise CustomError(404, 404, 'notice_lesson not found')
+        lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=False)
+        if lesson is None:
+            raise CustomError(404, 404, 'lesson not found')
         try:
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': notice_lesson['lesson_id']},
                                      data={'notices': int(lesson['notices'] + 1)})
@@ -251,6 +273,8 @@ class NoticeLessonController(object):
         frame_dict = dict()
         for notice_lesson in notice_lessons:
             lesson = dao.Lesson.get_lesson(lesson_id=notice_lesson['lesson_id'], unscoped=True)
+            if lesson is None:
+                raise CustomError(404, 404, 'lesson not found')
             for key, value in column_dict.items():
                 excel_value = lesson[value] if value in lesson else notice_lesson.get(value, "")
                 if key not in frame_dict:

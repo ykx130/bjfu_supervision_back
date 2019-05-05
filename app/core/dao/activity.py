@@ -33,6 +33,8 @@ class Activity(db.Model):
 
     @classmethod
     def formatter(cls, activity):
+        if activity is None:
+            return None
         try:
             activity_dict = {
                 'id': activity.id,
@@ -95,8 +97,6 @@ class Activity(db.Model):
             activity = activity.filter(Activity.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if activity is None:
-            raise CustomError(404, 404, 'activity not found')
         return cls.formatter(activity)
 
     @classmethod
@@ -181,6 +181,8 @@ class ActivityUser(db.Model):
 
     @classmethod
     def formatter(cls, activity_user_user):
+        if activity_user_user is None:
+            return None
         try:
             activity_user_user_dict = {
                 'id': activity_user_user.id,
@@ -235,8 +237,6 @@ class ActivityUser(db.Model):
                 ActivityUser.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if activity_user is None:
-            raise CustomError(404, 404, 'activity_user not found')
         return cls.formatter(activity_user)
 
     @classmethod

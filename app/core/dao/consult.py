@@ -13,6 +13,8 @@ class ConsultType(db.Model):
 
     @classmethod
     def formatter(cls, consult_type):
+        if consult_type is None:
+            return None
         try:
             consult_type_dict = {'id': consult_type.id, 'name': consult_type.name}
         except Exception as e:
@@ -50,8 +52,6 @@ class ConsultType(db.Model):
             consult_type = consult_type.filter(ConsultType.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if consult_type is None:
-            raise CustomError(404, 404, 'consult_type not found')
         return cls.formatter(consult_type)
 
     @classmethod
@@ -151,6 +151,8 @@ class Consult(db.Model):
 
     @classmethod
     def formatter(cls, consult):
+        if consult is None:
+            return None
         try:
             consult_dict = {
                 'id': consult.id,
@@ -200,8 +202,6 @@ class Consult(db.Model):
             consult = consult.filter(Consult.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if consult is None:
-            raise CustomError(404, 404, 'consult not found')
         return cls.formatter(consult)
 
     @classmethod

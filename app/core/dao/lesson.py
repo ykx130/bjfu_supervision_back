@@ -16,6 +16,8 @@ class Term(db.Model):
 
     @classmethod
     def formatter(cls, term):
+        if term is None:
+            return None
         term_dict = {
             'name': term.name,
             'begin_time': str(term.begin_time),
@@ -92,8 +94,6 @@ class Term(db.Model):
             term = term.filter(Term.name == term_name).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if term is None:
-            raise CustomError(404, 404, 'term not found')
         return cls.formatter(term)
 
     @classmethod
@@ -128,6 +128,8 @@ class LessonRecord(db.Model):
 
     @classmethod
     def formatter(cls, lesson_record):
+        if lesson_record is None:
+            return None
         try:
             lesson_record_dict = {
                 'id': lesson_record.id,
@@ -175,8 +177,6 @@ class LessonRecord(db.Model):
                 LessonRecord.term == term).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if lesson_record is None:
-            raise CustomError(404, 404, 'lesson record not found')
         return cls.formatter(lesson_record)
 
     @classmethod
@@ -285,6 +285,8 @@ class Lesson(db.Model):
 
     @classmethod
     def formatter(cls, lesson):
+        if lesson is None:
+            return None
         lesson_dict = {'id': lesson.id, 'lesson_id': lesson.lesson_id, 'lesson_attribute': lesson.lesson_attribute,
                        'lesson_state': lesson.lesson_state, 'lesson_teacher_id': lesson.lesson_teacher_id,
                        'lesson_name': lesson.lesson_name, 'lesson_teacher_name': lesson.lesson_teacher_name,
@@ -335,8 +337,6 @@ class Lesson(db.Model):
             lesson = lesson.filter(Lesson.lesson_id == lesson_id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if lesson is None:
-            raise CustomError(404, 404, 'lesson not found')
         return cls.formatter(lesson)
 
     @classmethod
@@ -453,6 +453,8 @@ class LessonCase(db.Model):
 
     @classmethod
     def formatter(cls, lesson_case):
+        if lesson_case is None:
+            return None
         lesson_case_dict = {'lesson_week': lesson_case.lesson_week, 'lesson_time': str(lesson_case.lesson_time),
                             'lesson_date': str(lesson_case.lesson_date.strftime('%Y-%m-%d')),
                             'lesson_weekday': lesson_case.lesson_weekday,
@@ -490,8 +492,6 @@ class LessonCase(db.Model):
             lesson_case = lesson_case.filter(LessonCase.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if lesson_case is None:
-            raise CustomError(404, 404, 'lesson_case not found')
         return cls.formatter(lesson_case)
 
     @classmethod
@@ -585,6 +585,8 @@ class NoticeLesson(db.Model):
 
     @classmethod
     def formatter(cls, notice_lesson):
+        if notice_lesson is None:
+            return None
         notice_lesson_dict = {
             'id': notice_lesson.id,
             'lesson_id': notice_lesson.lesson_id,
@@ -624,8 +626,6 @@ class NoticeLesson(db.Model):
             notice_lesson = notice_lesson.filter(NoticeLesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if notice_lesson is None:
-            raise CustomError(404, 404, 'notice_lesson not found')
         return cls.formatter(notice_lesson)
 
     @classmethod
@@ -721,6 +721,8 @@ class ModelLesson(db.Model):
 
     @classmethod
     def formatter(cls, model_lesson):
+        if model_lesson is None:
+            return None
         model_lesson_dict = {
             'id': model_lesson.id,
             'lesson_id': model_lesson.lesson_id,
@@ -766,8 +768,6 @@ class ModelLesson(db.Model):
             model_lesson = model_lesson.filter(ModelLesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if model_lesson is None:
-            raise CustomError(404, 404, 'model_lesson not found')
         return cls.formatter(model_lesson)
 
     @classmethod

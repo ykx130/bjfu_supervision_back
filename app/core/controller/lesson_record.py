@@ -9,7 +9,6 @@ import json
 import app.core.services as service
 
 
-
 class LessonRecordController(object):
     @classmethod
     def formatter(cls, lesson_record):
@@ -57,6 +56,8 @@ class LessonRecordController(object):
         if term is None:
             term = service.TermService.get_now_term()['name']
         lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=unscoped)
+        if lesson_record is None:
+            raise CustomError(404, 404, 'lesson_record not found')
         return cls.formatter(lesson_record)
 
     @classmethod
@@ -64,6 +65,8 @@ class LessonRecordController(object):
         if term is None:
             term = service.TermService.get_now_term()['name']
         lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=False)
+        if lesson_record is None:
+            raise CustomError(404, 404, 'lesson_record not found')
         try:
             dao.LessonRecord.delete_lesson_record(ctx=False, query_dict={'id': [lesson_record['id']]})
             if ctx:
@@ -84,6 +87,8 @@ class LessonRecordController(object):
             for username in usernames:
                 supervisor_query_dict = {'term': [term], 'username': [username]}
                 user = dao.User.get_user(username=username, unscoped=False)
+                if user is None:
+                    raise CustomError(404, 404, 'lesson_record not found')
                 (supervisors, num) = dao.Supervisor.query_supervisors(query_dict=supervisor_query_dict, unscoped=False)
                 for supervisor in supervisors:
                     (_, num) = dao.LessonRecord.query_lesson_records(
@@ -111,7 +116,11 @@ class LessonRecordController(object):
         username = data.get('username', None)
         term = data.get('term', service.TermService.get_now_term()['name'])
         user = dao.User.get_user(username=username, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'lesson_record not found')
         supervisor = dao.Supervisor.get_supervisor(username=username, term=term, unscoped=False)
+        if supervisor is None:
+            raise CustomError(404, 404, 'supervisor not found')
         try:
             data = {'username': username, 'term': term, 'name': user['name'], 'group_name': supervisor['group']}
             dao.LessonRecord.insert_lesson_record(ctx=False, data=data)
@@ -131,6 +140,8 @@ class LessonRecordController(object):
         if data is None:
             data = {}
         lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=False)
+        if lesson_record is None:
+            raise CustomError(404, 404, 'lesson_record not found')
         try:
             dao.LessonRecord.update_lesson_record(query_dict={'id': [lesson_record['id']]}, data=data)
             if ctx:
