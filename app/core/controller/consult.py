@@ -27,6 +27,8 @@ class ConsultTypeController(object):
     @classmethod
     def get_consult_type(cls, id: int, unscoped: bool = False):
         consult_type = dao.ConsultType.get_consult_type(id=id, unscoped=unscoped)
+        if consult_type is None:
+            raise CustomError(404, 404, 'consult_type not found')
         return cls.formatter(consult_type)
 
     @classmethod
@@ -57,7 +59,9 @@ class ConsultTypeController(object):
         if data is None:
             data = {}
         data = cls.reformatter_update(data)
-        dao.ConsultType.get_consult_type(id=id, unscoped=False)
+        consult_type = dao.ConsultType.get_consult_type(id=id, unscoped=False)
+        if consult_type is None:
+            raise CustomError(404, 404, 'consult_type not found')
         try:
             dao.ConsultType.update_consult_type(ctx=False, query_dict={'id': [id]}, data=data)
             if ctx:
@@ -73,7 +77,9 @@ class ConsultTypeController(object):
 
     @classmethod
     def delete_consult_type(cls, ctx: bool = True, id: int = 0):
-        dao.ConsultType.get_consult_type(id=id, unscoped=False)
+        consult_type = dao.ConsultType.get_consult_type(id=id, unscoped=False)
+        if consult_type is None:
+            raise CustomError(404, 404, 'consult_type not found')
         try:
             dao.ConsultType.delete_consult_type(ctx=False, query_dict={'id': [id]})
             if ctx:
@@ -115,6 +121,8 @@ class ConsultController(object):
     @classmethod
     def get_consult(cls, id: int, unscoped: bool = False):
         consult = dao.Consult.get_consult(id=id, unscoped=unscoped)
+        if consult is None:
+            raise CustomError(404, 404, 'consult not found')
         return cls.formatter(consult)
 
     @classmethod
@@ -145,7 +153,9 @@ class ConsultController(object):
         if data is None:
             data = {}
         data = cls.reformatter_update(data)
-        dao.Consult.get_consult(id=id, unscoped=False)
+        consult = dao.Consult.get_consult(id=id, unscoped=False)
+        if consult is None:
+            raise CustomError(404, 404, 'consult not found')
         try:
             dao.Consult.update_consult(ctx=False, query_dict={'id': [id]}, data=data)
             if ctx:
@@ -161,7 +171,9 @@ class ConsultController(object):
 
     @classmethod
     def delete_consult(cls, ctx: bool = True, id: int = 0):
-        dao.Consult.get_consult(id=id, unscoped=False)
+        consult = dao.Consult.get_consult(id=id, unscoped=False)
+        if consult is None:
+            raise CustomError(404, 404, 'consult not found')
         try:
             dao.Consult.delete_consult(ctx=False, query_dict={'id': [id]})
             if ctx:

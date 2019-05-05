@@ -42,6 +42,8 @@ class FormMeta(object):
 
     @classmethod
     def formatter_simple(cls, data):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -55,6 +57,8 @@ class FormMeta(object):
 
     @classmethod
     def formatter_total(cls, data: dict):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -82,8 +86,6 @@ class FormMeta(object):
             data = mongo.db.form_meta.find_one(condition)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if data is None:
-            raise CustomError(404, 404, 'form meta not found')
         return cls.formatter_total(data)
 
     @classmethod
@@ -150,6 +152,8 @@ class WorkPlan(db.Model):
 
     @classmethod
     def formatter(cls, work_plan):
+        if work_plan is None:
+            return None
         try:
             work_plan_dict = {
                 'id': work_plan.id,
@@ -191,18 +195,17 @@ class WorkPlan(db.Model):
     def query_work_plan(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = dict()
-        name_map = {'work_plans': WorkPlan}
         query = WorkPlan.query
         if not unscoped:
             query = query.filter(WorkPlan.using == True)
         url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
-            (query, total) = mysql_url_condition.process_query(query, url_condition.filter_dict,
-                                                               url_condition.sort_limit_dict, url_condition.page_dict,
-                                                               name_map, WorkPlan)
+            query = mysql_url_condition.process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                                      WorkPlan)
+            (res, total) = mysql_url_condition.page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(data) for data in res], total
 
     @classmethod
     def get_work_plan(cls, id: int, unscoped: bool = False):
@@ -213,21 +216,18 @@ class WorkPlan(db.Model):
             work_plan = work_plan.filter(WorkPlan.id == int(id)).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if work_plan is None:
-            raise CustomError(404, 404, 'work plan not found')
         return cls.formatter(work_plan)
 
     @classmethod
     def delete_work_plan(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = dict()
-        name_map = {'work_plans': WorkPlan}
-        work_plans = WorkPlan.query.filter(WorkPlan.using == True)
+        query = WorkPlan.query.filter(WorkPlan.using == True)
         url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
-            (work_plans, total) = mysql_url_condition.process_query(work_plans, url_condition.filter_dict,
-                                                                    url_condition.sort_limit_dict,
-                                                                    url_condition.page_dict, name_map, WorkPlan)
+            query = mysql_url_condition.process_query(query, url_condition.filter_dict,
+                                                      url_condition.sort_limit_dict, WorkPlan)
+            (work_plans, total) = mysql_url_condition.page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for work_plan in work_plans:
@@ -247,20 +247,19 @@ class WorkPlan(db.Model):
         if query_dict is None:
             query_dict = dict()
         data = cls.reformatter_update(data)
-        name_map = {'work_plans': WorkPlan}
-        work_plans = WorkPlan.query.filter(WorkPlan.using == True)
+        query = WorkPlan.query.filter(WorkPlan.using == True)
         url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
-            (work_plans, total) = mysql_url_condition.process_query(work_plans, url_condition.filter_dict,
-                                                                    url_condition.sort_limit_dict,
-                                                                    url_condition.page_dict, name_map, WorkPlan)
+            query = mysql_url_condition.process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                                      WorkPlan)
+            (work_plans, total) = mysql_url_condition.page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        for lesson_record in work_plans:
+        for work_plan in work_plans:
             for key, value in data.items():
-                if hasattr(lesson_record, key):
-                    setattr(lesson_record, key, value)
-            db.session.add(lesson_record)
+                if hasattr(work_plan, key):
+                    setattr(work_plan, key, value)
+            db.session.add(work_plan)
         if ctx:
             try:
                 db.session.commit()
@@ -312,6 +311,8 @@ class Form(object):
 
     @classmethod
     def formatter_simple(cls, data: dict):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -328,6 +329,8 @@ class Form(object):
 
     @classmethod
     def formatter_total(cls, data: dict):
+        if data is None:
+            return None
         try:
             json_dict = {
                 '_id': str(data.get('_id', None)),
@@ -355,8 +358,6 @@ class Form(object):
             data = mongo.db.form.find_one(condition)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if data is None:
-            raise CustomError(404, 404, 'form not found')
         return cls.formatter_total(data)
 
     @classmethod

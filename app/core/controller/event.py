@@ -25,6 +25,8 @@ class EventController(object):
     @classmethod
     def get_event(cls, id: int, unscoped: bool = False):
         event = dao.Event.get_event(id=id, unscoped=unscoped)
+        if event is None:
+            raise CustomError(404, 404, 'event not found')
         return cls.formatter(event)
 
     @classmethod
@@ -61,7 +63,9 @@ class EventController(object):
         if data is None:
             data = {}
         data = cls.reformatter_update(data)
-        dao.Event.get_event(id=id, unscoped=False)
+        event = dao.Event.get_event(id=id, unscoped=False)
+        if event is None:
+            raise CustomError(404, 404, 'event not found')
         try:
             dao.Event.update_event(ctx=False, query_dict={'id': [id]}, data=data)
             if ctx:
@@ -77,7 +81,9 @@ class EventController(object):
 
     @classmethod
     def delete_event(cls, ctx: bool = True, id: int = 0):
-        dao.Event.get_event(id=id, unscoped=False)
+        event = dao.Event.get_event(id=id, unscoped=False)
+        if event is None:
+            raise CustomError(404, 404, 'event not found')
         try:
             dao.Event.delete_event(ctx=False, query_dict={'id': [id]})
             if ctx:

@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
 
 
@@ -31,6 +31,8 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def formatter(cls, user):
+        if user is None:
+            return None
         user_dict = {
             'id': user.id,
             'username': user.username,
@@ -67,13 +69,12 @@ class User(db.Model, UserMixin):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'users': User}
         query = User.query
         if not unscoped:
             query = query.filter(User.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, User)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, User)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -106,26 +107,22 @@ class User(db.Model, UserMixin):
             user = user.filter(User.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         return cls.formatter(user)
 
     @classmethod
     def query_users(cls, query_dict: dict = None, unscoped=False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'users': User, 'groups': Group}
         query = User.query
         if not unscoped:
             query = query.filter(User.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict,
-                                           url_condition.sort_limit_dict, url_condition.page_dict,
-                                           name_map, User)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, User)
+            (users, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(user) for user in users], total
 
     @classmethod
     def insert_user(cls, ctx=True, data=None):
@@ -159,8 +156,6 @@ class User(db.Model, UserMixin):
             user = User.query.filter(User.username == username).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         user.using = False
         db.session.add(user)
         if ctx:
@@ -180,8 +175,6 @@ class User(db.Model, UserMixin):
             user = User.query.filter(User.username == username).filter(User.using == True).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         for key, value in data.items():
             if hasattr(user, key):
                 setattr(user, key, value)
@@ -207,6 +200,8 @@ class Group(db.Model):
 
     @classmethod
     def formatter(cls, group):
+        if group is None:
+            return None
         group_dict = {
             'name': group.name,
             'leader_name': group.leader_name
@@ -217,13 +212,12 @@ class Group(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'groups': Group}
         query = Group.query
         if not unscoped:
             query = query.filter(Group.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Group)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Group)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -234,21 +228,17 @@ class Group(db.Model):
             group = Group.query.filter(Group.using == True).filter(Group.name == group_name).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if group is None:
-            raise CustomError(404, 404, 'group not found')
         return cls.formatter(group)
 
     @classmethod
     def query_groups(cls, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'groups': Group}
         url_condition = UrlCondition(query_dict)
         query = Group.query.filter(Group.using == True)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict,
-                                           url_condition.sort_limit_dict, url_condition.page_dict,
-                                           name_map, Group)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Group)
+            (users, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [cls.formatter(data) for data in query], total
@@ -259,13 +249,11 @@ class Group(db.Model):
             data = {}
         if query_dict is None:
             query_dict = {}
-        name_map = {'groups': Group}
         url_condition = UrlCondition(query_dict)
-        groups = Group.query.filter(Group.using == True)
+        query = Group.query.filter(Group.using == True)
         try:
-            (groups, total) = process_query(groups, url_condition.filter_dict,
-                                            url_condition.sort_limit_dict, url_condition.page_dict,
-                                            name_map, Group)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Group)
+            (groups, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for group in groups:
@@ -296,6 +284,8 @@ class Supervisor(db.Model):
 
     @classmethod
     def formatter(cls, supervisor):
+        if supervisor is None:
+            return None
         supervisor_dict = {
             "id": supervisor.id,
             'group': supervisor.group,
@@ -311,28 +301,25 @@ class Supervisor(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'supervisors': Supervisor}
         query = Supervisor.query
         if not unscoped:
             query = query.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Supervisor)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Supervisor)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
 
     @classmethod
     def query_supervisors(cls, query_dict: dict, unscoped: bool = False):
-        name_map = {'supervisors': Supervisor, 'users': User}
-        supervisors = Supervisor.query
+        query = Supervisor.query
         if not unscoped:
-            supervisors = supervisors.filter(Supervisor.using == True)
+            query = query.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (supervisors, total) = process_query(supervisors, url_condition.filter_dict,
-                                                 url_condition.sort_limit_dict, url_condition.page_dict,
-                                                 name_map, Supervisor)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Supervisor)
+            (supervisors, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [cls.formatter(supervisor) for supervisor in supervisors], total
@@ -346,8 +333,6 @@ class Supervisor(db.Model):
             supervisor = supervisor.filter(Supervisor.username == username).filter(Supervisor.term == term).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if supervisor is None:
-            raise CustomError(404, 404, 'user not found')
         return cls.formatter(supervisor)
 
     @classmethod
@@ -359,8 +344,6 @@ class Supervisor(db.Model):
             supervisor = supervisor.filter(Supervisor.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if supervisor is None:
-            raise CustomError(404, 404, 'user not found')
         return cls.formatter(supervisor)
 
     @classmethod
@@ -381,13 +364,11 @@ class Supervisor(db.Model):
     def delete_supervisor(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'supervisors': Supervisor}
         query = Supervisor.query.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (supervisors, total) = process_query(query, url_condition.filter_dict,
-                                                 url_condition.sort_limit_dict, url_condition.page_dict,
-                                                 name_map, Supervisor)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Supervisor)
+            (supervisors, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for supervisor in supervisors:
@@ -406,13 +387,11 @@ class Supervisor(db.Model):
             data = {}
         if query_dict is None:
             query_dict = {}
-        name_map = {'supervisors': Supervisor}
         query = Supervisor.query.filter(Supervisor.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (supervisors, total) = process_query(query, url_condition.filter_dict,
-                                                 url_condition.sort_limit_dict, url_condition.page_dict,
-                                                 name_map, Supervisor)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Supervisor)
+            (supervisors, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for supervisor in supervisors:
@@ -439,6 +418,8 @@ class Event(db.Model):
 
     @classmethod
     def formatter(cls, event):
+        if event is None:
+            return None
         event_dict = {
             'id': event.id,
             'username': event.username,
@@ -460,13 +441,12 @@ class Event(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'events': Event}
         query = Event.query
         if not unscoped:
             query = query.filter(Event.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Event)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Event)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -480,8 +460,6 @@ class Event(db.Model):
             event = event.filter(Event.id == id).filter(Event.using == True).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if event is None:
-            raise CustomError(404, 404, 'event not found')
         return cls.formatter(event)
 
     @classmethod
@@ -505,29 +483,26 @@ class Event(db.Model):
     def query_events(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'events': Event}
         query = Event.query
         if not unscoped:
             query = query.filter(Event.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, Event)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Event)
+            (events, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(event) for event in events], total
 
     @classmethod
     def delete_event(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'events': Event}
-        events = Event.query.filter(Event.using == True)
+        query = Event.query.filter(Event.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (events, total) = process_query(events, url_condition.filter_dict,
-                                            url_condition.sort_limit_dict,
-                                            url_condition.page_dict, name_map, Event)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Event)
+            (events, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for event in events:
@@ -547,13 +522,11 @@ class Event(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'events': Event}
-        events = Event.query.filter(Event.using == True)
+        query = Event.query.filter(Event.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (events, total) = process_query(events, url_condition.filter_dict,
-                                            url_condition.sort_limit_dict,
-                                            url_condition.page_dict, name_map, Event)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Event)
+            (events, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for event in events:

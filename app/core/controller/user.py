@@ -132,7 +132,9 @@ class UserController():
                 raise CustomError(500, 500, 'username or role_names should be given')
 
             term = data['term']
-            user = dao.User.get_user(username)
+            user = dao.User.get_user(username=username, unscoped=False)
+            if user is None:
+                raise CustomError(404, 404, 'user is not found')
             dao.User.update_user(ctx=False, username=username, data=data)
 
             # supervisor role_name 变更
@@ -191,6 +193,9 @@ class UserController():
 
     @classmethod
     def delete_user(cls, ctx: bool = True, username: str = ''):
+        user = dao.User.get_user(username=username, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'user is not found')
         try:
             dao.User.delete_user(ctx=ctx, username=username)
             if ctx:
@@ -310,6 +315,9 @@ class SupervisorController():
     def delete_supervisor(cls, ctx: bool = True, username: str = '', term: str = None):
         if term is None:
             term = service.TermService.get_now_term()['name']
+        user = dao.User.get_user(username=username, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'user is not found')
         try:
             dao.User.update_user(ctx=False, username=username, data={'guider': False})
             dao.Supervisor.delete_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]})
@@ -329,7 +337,9 @@ class SupervisorController():
         if data is None:
             data = dict()
         username = data.get('username', None)
-        user = dao.User.get_user(username)
+        user = dao.User.get_user(username=username, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'user is not found')
         term = data.get('term', service.TermService.get_now_term()['name'])
         data['name'] = user['name']
         (_, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term': [term]}, unscoped=False)

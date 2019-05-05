@@ -1,8 +1,9 @@
 from app.utils.mysql import db
-from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query
+from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
 from datetime import datetime
 from app.utils.misc import convert_string_to_date
+from sqlalchemy.sql import or_
 
 
 class Term(db.Model):
@@ -15,6 +16,8 @@ class Term(db.Model):
 
     @classmethod
     def formatter(cls, term):
+        if term is None:
+            return None
         term_dict = {
             'name': term.name,
             'begin_time': str(term.begin_time),
@@ -54,13 +57,12 @@ class Term(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'terms': Term}
         query = Term.query
         if not unscoped:
             query = query.filter(Term.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Term)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Term)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -69,7 +71,6 @@ class Term(db.Model):
     def query_terms(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = dict()
-        name_map = {'terms': Term}
         url_condition = UrlCondition(query_dict)
         query = Term.query
         if not unscoped:
@@ -78,12 +79,11 @@ class Term(db.Model):
             query = query.filter(Term.begin_time < query_dict['time']).filter(
                 Term.end_time >= query_dict['time'])
         try:
-            (query, total) = process_query(query, url_condition.filter_dict,
-                                           url_condition.sort_limit_dict, url_condition.page_dict,
-                                           name_map, Term)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Term)
+            (terms, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(term) for term in terms], total
 
     @classmethod
     def get_term(cls, term_name: str, unscoped: bool = False):
@@ -94,8 +94,6 @@ class Term(db.Model):
             term = term.filter(Term.name == term_name).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if term is None:
-            raise CustomError(404, 404, 'term not found')
         return cls.formatter(term)
 
     @classmethod
@@ -130,6 +128,8 @@ class LessonRecord(db.Model):
 
     @classmethod
     def formatter(cls, lesson_record):
+        if lesson_record is None:
+            return None
         try:
             lesson_record_dict = {
                 'id': lesson_record.id,
@@ -157,13 +157,12 @@ class LessonRecord(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lesson_records': LessonRecord}
         query = LessonRecord.query
         if not unscoped:
             query = query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, LessonRecord)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonRecord)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -178,8 +177,6 @@ class LessonRecord(db.Model):
                 LessonRecord.term == term).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if lesson_record is None:
-            raise CustomError(404, 404, 'lesson record not found')
         return cls.formatter(lesson_record)
 
     @classmethod
@@ -203,30 +200,26 @@ class LessonRecord(db.Model):
     def query_lesson_records(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = dict()
-        name_map = {'lesson_records': LessonRecord}
         query = LessonRecord.query
         if not unscoped:
             query = query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict,
-                                           url_condition.sort_limit_dict, url_condition.page_dict,
-                                           name_map, LessonRecord)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonRecord)
+            (lesson_records, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(lesson_record) for lesson_record in lesson_records], total
 
     @classmethod
     def delete_lesson_record(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = dict()
-        name_map = {'lesson_records': LessonRecord}
-        lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
+        query = LessonRecord.query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (lesson_records, total) = process_query(lesson_records, url_condition.filter_dict,
-                                                    url_condition.sort_limit_dict, url_condition.page_dict,
-                                                    name_map, LessonRecord)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonRecord)
+            (lesson_records, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for lesson_record in lesson_records:
@@ -246,13 +239,11 @@ class LessonRecord(db.Model):
         if query_dict is None:
             query_dict = dict()
         data = cls.reformatter_update(data)
-        name_map = {'lesson_records': LessonRecord}
-        lesson_records = LessonRecord.query.filter(LessonRecord.using == True)
+        query = LessonRecord.query.filter(LessonRecord.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (lesson_records, total) = process_query(lesson_records, url_condition.filter_dict,
-                                                    url_condition.sort_limit_dict, url_condition.page_dict,
-                                                    name_map, LessonRecord)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonRecord)
+            (lesson_records, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for lesson_record in lesson_records:
@@ -294,6 +285,8 @@ class Lesson(db.Model):
 
     @classmethod
     def formatter(cls, lesson):
+        if lesson is None:
+            return None
         lesson_dict = {'id': lesson.id, 'lesson_id': lesson.lesson_id, 'lesson_attribute': lesson.lesson_attribute,
                        'lesson_state': lesson.lesson_state, 'lesson_teacher_id': lesson.lesson_teacher_id,
                        'lesson_name': lesson.lesson_name, 'lesson_teacher_name': lesson.lesson_teacher_name,
@@ -325,13 +318,12 @@ class Lesson(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lessons': Lesson}
         query = Lesson.query
         if not unscoped:
             query = query.filter(Lesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, Lesson)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Lesson)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -345,8 +337,6 @@ class Lesson(db.Model):
             lesson = lesson.filter(Lesson.lesson_id == lesson_id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if lesson is None:
-            raise CustomError(404, 404, 'lesson not found')
         return cls.formatter(lesson)
 
     @classmethod
@@ -370,28 +360,32 @@ class Lesson(db.Model):
     def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lessons': Lesson}
         query = Lesson.query
         if not unscoped:
             query = query.filter(Lesson.using == True)
+        lesson_or_teacher_name = query_dict.get('lesson_or_teacher_name_or', None)
+        if lesson_or_teacher_name is not None and len(lesson_or_teacher_name) != 0:
+            del query_dict['lesson_or_teacher_name_or']
+            lesson_or_teacher_name = lesson_or_teacher_name[0]
+            query = query.filter(or_(Lesson.lesson_name.like(lesson_or_teacher_name + "%"),
+                                     Lesson.lesson_teacher_name.like(lesson_or_teacher_name + "%")))
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, Lesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Lesson)
+            (lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(lesson) for lesson in lessons], total
 
     @classmethod
     def delete_lesson(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lessons': Lesson}
-        lessons = Lesson.query.filter(Lesson.using == True)
+        query = Lesson.query.filter(Lesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (lessons, total) = process_query(lessons, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                             url_condition.page_dict, name_map, Lesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Lesson)
+            (lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for lesson in lessons:
@@ -411,12 +405,11 @@ class Lesson(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'lessons': Lesson}
-        lessons = Lesson.query.filter(Lesson.using == True)
+        query = Lesson.query.filter(Lesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (lessons, total) = process_query(lessons, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                             url_condition.page_dict, name_map, Lesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Lesson)
+            (lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for lesson in lessons:
@@ -435,14 +428,13 @@ class Lesson(db.Model):
     def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lessons': Lesson}
         query = Lesson.query.with_entities(Lesson.lesson_teacher_name).distinct()
         if not unscoped:
             query = query.filter(Lesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, Lesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Lesson)
+            (lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [data.lesson_teacher_name for data in query], total
@@ -461,6 +453,8 @@ class LessonCase(db.Model):
 
     @classmethod
     def formatter(cls, lesson_case):
+        if lesson_case is None:
+            return None
         lesson_case_dict = {'lesson_week': lesson_case.lesson_week, 'lesson_time': str(lesson_case.lesson_time),
                             'lesson_date': str(lesson_case.lesson_date.strftime('%Y-%m-%d')),
                             'lesson_weekday': lesson_case.lesson_weekday,
@@ -479,13 +473,12 @@ class LessonCase(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lesson_cases': LessonCase}
         query = LessonCase.query
         if not unscoped:
             query = query.filter(LessonCase.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, LessonCase)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -499,8 +492,6 @@ class LessonCase(db.Model):
             lesson_case = lesson_case.filter(LessonCase.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if lesson_case is None:
-            raise CustomError(404, 404, 'lesson_case not found')
         return cls.formatter(lesson_case)
 
     @classmethod
@@ -524,29 +515,26 @@ class LessonCase(db.Model):
     def query_lesson_cases(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lesson_cases': LessonCase}
         query = LessonCase.query
         if not unscoped:
             query = query.filter(LessonCase.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, LessonCase)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(lesson_case) for lesson_case in lesson_cases], total
 
     @classmethod
     def delete_lesson_case(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'lesson_cases': LessonCase}
-        lesson_cases = LessonCase.query.filter(LessonCase.using == True)
+        query = LessonCase.query.filter(LessonCase.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (lesson_cases, total) = process_query(lesson_cases, url_condition.filter_dict,
-                                                  url_condition.sort_limit_dict,
-                                                  url_condition.page_dict, name_map, LessonCase)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for lesson_case in lesson_cases:
@@ -566,13 +554,11 @@ class LessonCase(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'lesson_cases': LessonCase}
-        lesson_cases = LessonCase.query.filter(LessonCase.using == True)
+        query = LessonCase.query.filter(LessonCase.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (lesson_cases, total) = process_query(lesson_cases, url_condition.filter_dict,
-                                                  url_condition.sort_limit_dict,
-                                                  url_condition.page_dict, name_map, LessonCase)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for lesson_case in lesson_cases:
@@ -599,6 +585,8 @@ class NoticeLesson(db.Model):
 
     @classmethod
     def formatter(cls, notice_lesson):
+        if notice_lesson is None:
+            return None
         notice_lesson_dict = {
             'id': notice_lesson.id,
             'lesson_id': notice_lesson.lesson_id,
@@ -619,13 +607,12 @@ class NoticeLesson(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'notice_lessons': NoticeLesson}
         query = NoticeLesson.query
         if not unscoped:
             query = query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, NoticeLesson)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -639,8 +626,6 @@ class NoticeLesson(db.Model):
             notice_lesson = notice_lesson.filter(NoticeLesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if notice_lesson is None:
-            raise CustomError(404, 404, 'notice_lesson not found')
         return cls.formatter(notice_lesson)
 
     @classmethod
@@ -664,29 +649,27 @@ class NoticeLesson(db.Model):
     def query_notice_lessons(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'notice_lessons': NoticeLesson}
+
         query = NoticeLesson.query
         if not unscoped:
             query = query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, NoticeLesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
+            (notice_lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(notice_lesson) for notice_lesson in notice_lessons], total
 
     @classmethod
     def delete_notice_lesson(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'notice_lessons': NoticeLesson}
-        notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True)
+        query = NoticeLesson.query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (notice_lessons, total) = process_query(notice_lessons, url_condition.filter_dict,
-                                                    url_condition.sort_limit_dict,
-                                                    url_condition.page_dict, name_map, NoticeLesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
+            (notice_lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for notice_lesson in notice_lessons:
@@ -706,13 +689,11 @@ class NoticeLesson(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'notice_lessons': NoticeLesson}
-        notice_lessons = NoticeLesson.query.filter(NoticeLesson.using == True)
+        query = NoticeLesson.query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (notice_lessons, total) = process_query(notice_lessons, url_condition.filter_dict,
-                                                    url_condition.sort_limit_dict,
-                                                    url_condition.page_dict, name_map, NoticeLesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
+            (notice_lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for notice_lesson in notice_lessons:
@@ -740,6 +721,8 @@ class ModelLesson(db.Model):
 
     @classmethod
     def formatter(cls, model_lesson):
+        if model_lesson is None:
+            return None
         model_lesson_dict = {
             'id': model_lesson.id,
             'lesson_id': model_lesson.lesson_id,
@@ -766,13 +749,12 @@ class ModelLesson(db.Model):
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'model_lessons': ModelLesson}
         query = ModelLesson.query
         if not unscoped:
             query = query.filter(ModelLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, name_map, ModelLesson)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ModelLesson)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -786,8 +768,6 @@ class ModelLesson(db.Model):
             model_lesson = model_lesson.filter(ModelLesson.id == id).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        if model_lesson is None:
-            raise CustomError(404, 404, 'model_lesson not found')
         return cls.formatter(model_lesson)
 
     @classmethod
@@ -811,29 +791,26 @@ class ModelLesson(db.Model):
     def query_model_lessons(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        name_map = {'model_lessons': ModelLesson}
         query = ModelLesson.query
         if not unscoped:
             query = query.filter(ModelLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (query, total) = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                           url_condition.page_dict, name_map, ModelLesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ModelLesson)
+            (model_lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return [cls.formatter(data) for data in query], total
+        return [cls.formatter(model_lesson) for model_lesson in model_lessons], total
 
     @classmethod
     def delete_model_lesson(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        name_map = {'model_lessons': ModelLesson}
-        model_lessons = ModelLesson.query.filter(ModelLesson.using == True)
+        query = ModelLesson.query.filter(ModelLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (model_lessons, total) = process_query(model_lessons, url_condition.filter_dict,
-                                                   url_condition.sort_limit_dict,
-                                                   url_condition.page_dict, name_map, ModelLesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ModelLesson)
+            (model_lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for model_lesson in model_lessons:
@@ -853,13 +830,11 @@ class ModelLesson(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        name_map = {'model_lessons': ModelLesson}
-        model_lessons = ModelLesson.query.filter(ModelLesson.using == True)
+        query = ModelLesson.query.filter(ModelLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            (model_lessons, total) = process_query(model_lessons, url_condition.filter_dict,
-                                                   url_condition.sort_limit_dict,
-                                                   url_condition.page_dict, name_map, ModelLesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ModelLesson)
+            (model_lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for model_lesson in model_lessons:
