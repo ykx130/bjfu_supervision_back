@@ -53,6 +53,8 @@ def update_database(info: dict = None):
     for data in datas:
         if '补考' in data['lesson_class']:
             continue
+        if 'lesson_teacher_name' == '':
+            continue
         teacher_name = data['lesson_teacher_name']
         teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
         data['lesson_teacher_name'] = teachers
@@ -146,6 +148,7 @@ def update_database(info: dict = None):
                             lesson_case_data['lesson_date'] = date
                             dao.LessonCase.insert_lesson_case(ctx=True, data=lesson_case_data)
     return True
+
 
 if __name__ == '__main__':
     update_database()
