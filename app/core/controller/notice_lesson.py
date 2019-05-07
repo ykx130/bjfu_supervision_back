@@ -246,6 +246,8 @@ class NoticeLessonController(object):
                 if num != 0:
                     continue
                 notice_lesson_data['term'] = '_'.join([str(df.iloc[i]['开课学年']), str(df.iloc[i]['开课学期'])])
+                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                                         data={'lesson_level': '关注课程'})
                 dao.NoticeLesson.insert_notice_lesson(ctx=False, data=notice_lesson_data)
             if ctx:
                 db.session.commit()
