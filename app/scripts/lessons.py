@@ -36,8 +36,8 @@ def update_database(info: dict = None):
         info = {}
     host = info.get("host", "localhost")
     user = info.get("user", "root")
-    passwd = info.get("passwd", "wshwoaini")
-    database = info.get("db", "lessons")
+    passwd = info.get("passwd", "Root!!2018")
+    database = info.get("db", "raw_supervision")
     charset = info.get("charset", "utf8")
     try:
         lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
@@ -52,6 +52,8 @@ def update_database(info: dict = None):
         raise CustomError(500, 500, str(e))
     for data in datas:
         if '补考' in data['lesson_class']:
+            continue
+        if data['lesson_teacher_name'] == '':
             continue
         teacher_name = data['lesson_teacher_name']
         teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
@@ -100,7 +102,7 @@ def update_database(info: dict = None):
             dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
             new_lesson = dao.Lesson.get_lesson(lesson_id=new_lesson_id)
             cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
-                                        ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
+                                                    ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
             lesson_cases = cursor.fetchall()
             lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
                                '06': '0607',
@@ -146,6 +148,7 @@ def update_database(info: dict = None):
                             lesson_case_data['lesson_date'] = date
                             dao.LessonCase.insert_lesson_case(ctx=True, data=lesson_case_data)
     return True
+
 
 if __name__ == '__main__':
     update_database()

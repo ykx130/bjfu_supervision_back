@@ -298,6 +298,11 @@ class Form(object):
                 'create_at': None,
                 'creator': {}
             },
+            'model_lesson': {
+                'recommend': False,
+                'lesson_id': '',
+                'guider': ''
+            },
             'status': None,
             'using': True,
             'values': []
