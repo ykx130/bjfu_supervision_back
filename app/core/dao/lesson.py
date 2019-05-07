@@ -714,7 +714,7 @@ class ModelLesson(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
-    status = db.Column(db.String(32), default='推荐课')  # 好评课 推荐课
+    status = db.Column(db.Integer, default=2)  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
     assign_group = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
@@ -723,11 +723,13 @@ class ModelLesson(db.Model):
     def formatter(cls, model_lesson):
         if model_lesson is None:
             return None
+        status_dict = {1: '推荐为好评课', 2: '待商榷'}
+        status = status_dict[model_lesson.status]
         model_lesson_dict = {
             'id': model_lesson.id,
             'lesson_id': model_lesson.lesson_id,
             'assign_group': model_lesson.assign_group,
-            'status': model_lesson.status,
+            'status': status,
             'votes': model_lesson.votes,
         }
         return model_lesson_dict
@@ -735,15 +737,26 @@ class ModelLesson(db.Model):
     @classmethod
     def reformatter_insert(cls, data: dict):
         allow_column = ['lesson_id', 'assign_group', 'status', 'votes', 'term']
+        status_dict = {'推荐为好评课': 1, '待商榷': 2}
         new_data = dict()
         for key, value in data.items():
             if key in allow_column:
+                if key == 'status':
+                    value = status_dict[value]
                 new_data[key] = value
         return new_data
 
     @classmethod
     def reformatter_update(cls, data: dict):
-        return data
+        if data is None:
+            return dict()
+        new_data = dict()
+        status_dict = {'推荐为好评课': 1, '待商榷': 2}
+        for key, value in data.items():
+            if key == 'status':
+                value = status_dict[value]
+            new_data[key] = value
+        return new_data
 
     @classmethod
     def count(cls, query_dict: dict, unscoped: bool = False):
