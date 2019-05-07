@@ -143,7 +143,7 @@ class ModelLessonController(object):
         model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
-        dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         try:
@@ -169,6 +169,8 @@ class ModelLessonController(object):
         try:
             for model_lesson_id in model_lesson_ids:
                 model_lesson = dao.ModelLesson.get_model_lesson(id=model_lesson_id, unscoped=False)
+                if model_lesson is None:
+                    raise CustomError(404, 404, 'model_lesson not found')
                 lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
                 if lesson is None:
                     raise CustomError(404, 404, 'lesson not found')
