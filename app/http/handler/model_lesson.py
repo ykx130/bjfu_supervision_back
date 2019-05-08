@@ -113,10 +113,10 @@ def update_model_lesson(id):
     }), 200
 
 
-@model_lesson_blueprint.route('/model_lessons/<int:id>/vote', methods=['post'])
-def model_lesson_vote(id):
+@model_lesson_blueprint.route('/model_lessons/<string:lesson_id>/vote', methods=['POST'])
+def model_lesson_vote(lesson_id):
     try:
-        controller.ModelLessonController.model_lesson_vote(id=id, vote=request.json.get('vote', True))
+        controller.ModelLessonController.model_lesson_vote(lesson_id=lesson_id, vote=request.json.get('vote', True))
     except CustomError as e:
         return jsonify({
             'code': e.code,

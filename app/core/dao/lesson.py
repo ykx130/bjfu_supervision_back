@@ -784,6 +784,17 @@ class ModelLesson(db.Model):
         return cls.formatter(model_lesson)
 
     @classmethod
+    def get_model_lesson_by_lesson_id(cls, lesson_id: str, unscoped: bool = False):
+        model_lesson = ModelLesson.query
+        if not unscoped:
+            model_lesson = model_lesson.filter(ModelLesson.using == True)
+        try:
+            model_lesson = model_lesson.filter(ModelLesson.lesson_id == lesson_id).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return cls.formatter(model_lesson)
+
+    @classmethod
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = {}
