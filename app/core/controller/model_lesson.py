@@ -198,7 +198,7 @@ class ModelLessonController(object):
             raise CustomError(404, 404, 'lesson not found')
         try:
             if vote:
-                dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]},
+                dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
                                                     data={'votes': int(model_lesson['votes']) + 1})
             if ctx:
                 db.session.commit()
