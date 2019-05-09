@@ -16,6 +16,8 @@ def lesson_week_list(lesson_week):
     lesson_weeks = list()
     lesson_week_blocks = lesson_week.replace(' ', '').split(',')
     for lesson_week_block in lesson_week_blocks:
+        if lesson_week_block == '':
+            continue
         weeks = lesson_week_block.replace(' ', '').split('-')
         if len(weeks) == 2:
             week_begin = int(weeks[0])
@@ -29,7 +31,7 @@ def lesson_week_list(lesson_week):
 def week_to_date(term_begin_time, week, weekday):
     time = convert_string_to_datetime(term_begin_time)
     date = time + timedelta((int(week) - 1) * 7 + int(weekday) - 1)
-    return date
+    return date.date()
 
 
 def get_cursor(info: dict):
@@ -37,8 +39,8 @@ def get_cursor(info: dict):
         info = {}
     host = info.get("host", "localhost")
     user = info.get("user", "root")
-    passwd = info.get("passwd", "Root!!2018")
-    database = info.get("db", "raw_supervision")
+    passwd = info.get("passwd", "wshwoaini")
+    database = info.get("db", "lessons")
     charset = info.get("charset", "utf8")
     lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
                                 cursorclass=pymysql.cursors.DictCursor)
@@ -49,7 +51,7 @@ def get_cursor(info: dict):
 def query_raw_lessons(cursor, term=None):
     sql = "select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
          lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
-         lesson_attention_reason, lesson_grade, assign_group from original_lessons"
+          lesson_grade from original_lessons"
     if term is not None:
         parts = term.split('-')
         if len(parts) != 3:
@@ -97,7 +99,7 @@ def format_raw_lesson(data):
 def update_lesson(query_dict: dict, data: dict):
     not_allow_column = ['lesson_model', 'notices', 'lesson_level', 'lesson_state']
     new_data = dict()
-    for key, value in data:
+    for key, value in data.items():
         if key not in not_allow_column:
             new_data[key] = value
     dao.Lesson.update_lesson(query_dict=query_dict, data=data)
@@ -205,8 +207,6 @@ def update_database(info: dict = None):
     raw_lessons = query_raw_lessons(cursor)
 
     for raw_lesson in raw_lessons:
-        if '补考' in raw_lesson['lesson_class']:
-            continue
         if raw_lesson['lesson_teacher_name'] == '':
             continue
         term_name = '-'.join([raw_lesson['lesson_year'], raw_lesson['lesson_semester']]).replace(' ', '')
@@ -225,10 +225,12 @@ def update_database(info: dict = None):
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
             new_lesson = dao.Lesson.get_lesson(lesson_id=lesson_data['lesson_id'])
-            raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw'],
-                                                           teacher_name=raw_lesson['lesson_teacher_name'])
+            raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
+                                                           teacher_name=lesson_data['lesson_teacher_name'])
             del_lesson_cases(query_dict={'lesson_id':[new_lesson['id']]})
             for raw_lesson_case_data in raw_lesson_case_datas:
+                if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
+                    continue
                 lesson_case_datas = format_raw_lesson_case(raw_lesson_case=raw_lesson_case_data,
                                                            lesson_id=new_lesson['id'], term_begin_time=term_begin_time,
                                                            lesson_time_map=lesson_time_map)
