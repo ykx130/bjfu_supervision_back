@@ -33,6 +33,8 @@ def week_to_date(term_begin_time, week, weekday):
 
 
 def get_cursor(info: dict):
+    if info is None:
+        info = {}
     host = info.get("host", "localhost")
     user = info.get("user", "root")
     passwd = info.get("passwd", "Root!!2018")
