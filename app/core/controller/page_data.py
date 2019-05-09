@@ -38,6 +38,6 @@ class PageDataController():
             num = redis_cli.get('sys:form_num:{unit}'.format(unit=unit))
             if not num:
                 num = 0
-            form_num[unit] = num
+            form_num[unit] = int(num)
         data_dict["sys:form_num"] = form_num
         return data_dict
