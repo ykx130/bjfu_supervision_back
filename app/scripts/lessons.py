@@ -120,7 +120,7 @@ def insert_term(term_name):
 
 
 def query_raw_lesson_cases(cursor, lesson_id, teacher_name):
-    cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
+    cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from original_lessons where lesson_id \
     ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
     lesson_case_datas = cursor.fetchall()
     return lesson_case_datas
