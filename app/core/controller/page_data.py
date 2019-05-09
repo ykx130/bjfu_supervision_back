@@ -2,7 +2,7 @@ import json
 from app import redis_cli
 from app.core import dao
 from app.core.services import TermService
-
+from app.core.const import UNIT_LIST
 
 class PageDataController():
 
@@ -33,4 +33,11 @@ class PageDataController():
         now_term = TermService.get_now_term()
         data_dict["sys:guider_num"] = dao.Supervisor.count(query_dict={'term': [now_term['name']]})
         data_dict["sys:notice_lesson_num"] = dao.NoticeLesson.count(query_dict={'term': [now_term['name']]})
+        form_num = {}
+        for unit in UNIT_LIST:
+            num = redis_cli.get('sys:form_num:{unit}'.format(unit=unit))
+            if not num:
+                num = 0
+            form_num[unit] = num
+
         return data_dict
