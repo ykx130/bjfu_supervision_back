@@ -2,6 +2,7 @@ import app.core.dao as dao
 import pymysql
 from app.utils.misc import convert_string_to_datetime
 from app.utils.Error import CustomError
+import app.core.services as service
 import json
 from datetime import datetime, timedelta
 import re
@@ -31,122 +32,207 @@ def week_to_date(term_begin_time, week, weekday):
     return date
 
 
-def update_database(info: dict = None):
-    if info is None:
-        info = {}
+def get_cursor(info: dict):
     host = info.get("host", "localhost")
     user = info.get("user", "root")
     passwd = info.get("passwd", "Root!!2018")
     database = info.get("db", "raw_supervision")
     charset = info.get("charset", "utf8")
-    try:
-        lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
-                                    cursorclass=pymysql.cursors.DictCursor)
-        cursor = lesson_db.cursor()
+    lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
+                                cursorclass=pymysql.cursors.DictCursor)
+    cursor = lesson_db.cursor()
+    return cursor
 
-        cursor.execute('select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name, \
-                       lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class, lesson_attention_reason,\
-                       lesson_model, lesson_grade, assign_group from lessons')
-        datas = cursor.fetchall()
-    except Exception as e:
-        raise CustomError(500, 500, str(e))
-    for data in datas:
-        if '补考' in data['lesson_class']:
-            continue
-        if data['lesson_teacher_name'] == '':
-            continue
-        teacher_name = data['lesson_teacher_name']
-        teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
-        data['lesson_teacher_name'] = teachers
-        teacher_ids = data['lesson_teacher_id'].replace(' ', '').split(',')
-        data['lesson_teacher_id'] = teacher_ids
-        teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
-        data['lesson_teacher_unit'] = teacher_units
-        lesson_id = data['lesson_id']
-        data['raw_lesson_id'] = lesson_id
-        term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
-        term = dao.Term.get_term(term_name=term_name)
-        data['lesson_id'] = [lesson_id + teacher_id + term_name.replace('-', '') for teacher_id in teacher_ids]
-        if term is None:
-            parts = term_name.split('-')
-            if int(parts[2]) == 1:
-                begin_year = parts[0]
-                end_year = parts[1]
-                begin_time = begin_year + '-09-01'
-                end_time = end_year + '-02-14'
+
+def query_raw_lessons(cursor, term=None):
+    sql = "select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
+         lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
+         lesson_attention_reason, lesson_grade, assign_group from original_lessons"
+    if term is not None:
+        parts = term.split('-')
+        if len(parts) != 3:
+            raise CustomError(500, 200, 'term format is wrong')
+        lesson_year = parts[0] + parts[1]
+        lesson_semester = parts[2]
+        filter_sql = "where lesson_year= '{lesson_year}'and lesson_semester = '{lesson_semester}'".format(
+            lesson_year=lesson_year, lesson_semester=lesson_semester)
+        sql = " ".join([sql, filter_sql])
+    cursor.execute(sql)
+    datas = cursor.fetchall()
+    return datas
+
+
+def format_raw_lesson(data):
+    teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
+    data['lesson_teacher_name'] = teachers
+    teacher_ids = data['lesson_teacher_id'].replace(' ', '').split(',')
+    data['lesson_teacher_id'] = teacher_ids
+    teacher_units = data['lesson_teacher_unit'].replace(' ', '').split(',')
+    data['lesson_teacher_unit'] = teacher_units
+    lesson_id = data['lesson_id']
+    data['raw_lesson_id'] = lesson_id
+    term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
+    data['lesson_id'] = [lesson_id + teacher_id + term_name.replace('-', '') for teacher_id in teacher_ids]
+    lesson_datas = list()
+    for index in range(len(teachers)):
+        lesson_data = dict()
+        lesson_data['term'] = term_name
+        for k, v in data.items():
+            try:
+                v = json.loads(v)
+            except:
+                v = v
+            if v is None or v is '':
+                continue
+            if type(v) is list:
+                lesson_data[k] = v[index]
             else:
-                begin_year = parts[1]
-                end_year = parts[1]
-                begin_time = begin_year + '-02-14'
-                end_time = end_year + '-09-01'
-            term_data = {'name': term_name, 'begin_time': begin_time, 'end_time': end_time}
-            dao.Term.insert_term(ctx=True, data=term_data)
-            term = dao.Term.get_term(term_name=term_name)
-        term_begin_time = term['begin_time']
+                lesson_data[k] = v
+        lesson_datas.append(lesson_data)
+    return lesson_datas
 
-        for index in range(len(teachers)):
-            new_lesson_id = data['lesson_id'][index]
-            lesson_data = dict()
-            lesson_data['term'] = term_name
-            for k, v in data.items():
-                try:
-                    v = json.loads(v)
-                except:
-                    v = v
-                if v is None or v is '':
-                    continue
-                if type(v) is list:
-                    lesson_data[k] = v[index]
-                else:
-                    lesson_data[k] = v
-            dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
-            new_lesson = dao.Lesson.get_lesson(lesson_id=new_lesson_id)
-            cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
-                                                    ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
-            lesson_cases = cursor.fetchall()
-            lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
-                               '06': '0607',
-                               '07': '0607', '08': '0809', '09': '0809', '10': '1011', '11': '1011',
-                               '12': '12'}
-            for lesson_case in lesson_cases:
-                if lesson_case['lesson_week'] == '':
-                    lesson_case_data = {'lesson_id': new_lesson['id']}
-                    for k, v in lesson_case.items():
-                        try:
-                            v = json.loads(v)
-                        except:
-                            v = v
-                        if v is None or v is '':
-                            continue
-                        lesson_case_data[k] = v
-                    dao.LessonCase.insert_lesson_case(ctx=True, data=lesson_case_data)
-                else:
-                    weeks = lesson_week_list(lesson_case['lesson_week'])
-                    for week in weeks:
-                        lesson_time = lesson_case['lesson_time']
-                        lesson_time_set = set()
-                        lesson_times_beg = re.findall(r'.{2}', lesson_time)
-                        for lesson_time_beg in lesson_times_beg:
-                            lesson_time_set.add(lesson_time_map[lesson_time_beg])
-                        for lesson_time in lesson_time_set:
-                            lesson_case_data = {'lesson_id': new_lesson['id']}
-                            for k, v in lesson_case.items():
-                                try:
-                                    v = json.loads(v)
-                                except:
-                                    v = v
-                                if v is None or v is '':
-                                    continue
-                                if k == 'lesson_week':
-                                    lesson_case_data['lesson_week'] = week
-                                    continue
-                                if k == 'lesson_time':
-                                    lesson_case_data['lesson_time'] = lesson_time
-                                    continue
-                                lesson_case_data[k] = v
-                            date = week_to_date(term_begin_time, week, lesson_case_data['lesson_weekday'])
-                            lesson_case_data['lesson_date'] = date
-                            dao.LessonCase.insert_lesson_case(ctx=True, data=lesson_case_data)
+
+def update_lesson(query_dict: dict, data: dict):
+    not_allow_column = ['lesson_model', 'notices', 'lesson_level', 'lesson_state']
+    new_data = dict()
+    for key, value in data:
+        if key not in not_allow_column:
+            new_data[key] = value
+    dao.Lesson.update_lesson(query_dict=query_dict, data=data)
+
+
+def insert_term(term_name):
+    parts = term_name.split('-')
+    if int(parts[2]) == 1:
+        begin_year = parts[0]
+        end_year = parts[1]
+        begin_time = begin_year + '-09-01'
+        end_time = end_year + '-02-14'
+    else:
+        begin_year = parts[1]
+        end_year = parts[1]
+        begin_time = begin_year + '-02-14'
+        end_time = end_year + '-09-01'
+    term_data = {'name': term_name, 'begin_time': begin_time, 'end_time': end_time}
+    dao.Term.insert_term(ctx=True, data=term_data)
+    term = dao.Term.get_term(term_name=term_name)
+    return term
+
+
+def query_raw_lesson_cases(cursor, lesson_id, teacher_name):
+    cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
+    ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
+    lesson_case_datas = cursor.fetchall()
+    return lesson_case_datas
+
+
+def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_time_map):
+    lesson_case_datas = list()
+    if raw_lesson_case['lesson_week'] == '':
+        lesson_case_data = {'lesson_id': lesson_id}
+        for k, v in raw_lesson_case.items():
+            try:
+                v = json.loads(v)
+            except:
+                v = v
+            if v is None or v is '':
+                continue
+            lesson_case_data[k] = v
+        lesson_case_datas.append(lesson_case_data)
+    else:
+        weeks = lesson_week_list(raw_lesson_case['lesson_week'])
+        for week in weeks:
+            lesson_time = raw_lesson_case['lesson_time']
+            lesson_time_set = set()
+            lesson_times_beg = re.findall(r'.{2}', lesson_time)
+            for lesson_time_beg in lesson_times_beg:
+                lesson_time_set.add(lesson_time_map[lesson_time_beg])
+            for lesson_time in lesson_time_set:
+                lesson_case_data = {'lesson_id': lesson_id}
+                for k, v in raw_lesson_case.items():
+                    try:
+                        v = json.loads(v)
+                    except:
+                        v = v
+                    if v is None or v is '':
+                        continue
+                    if k == 'lesson_week':
+                        lesson_case_data['lesson_week'] = week
+                        continue
+                    if k == 'lesson_time':
+                        lesson_case_data['lesson_time'] = lesson_time
+                        continue
+                    lesson_case_data[k] = v
+                date = week_to_date(term_begin_time, week, lesson_case_data['lesson_weekday'])
+                lesson_case_data['lesson_date'] = date
+                lesson_case_datas.append(lesson_case_data)
+    return lesson_case_datas
+
+
+def insert_lesson(data: dict):
+    dao.Lesson.insert_lesson(data=data)
+    lesson = dao.Lesson.get_lesson(lesson_id=data['lesson_id'])
+    return lesson
+
+
+
+def insert_lesson_case(data: dict):
+    dao.LessonCase.insert_lesson_case(data=data)
+
+
+def del_lesson_cases(query_dict: dict):
+    dao.LessonCase.delete_lesson_case(query_dict=query_dict)
+
+
+def if_has_lesson(query_dict: dict):
+    _, num = dao.Lesson.query_lessons(query_dict=query_dict)
+    if num != 0:
+        return True
+    else:
+        return False
+
+
+def update_database(info: dict = None):
+    lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
+                       '06': '0607',
+                       '07': '0607', '08': '0809', '09': '0809', '10': '1011', '11': '1011',
+                       '12': '12'}
+
+    cursor = get_cursor(info=info)
+
+    raw_lessons = query_raw_lessons(cursor)
+
+    for raw_lesson in raw_lessons:
+        if '补考' in raw_lesson['lesson_class']:
+            continue
+        if raw_lesson['lesson_teacher_name'] == '':
+            continue
+        term_name = '-'.join([raw_lesson['lesson_year'], raw_lesson['lesson_semester']]).replace(' ', '')
+        term = dao.Term.get_term(term_name=term_name)
+        if term is None:
+            term = insert_term(term_name=term_name)
+
+        term_begin_time = term['begin_time']
+        lesson_datas = format_raw_lesson(raw_lesson)
+
+        for lesson_data in lesson_datas:
+            if if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
+                                         'lesson_class': [lesson_data['lesson_class']]}):
+                update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
+                                          'lesson_class': [lesson_data['lesson_class']]}, data=lesson_data)
+            else:
+                dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
+            new_lesson = dao.Lesson.get_lesson(lesson_id=lesson_data['lesson_id'])
+            raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw'],
+                                                           teacher_name=raw_lesson['lesson_teacher_name'])
+            del_lesson_cases(query_dict={'lesson_id':[new_lesson['id']]})
+            for raw_lesson_case_data in raw_lesson_case_datas:
+                lesson_case_datas = format_raw_lesson_case(raw_lesson_case=raw_lesson_case_data,
+                                                           lesson_id=new_lesson['id'], term_begin_time=term_begin_time,
+                                                           lesson_time_map=lesson_time_map)
+                for lesson_case_data in lesson_case_datas:
+                    insert_lesson_case(data=lesson_case_data)
+
     return True
 
 
