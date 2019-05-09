@@ -47,7 +47,7 @@ def get_cursor(info: dict):
 def query_raw_lessons(cursor, term=None):
     sql = "select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
          lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
-         lesson_attention_reason,lesson_model, lesson_grade, assign_group from lessons"
+         lesson_attention_reason, lesson_grade, assign_group from original_lessons"
     if term is not None:
         parts = term.split('-')
         if len(parts) != 3:
@@ -72,7 +72,6 @@ def format_raw_lesson(data):
     lesson_id = data['lesson_id']
     data['raw_lesson_id'] = lesson_id
     term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
-    data['term_name'] = term_name
     data['lesson_id'] = [lesson_id + teacher_id + term_name.replace('-', '') for teacher_id in teacher_ids]
     lesson_datas = list()
     for index in range(len(teachers)):
@@ -94,7 +93,12 @@ def format_raw_lesson(data):
 
 
 def update_lesson(query_dict: dict, data: dict):
-    pass
+    not_allow_column = ['lesson_model', 'notices', 'lesson_level', 'lesson_state']
+    new_data = dict()
+    for key, value in data:
+        if key not in not_allow_column:
+            new_data[key] = value
+    dao.Lesson.update_lesson(query_dict=query_dict, data=data)
 
 
 def insert_term(term_name):
@@ -166,16 +170,13 @@ def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_t
 
 
 def insert_lesson(data: dict):
-    pass
+    dao.Lesson.insert_lesson(data=data)
+    lesson = dao.Lesson.get_lesson(lesson_id=data['lesson_id'])
+    return lesson
 
 
 def del_lesson(where_dict: dict):
     pass
-
-
-def if_has_lesson(query_dict: dict, data: dict):
-    (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict)
-    return lessons
 
 
 def insert_lesson_case(data: dict):
@@ -183,15 +184,15 @@ def insert_lesson_case(data: dict):
 
 
 def del_lesson_cases(query_dict: dict):
-    pass
+    dao.LessonCase.delete_lesson_case(query_dict=query_dict)
 
 
-def insert_model_lesson():
-    pass
-
-
-def insert_notice_lesson():
-    pass
+def if_has_lesson(query_dict: dict):
+    _, num = dao.Lesson.query_lessons(query_dict=query_dict)
+    if num != 0:
+        return True
+    else:
+        return False
 
 
 def update_database(info: dict = None):
@@ -209,18 +210,25 @@ def update_database(info: dict = None):
             continue
         if raw_lesson['lesson_teacher_name'] == '':
             continue
-        term_name = raw_lesson['term_name']
+        term_name = '-'.join([raw_lesson['lesson_year'], raw_lesson['lesson_semester']]).replace(' ', '')
         term = dao.Term.get_term(term_name=term_name)
         if term is None:
             term = insert_term(term_name=term_name)
 
         term_begin_time = term['begin_time']
         lesson_datas = format_raw_lesson(raw_lesson)
+
         for lesson_data in lesson_datas:
-            dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
+            if if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
+                                         'lesson_class': [lesson_data['lesson_class']]}):
+                update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
+                                          'lesson_class': [lesson_data['lesson_class']]}, data=lesson_data)
+            else:
+                dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
             new_lesson = dao.Lesson.get_lesson(lesson_id=lesson_data['lesson_id'])
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw'],
                                                            teacher_name=raw_lesson['lesson_teacher_name'])
+            del_lesson_cases(query_dict={'lesson_id':[new_lesson['id']]})
             for raw_lesson_case_data in raw_lesson_case_datas:
                 lesson_case_datas = format_raw_lesson_case(raw_lesson_case=raw_lesson_case_data,
                                                            lesson_id=new_lesson['id'], term_begin_time=term_begin_time,
