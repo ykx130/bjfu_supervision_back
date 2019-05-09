@@ -39,8 +39,8 @@ def get_cursor(info: dict):
         info = {}
     host = info.get("host", "localhost")
     user = info.get("user", "root")
-    passwd = info.get("passwd", "wshwoaini")
-    database = info.get("db", "lessons")
+    passwd = info.get("passwd", "Root!!2018")
+    database = info.get("db", "raw_supervision")
     charset = info.get("charset", "utf8")
     lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
                                 cursorclass=pymysql.cursors.DictCursor)
