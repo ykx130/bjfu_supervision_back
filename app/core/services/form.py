@@ -45,7 +45,8 @@ class FormService:
                     if not item_map.get(item['item_name']):
                         point = {o['label']: {"option": o, "num": 0} for o in item.get("payload", {}).get("options", [])}
                         for value in item["value"]:
-                            point[value]["num"] = point[value]["num"] + 1
+                            if  value in point:
+                                point[value]["num"] = point[value]["num"] + 1
                         item_map[item['item_name']] = {
                             "item_name": item['item_name'],
                             "point": list(point.values())
@@ -53,7 +54,7 @@ class FormService:
                     else:
                         point = item_map[item['item_name']]["point"]
                         for p in point:
-                            if p['option']['value'] in item['value']:
+                            if p['option']['label'] in item['value']:
                                 p['num'] = p['num'] + 1
                 if item.get("item_type") == "raw_text":
                     # 处理文本分词
