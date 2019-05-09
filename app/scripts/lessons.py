@@ -175,9 +175,6 @@ def insert_lesson(data: dict):
     return lesson
 
 
-def del_lesson(where_dict: dict):
-    pass
-
 
 def insert_lesson_case(data: dict):
     dao.LessonCase.insert_lesson_case(data=data)
