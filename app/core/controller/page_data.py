@@ -1,6 +1,7 @@
 import json
 from app import redis_cli
 from app.core import dao
+from app.core.services import TermService
 
 
 class PageDataController():
@@ -29,6 +30,7 @@ class PageDataController():
 
         data_dict["sys:submitted_form"] = wait_submitted_form
         data_dict["sys:submitted_form"] = submitted_form
-        data_dict["sys:guider_num"] = dao.Supervisor.count(query_dict={})
-        data_dict["sys:notice_lesson_num"] = dao.NoticeLesson.count(query_dict={})
+        now_term = TermService.get_now_term()
+        data_dict["sys:guider_num"] = dao.Supervisor.count(query_dict={'term': [now_term['name']]})
+        data_dict["sys:notice_lesson_num"] = dao.NoticeLesson.count(query_dict={'term': [now_term['name']]})
         return data_dict

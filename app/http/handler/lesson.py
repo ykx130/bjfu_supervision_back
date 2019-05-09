@@ -38,6 +38,23 @@ def get_lessons():
     }), 200
 
 
+@lesson_blueprint.route('/lessons_with_case')
+def get_lessons_with_case():
+    try:
+        (lessons, num) = controller.LessonController.query_lessons_with_cases(query_dict=args_to_dict(request.args))
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'lessons': lessons,
+        'total': num,
+    }), 200
+
+
 @lesson_blueprint.route('/lesson_cases')
 def query_lesson_cases():
     try:

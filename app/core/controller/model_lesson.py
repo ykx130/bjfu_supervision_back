@@ -188,8 +188,8 @@ class ModelLessonController(object):
         return True
 
     @classmethod
-    def model_lesson_vote(cls, ctx: bool = True, id: int = 0, vote: bool = True):
-        model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
+    def model_lesson_vote(cls, ctx: bool = True, lesson_id: str = 0, vote: bool = True):
+        model_lesson = dao.ModelLesson.get_model_lesson_by_lesson_id(lesson_id=lesson_id, unscoped=False)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
         lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
@@ -197,10 +197,8 @@ class ModelLessonController(object):
             raise CustomError(404, 404, 'lesson not found')
         try:
             if vote:
-                dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]},
+                dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
                                                     data={'votes': int(model_lesson['votes']) + 1})
-            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': model_lesson['lesson_id']},
-                                     data={'notices': int(lesson['notices'] + 1)})
             if ctx:
                 db.session.commit()
         except Exception as e:
