@@ -39,5 +39,5 @@ class PageDataController():
             if not num:
                 num = 0
             form_num[unit] = num
-
+        data_dict["sys:form_num"] = form_num
         return data_dict
