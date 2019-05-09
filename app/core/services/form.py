@@ -43,7 +43,7 @@ class FormService:
                 if item.get("item_type") == "checkbox_option":
                     # 处理多选
                     if not item_map.get(item['item_name']):
-                        point = {o['value']: {"option": o, "num": 0} for o in item.get("payload", {}).get("options", [])}
+                        point = {o['label']: {"option": o, "num": 0} for o in item.get("payload", {}).get("options", [])}
                         for value in item["value"]:
                             point[value]["num"] = point[value]["num"] + 1
                         item_map[item['item_name']] = {
