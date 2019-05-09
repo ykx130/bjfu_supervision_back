@@ -23,8 +23,8 @@ class Config:
     MONGO_PORT = 27017
     MAIL_DEBUG = True
     SQLALCHEMY_DATABASE_URI = \
-        "mysql+pymysql://root:wshwoaini@localhost:3306/supervision?charset=utf8mb4"
-    KAFLKA_HOST = ["47.92.110.74:9092", ]
+        "mysql+pymysql://root:Root!!2018@localhost:3306/supervision?charset=utf8mb4"
+    KAFLKA_HOST = ["202.204.121.155:17092", ]
     KAFLKA_TOPIC = "bjfu_calculate_send_topic"
 
     REDIS_URL = "redis://@localhost:6379/1"
