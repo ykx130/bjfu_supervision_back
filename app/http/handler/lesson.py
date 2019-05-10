@@ -123,8 +123,11 @@ def get_teacher_names():
 
 @lesson_blueprint.route('/terms')
 def get_terms():
+    query_dict = args_to_dict(request.args)
+    query_dict['_sort'] = ['name']
+    query_dict['_order'] = ['desc']
     try:
-        (terms, total) = controller.TermController.query_terms(query_dict=args_to_dict(request.args))
+        (terms, total) = controller.TermController.query_terms(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,

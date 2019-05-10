@@ -226,8 +226,7 @@ class NoticeLessonController(object):
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                        '指定小组': 'assign_group', '关注原因': 'lesson_attention_reason', '关注次数': 'notices'}
-        filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute',
-                       'lesson_grade']
+        filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year']
         row_num = df.shape[0]
         try:
             for i in range(0, row_num):
@@ -241,11 +240,12 @@ class NoticeLessonController(object):
                 if total == 0:
                     raise CustomError(404, 404, 'lesson not found')
                 lesson_id = lessons[0]['lesson_id']
+                term = lessons[0]['term']
                 notice_lesson_data['lesson_id'] = lesson_id
                 (_, num) = dao.NoticeLesson.query_notice_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
                     continue
-                notice_lesson_data['term'] = '_'.join([str(df.iloc[i]['开课学年']), str(df.iloc[i]['开课学期'])])
+                notice_lesson_data['term'] = term
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
                                          data={'lesson_level': '关注课程'})
                 dao.NoticeLesson.insert_notice_lesson(ctx=False, data=notice_lesson_data)
@@ -264,11 +264,10 @@ class NoticeLessonController(object):
     def export_lesson_excel(cls, data: dict = None):
         if data is None:
             data = dict()
-        if 'notice_lesson_ids' not in data:
-            (notice_lessons, _) = dao.NoticeLesson.query_notice_lessons(query_dict={}, unscoped=False)
+        if 'term' in data:
+            notice_lessons, num = dao.NoticeLesson.query_notice_lessons(query_dict={'term': [data['term']]})
         else:
-            notice_lesson_ids = data.get('notice_lesson_ids')
-            (notice_lessons, _) = dao.NoticeLesson.query_notice_lessons(query_dict={'id': notice_lesson_ids})
+            notice_lessons, num = dao.NoticeLesson.query_notice_lessons()
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                        '指定小组': 'assign_group', '关注原因': 'lesson_attention_reason', '关注次数': 'notices'}

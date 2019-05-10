@@ -223,8 +223,7 @@ class ModelLessonController(object):
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                        '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
-        filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year', 'lesson_attribute',
-                       'lesson_grade']
+        filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year']
         row_num = df.shape[0]
         try:
             for i in range(0, row_num):
@@ -238,11 +237,12 @@ class ModelLessonController(object):
                 if total == 0:
                     raise CustomError(404, 404, 'lesson not found')
                 lesson_id = lessons[0]['lesson_id']
+                term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
                     continue
-                model_lesson_data['term'] = '_'.join([str(df.iloc[i]['开课学年']), str(df.iloc[i]['开课学期'])])
+                model_lesson_data['term'] = term
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'model_lesson': '推荐课'})
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
             if ctx:
@@ -260,11 +260,10 @@ class ModelLessonController(object):
     def export_lesson_excel(cls, data: dict = None):
         if data is None:
             data = dict()
-        if 'model_lesson_ids' not in data:
-            (model_lessons, _) = dao.ModelLesson.query_model_lessons(query_dict={}, unscoped=False)
+        if 'term' in data:
+            model_lessons, num = dao.ModelLesson.query_model_lessons(query_dict={'term':[data['term']]})
         else:
-            model_lesson_ids = data.get('model_lesson_ids')
-            (model_lessons, _) = dao.ModelLesson.query_model_lessons(query_dict={'id': model_lesson_ids})
+            model_lessons, num = dao.ModelLesson.query_model_lessons()
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
                        '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
