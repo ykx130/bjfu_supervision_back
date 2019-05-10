@@ -232,8 +232,8 @@ class ModelLessonController(object):
                 for col_name_c, col_name_e in column_dict.items():
                     model_lesson_data[col_name_e] = str(df.iloc[i][col_name_c])
                     if col_name_e in filter_list:
-                        lesson_filter[col_name_e] = str(df.iloc[i][col_name_c])
-                (lessons, total) = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
+                        lesson_filter[col_name_e] = [str(df.iloc[i][col_name_c])]
+                lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
                     raise CustomError(404, 404, 'lesson not found')
                 lesson_id = lessons[0]['lesson_id']
@@ -243,7 +243,7 @@ class ModelLessonController(object):
                 if num != 0:
                     continue
                 model_lesson_data['term'] = term
-                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'model_lesson': '推荐课'})
+                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'lesson_model': '推荐课'})
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
             if ctx:
                 db.session.commit()
