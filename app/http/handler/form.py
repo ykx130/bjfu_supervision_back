@@ -35,7 +35,7 @@ def query_forms():
     query_dict = args_to_dict(request.args)
     if not current_user.admin:
         user = controller.UserController.get_user(username=current_user.username)
-        if '小组长' in user:
+        if '小组长' in user['role_names']:
             query_dict['meta.guider_group']: [current_user.username]
     try:
         (forms, total) = controller.FormController.query_forms(query_dict=query_dict)
