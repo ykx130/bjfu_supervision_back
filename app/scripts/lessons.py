@@ -6,6 +6,7 @@ import app.core.services as service
 import json
 from datetime import datetime, timedelta
 import re
+import argparse
 from app import app
 
 ctx = app.app_context()
@@ -179,7 +180,6 @@ def insert_lesson(data: dict):
     return lesson
 
 
-
 def insert_lesson_case(data: dict):
     dao.LessonCase.insert_lesson_case(data=data)
 
@@ -204,7 +204,7 @@ def update_database(info: dict = None):
 
     cursor = get_cursor(info=info)
 
-    raw_lessons = query_raw_lessons(cursor)
+    raw_lessons = query_raw_lessons(cursor, info.get('term', None))
 
     for raw_lesson in raw_lessons:
         if raw_lesson['lesson_teacher_name'] == '':
@@ -227,7 +227,7 @@ def update_database(info: dict = None):
             new_lesson = dao.Lesson.get_lesson(lesson_id=lesson_data['lesson_id'])
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
                                                            teacher_name=lesson_data['lesson_teacher_name'])
-            del_lesson_cases(query_dict={'lesson_id':[new_lesson['id']]})
+            del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})
             for raw_lesson_case_data in raw_lesson_case_datas:
                 if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
                     continue
@@ -241,4 +241,14 @@ def update_database(info: dict = None):
 
 
 if __name__ == '__main__':
-    update_database()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--term', '-t', help='请输入学期', default=None)
+    parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
+    parser.add_argument('--user', '-u', help='请输入用户名', default='root')
+    parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')
+    parser.add_argument('--db', '-d', help='请输入数据库名', default='raw_supervision')
+    parser.add_argument('--charset', '-c', help='请输入编码格式', default='utf8')
+    args = parser.parse_args()
+    info = {'term': args.term, 'host': args.host, 'user': args.user, 'passwd': args.passwd, 'db': args.db,
+            'charset': args.charset}
+    update_database(info=info)

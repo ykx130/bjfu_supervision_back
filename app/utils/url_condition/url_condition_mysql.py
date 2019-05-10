@@ -18,7 +18,7 @@ class UrlCondition(object):
                     sort_list = v.split(',')
                 elif key == '_order':
                     v = v.replace(' ', '')
-                    order_list = [int(item_order) for item_order in v.split(',')]
+                    order_list = [str(item_order) for item_order in v.split(',')]
                 elif key == '_limit':
                     self.sort_limit_dict[key] = v
                 else:
