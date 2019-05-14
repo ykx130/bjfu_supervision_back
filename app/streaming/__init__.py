@@ -6,10 +6,20 @@
 import json
 from kafka import KafkaConsumer, KafkaProducer
 from app.config import Config
-from app.utils.logger import log
+from app import app
+from flask import current_app
 
 
 def sub_kafka(topic=''):
+    """
+    订阅特定topic
+    产生特定
+    :param topic:
+    :return:
+    """
+    ctx = app.app_context()
+    ctx.push()
+
     def wrapper(func):
         def ex():
             consumer = KafkaConsumer(topic, bootstrap_servers=Config.KAFLKA_HOST,
@@ -17,20 +27,10 @@ def sub_kafka(topic=''):
                                      group_id=func.__name__ + '_group'
                                      )
             for msg in consumer:
-                log.info("received msg : {}".format(msg))
-                func(msg.value)
+                current_app.logger.info("received msg : {}".format(msg))
+                print("FUNC {} RECEIVED MSG : {}".format(func.__name__, msg))
+                func(method=msg.value.get("method"), args=msg.value.get("args"))
 
         return ex
 
     return wrapper
-
-
-def send_kafka_message(topic, method, **args):
-    producer = KafkaProducer(bootstrap_servers=Config.KAFLKA_HOST,
-                             value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-
-    producer.send(topic, value={
-        "method": method,
-        "args": args
-    })
-    log.info("SEND MESSAGE  method : {} args: {}".format(method, json.dumps(args)))

@@ -1,15 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2018/7/7 2:51 PM
-# @Author  : suchang
-# @File    : __init__.py.py
-
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 import os
+from app.utils.mongodb import mongo
 from app.config import config
 from flask_login import LoginManager
 from app.utils.reids import get_redis_con
 from app.utils.mysql import db
+from flask_pymongo import PyMongo
+import logging
+from app.utils.logger import consoleHandler, fileHandler
+from kafka import KafkaConsumer, KafkaProducer
+import json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,16 +24,13 @@ def create_app(config_name):
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     db.init_app(app)
+    mongo.init_app(app)
     login_manager.init_app(app)
-
-    from app.http.handler.item_type import item_type_blueprint
-    app.register_blueprint(item_type_blueprint)
+    app.kafka_producer = KafkaProducer(bootstrap_servers=app.config['KAFLKA_HOST'],
+                                       value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     from app.http.handler.form_meta import form_meta_blueprint
     app.register_blueprint(form_meta_blueprint)
-
-    from app.http.handler.block_type import block_type_blueprint
-    app.register_blueprint(block_type_blueprint)
 
     from app.http.handler.form import form_blueprint
     app.register_blueprint(form_blueprint)
@@ -71,3 +69,11 @@ def create_app(config_name):
 
 
 app = create_app('default')
+app.logger.addHandler(consoleHandler)
+
+
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers.extend(gunicorn_logger.handlers)
+    app.logger.addHandler(fileHandler)
+    app.logger.setLevel(gunicorn_logger.level)

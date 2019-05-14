@@ -1,4 +1,39 @@
-from app.core.services import lesson_service
+from app.streaming import sub_kafka
+from app.core.services import InterfaceService
+from app.core import dao
+from multiprocessing import Process, Queue
+
+
+@sub_kafka('lesson_service')
+def lesson_service_server(method, args):
+    if not method:
+        return
+    if method == 'add_notice_lesson' or method == 'delete_notice_lesson':
+        InterfaceService.update_page_data()
+        # 更新首页
+        pass
+
+
+@sub_kafka('form_service')
+def lesson_form_service_server(method, args):
+    if not method:
+        return
+    if method == 'add_form' or method == 'repulse_form':
+        _, total, = dao.Form.query_forms(query_dict={
+            'meta.lesson.lesson_id': args.get("lesson_id")
+        })
+        dao.Lesson.update_lesson(query_dict={
+            'lesson_id': args.get("lesson_id")
+        }, data={
+            "lesson_state": "已完成" if total else "未完成"
+        })
+
 
 if __name__ == '__main__':
-    lesson_service.lesson_service_server()
+
+    processes = [
+        Process(target=lesson_service_server),
+        Process(target=lesson_form_service_server)
+    ]
+    [p.start() for p in processes]
+    [p.join() for p in processes]

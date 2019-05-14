@@ -10,7 +10,7 @@ def object_to_str(dict_unserializalbe):
 
 
 def dict_serializable(dict_unserializalbe):
-    r = {}
+    r = dict()
     for k, v in dict_unserializalbe.items():
         try:
             r[k] = json.loads(v)
@@ -21,18 +21,16 @@ def dict_serializable(dict_unserializalbe):
 
 class UrlCondition(object):
     def __init__(self, url_args):
-        self.sort_limit_dict = {}
-        self.page_dict = {}
-        self.filter_dict = {}
+        if url_args is None:
+            url_args = dict()
+        self.sort_limit_dict = dict()
+        self.page_dict = dict()
+        self.filter_dict = dict()
         order_list = []
         sort_list = []
         filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne']
         for key, value in url_args.items():
             for v in value:
-                try:
-                    v = json.loads(v)
-                except:
-                    v = v
                 if key == '_per_page' or key == '_page':
                     self.page_dict[key] = v
                 elif key == '_sort':
@@ -57,9 +55,9 @@ class UrlCondition(object):
                         else:
                             self.filter_dict[key]['$in'].append(v)
         if len(order_list) == len(sort_list):
-            self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, order_list))
+            self.sort_limit_dict['_sort_dict'] = [(order_list[i], sort_list[i]) for i in range(len(sort_list))]
         elif len(order_list) == 0:
-            self.sort_limit_dict['_sort_dict'] = dict(zip(sort_list, [1 for i in range(len(sort_list))]))
+            self.sort_limit_dict['_sort_dict'] = [(sort_list[i], 1) for i in range(len(sort_list))]
 
 
 # 将请求的url_args分解成三个字典
@@ -70,8 +68,8 @@ class UrlCondition(object):
 
 class Paginate(object):
     def __init__(self, _data, page_dict):
-        self.per_page = page_dict['_per_page'] if '_per_page' in page_dict else 20
-        self.page = page_dict['_page'] if '_page' in page_dict else 1
+        self.per_page = page_dict.get('_per_page', 20)
+        self.page = page_dict.get('_page', 1)
         self.total = _data.count()
         self.page_num = self.total // self.per_page + 1 if self.total % self.per_page != 0 else self.total // self.per_page
         self.prev = self.page - 1 if self.page > 1 else None
@@ -84,9 +82,9 @@ class Paginate(object):
 def sort_limit(datas, sort_limit_dict):
     dataspage = datas
     _limit = sort_limit_dict.get('_limit', None)
-    _sort_dict = sort_limit_dict.get('_sort_dict', {})
+    _sort_dict = sort_limit_dict.get('_sort_dict', [])
     if _limit is not None:
         dataspage = dataspage.limit(_limit)
-    if _sort_dict != {}:
+    if len(_sort_dict)>0:
         dataspage = dataspage.sort(_sort_dict)
     return dataspage
