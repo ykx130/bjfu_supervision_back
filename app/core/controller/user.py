@@ -371,7 +371,7 @@ class SupervisorController():
                     dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
                 school_term = school_term + 1
-                lesson_record_data = {'username': username, 'term': term, 'group_name': data['group'],
+                lesson_record_data = {'username': username, 'term': school_term.term_name, 'group_name': data['group'],
                                       'name': user['name']}
                 dao.LessonRecord.insert_lesson_record(ctx=False, data=lesson_record_data)
             if ctx:
