@@ -131,7 +131,7 @@ def model_lesson_vote(lesson_id):
 @model_lesson_blueprint.route('/model_lessons/excel/import', methods=['POST'])
 def import_lesson_excel():
     try:
-        controller.ModelLessonController.import_lesson_excel(data=request)
+        path = controller.ModelLessonController.import_lesson_excel(data=request)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -139,7 +139,8 @@ def import_lesson_excel():
         }), e.status_code
     return jsonify({
         'code': 200,
-        'msg': ''
+        'msg': '',
+        'fail_excel_path': path
     }), 200
 
 

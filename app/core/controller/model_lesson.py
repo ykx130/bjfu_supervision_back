@@ -225,6 +225,7 @@ class ModelLessonController(object):
                        '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
         filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year']
         row_num = df.shape[0]
+        fail_lessons = list()
         try:
             for i in range(0, row_num):
                 lesson_filter = dict()
@@ -235,12 +236,14 @@ class ModelLessonController(object):
                         lesson_filter[col_name_e] = [str(df.iloc[i][col_name_c])]
                 lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
-                    raise CustomError(404, 404, 'lesson not found')
+                    fail_lessons.append(lesson_filter)
+                    continue
                 lesson_id = lessons[0]['lesson_id']
                 term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
+                    fail_lessons.append(lesson_filter)
                     continue
                 model_lesson_data['term'] = term
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'lesson_model': '推荐课'})
@@ -254,14 +257,30 @@ class ModelLessonController(object):
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
-        return True
+        file_path = None
+        if len(fail_lessons) == 0:
+            frame_dict = {}
+            for file_lesson in fail_lessons:
+                for key, value in column_dict.items():
+                    if value in file_lesson:
+                        excel_value = file_lesson.get(value)
+                        if key not in frame_dict:
+                            frame_dict[key] = [excel_value]
+                        else:
+                            frame_dict[key].append(excel_value)
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123', index=False, header=True)
+        return file_path
 
     @classmethod
     def export_lesson_excel(cls, data: dict = None):
         if data is None:
             data = dict()
         if 'term' in data:
-            model_lessons, num = dao.ModelLesson.query_model_lessons(query_dict={'term':[data['term']]})
+            model_lessons, num = dao.ModelLesson.query_model_lessons(query_dict={'term': [data['term']]})
         else:
             model_lessons, num = dao.ModelLesson.query_model_lessons()
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',

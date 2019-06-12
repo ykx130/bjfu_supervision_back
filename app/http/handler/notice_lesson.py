@@ -116,7 +116,7 @@ def update_notice_lesson(id):
 @notice_lesson_blueprint.route('/notice_lessons/excel/import', methods=['POST'])
 def import_lesson_excel():
     try:
-        controller.NoticeLessonController.import_lesson_excel(data=request)
+        path = controller.NoticeLessonController.import_lesson_excel(data=request)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -125,7 +125,7 @@ def import_lesson_excel():
     return jsonify({
         'code': 200,
         'msg': '',
-        'notice_lesson': None
+        'fail_excel_path': path
     }), 200
 
 
