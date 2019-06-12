@@ -137,11 +137,18 @@ def import_lesson_excel():
             'code': e.code,
             'msg': e.err_info,
         }), e.status_code
-    return jsonify({
-        'code': 200,
-        'msg': '',
-        'fail_excel_path': path
-    }), 200
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
 
 
 @model_lesson_blueprint.route('/model_lessons/excel/export', methods=['POST'])
