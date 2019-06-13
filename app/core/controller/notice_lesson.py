@@ -249,9 +249,13 @@ class NoticeLessonController(object):
                     fail_lessons.append(lesson_filter)
                     continue
                 notice_lesson_data['term'] = term
-                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
-                                         data={'lesson_level': '关注课程'})
-                dao.NoticeLesson.insert_notice_lesson(ctx=False, data=notice_lesson_data)
+                try:
+                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                                             data={'lesson_level': '关注课程'})
+                    dao.NoticeLesson.insert_notice_lesson(ctx=False, data=notice_lesson_data)
+                except:
+                    fail_lessons.append(lesson_filter)
+                    continue
             if ctx:
                 db.session.commit()
         except Exception as e:

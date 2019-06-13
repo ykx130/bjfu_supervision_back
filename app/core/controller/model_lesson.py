@@ -246,8 +246,12 @@ class ModelLessonController(object):
                     fail_lessons.append(lesson_filter)
                     continue
                 model_lesson_data['term'] = term
-                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'lesson_model': '推荐课'})
-                dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
+                try:
+                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'lesson_model': '推荐课'})
+                    dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
+                except:
+                    fail_lessons.append(lesson_filter)
+                    continue
             if ctx:
                 db.session.commit()
         except Exception as e:
