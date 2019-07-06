@@ -136,7 +136,7 @@ class User(db.Model, UserMixin):
             if hasattr(user, key):
                 setattr(user, key, value)
         role_names = data.get('role_names', [])
-        role_name_dict = {'教师': 'teacher', '管理员': 'admin', '领导': 'leader'}
+        role_name_dict = {'教师': 'teacher', '管理员': 'admin', '学院领导': 'leader'}
         for role_name in role_names:
             role_name_e = role_name_dict[role_name]
             if hasattr(user, role_name_e):

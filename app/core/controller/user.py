@@ -50,7 +50,7 @@ class UserController():
 
     @classmethod
     def role_list(cls, user: dict, term: str):
-        role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '领导',
+        role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '学院领导',
                           'is_guider': '督导'}
         role_names = ['教师']
         for role_name_e, role_name_c in role_list_dict.items():
