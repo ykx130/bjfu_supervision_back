@@ -90,7 +90,7 @@ class UserController():
         return cls.formatter(user)
 
     @classmethod
-    def insert_user(cls, ctx: bool = True, data: dict = None):
+    def insert_user(cls, ctx: bool = True, data: dict = None, default_password='bjfu123456'):
         if data is None:
             data = dict()
         data = cls.reformatter(data)
@@ -105,6 +105,8 @@ class UserController():
             elif e is not None and e.status_code != 404:
                 raise e
         try:
+            if not data.get('password', None):
+                data['password'] = default_password
             dao.User.insert_user(ctx=ctx, data=data)
             if ctx:
                 db.session.commit()
