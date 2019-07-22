@@ -23,7 +23,7 @@ class AuthController():
     @classmethod
     def login(cls, username: str, password: str):
         if username is None or password is None:
-            raise CustomError(401, 401, 'username or password can not be null')
+            raise CustomError(403, 403, '用户名或密码错误')
         try:
             dao.User.login(username=username, password=password)
         except Exception as e:
