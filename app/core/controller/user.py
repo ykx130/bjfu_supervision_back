@@ -23,7 +23,7 @@ class AuthController():
     @classmethod
     def login(cls, username: str, password: str):
         if username is None or password is None:
-            raise CustomError(401, 401, 'username or password can not be null')
+            raise CustomError(403, 403, '用户名或密码错误')
         try:
             dao.User.login(username=username, password=password)
         except Exception as e:
@@ -50,7 +50,7 @@ class UserController():
 
     @classmethod
     def role_list(cls, user: dict, term: str):
-        role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '领导',
+        role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '学院领导',
                           'is_guider': '督导'}
         role_names = ['教师']
         for role_name_e, role_name_c in role_list_dict.items():
@@ -58,9 +58,10 @@ class UserController():
                 role_names.append(role_name_c)
         if user['is_guider']:
             supervisor = dao.Supervisor.get_supervisor(user['username'], term)
-            for role_name_e, role_name_c in role_list_dict.items():
-                if supervisor.get(role_name_e, False):
-                    role_names.append(role_name_c)
+            if supervisor:
+                for role_name_e, role_name_c in role_list_dict.items():
+                    if supervisor.get(role_name_e, False):
+                        role_names.append(role_name_c)
         return role_names
 
     @classmethod
@@ -90,7 +91,7 @@ class UserController():
         return cls.formatter(user)
 
     @classmethod
-    def insert_user(cls, ctx: bool = True, data: dict = None):
+    def insert_user(cls, ctx: bool = True, data: dict = None, default_password='bjfu123456'):
         if data is None:
             data = dict()
         data = cls.reformatter(data)
@@ -105,6 +106,8 @@ class UserController():
             elif e is not None and e.status_code != 404:
                 raise e
         try:
+            if not data.get('password', None):
+                data['password'] = default_password
             dao.User.insert_user(ctx=ctx, data=data)
             if ctx:
                 db.session.commit()
@@ -371,7 +374,7 @@ class SupervisorController():
                     dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
                 school_term = school_term + 1
-                lesson_record_data = {'username': username, 'term': term, 'group_name': data['group'],
+                lesson_record_data = {'username': username, 'term': school_term.term_name, 'group_name': data['group'],
                                       'name': user['name']}
                 dao.LessonRecord.insert_lesson_record(ctx=False, data=lesson_record_data)
             if ctx:
