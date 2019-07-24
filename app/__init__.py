@@ -16,6 +16,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
+login_manager.login_view = '/401'
 redis_cli = get_redis_con(config['default'].REDIS_URL)
 
 

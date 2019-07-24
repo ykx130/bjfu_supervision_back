@@ -53,3 +53,11 @@ def get_current():
         'msg': '',
         'current_user': user
     }), 200
+
+
+@user_blueprint.route("/401", methods=["GET"])
+def get_current():
+    return jsonify({
+        'code': 401,
+        'msg': '',
+    }), 401
