@@ -56,7 +56,7 @@ def get_current():
 
 
 @user_blueprint.route("/401", methods=["GET"])
-def get_current():
+def error_401():
     return jsonify({
         'code': 401,
         'msg': '',
