@@ -28,6 +28,7 @@ class Config:
     KAFLKA_TOPIC = "bjfu_calculate_send_topic"
 
     REDIS_URL = "redis://@localhost:6379/1"
+    CAPTCHA_EXPIRE = 300
 
     @staticmethod
     def init_app(app):
