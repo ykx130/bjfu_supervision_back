@@ -74,9 +74,6 @@ def error_401():
     }), 401
 
 
-captcha_bp = Blueprint(name='captcha', import_name='captcha', url_prefix='')
-
-
 @captcha_bp.route('/captcha', methods=['GET'])
 def get_captcha():
     try:

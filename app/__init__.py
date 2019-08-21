@@ -66,7 +66,8 @@ def create_app(config_name):
     from app.http.handler.page_data import page_data_blueprint
     app.register_blueprint(page_data_blueprint)
 
-    return app
+    from app.http.handler import captcha_bp
+    app.register_blueprint(page_data_blueprint)
 
 
 app = create_app('default')
