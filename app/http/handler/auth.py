@@ -1,4 +1,4 @@
-from app.http.handler import user_blueprint
+from app.http.handler import user_blueprint, captcha_bp
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import request, jsonify, Blueprint
 import app.core.controller as controller
