@@ -1,14 +1,13 @@
-
 from captcha.image import *
 from app.config import *
+from app import redis_cli
+from app.utils import CustomError
 import uuid
 import time
 import random
 import string
-import app.db as db
 import datetime
 import os
-import easyapi
 
 
 class CaptchaService(object):
@@ -27,7 +26,7 @@ class CaptchaService(object):
 
     @classmethod
     def remove(cls, id: str):
-        db.redis_cli.delete(id)
+        redis_cli.delete(id)
 
     @classmethod
     def make_image(cls, code, file_dir):
@@ -50,10 +49,10 @@ class CaptchaService(object):
 
     @classmethod
     def verify(cls, id: str, input: str):
-        code = db.redis_cli.get(id)
+        code = redis_cli.get(id)
         cls.remove(id)
         if code is None:
-            raise easyapi.BusinessError(code=500, http_code=200, err_info="验证码失效")
+            raise CustomError(code=500, status_code=200, err_info="验证码失效")
         if cls.judge(input, code):
             return True
         else:
