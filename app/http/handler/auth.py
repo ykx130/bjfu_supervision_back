@@ -10,11 +10,12 @@ from app.utils import CustomError
 def login():
     username = request.json.get("username")
     password = request.json.get("password")
-    captcha = request.json.get("captcha")
-    uuid = request.json.get('uuid', '')
+    # captcha = request.json.get("captcha")
+    # uuid = request.json.get('uuid', '')
 
     try:
-        ok = service.CaptchaService.verify(uuid, captcha)
+        ok = True
+       # ok = service.CaptchaService.verify(uuid, captcha)
         if not ok:
             return jsonify({
                 "code": 500,

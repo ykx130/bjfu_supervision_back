@@ -16,4 +16,4 @@ captcha_bp = Blueprint('captcha_blueprint', __name__)
 
 
 from . import activity, auth, consult, event, form, form_meta, lesson, lesson_record, model_lesson, notice_lesson, \
-    notices, user, work_plan
+    notices, user, work_plan, captcha_bp

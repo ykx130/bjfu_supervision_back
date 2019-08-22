@@ -44,7 +44,7 @@ class CaptchaService(object):
         code = cls.make_code()
         id = cls.make_uuid()
         path = cls.make_image(code, file_dir)
-        db.redis_cli.set(id, code, ex=Config.CAPTCHA_EXPIRE)
+        redis_cli.set(id, code, ex=Config.CAPTCHA_EXPIRE)
         return id, path
 
     @classmethod
