@@ -8,7 +8,7 @@ consoleHandler.setLevel(logging.DEBUG)
 consoleHandler.setFormatter(formatter)
 
 fileHandler = logging.handlers.TimedRotatingFileHandler(
-    filename='tracker_info',
+    filename='bjfu_supervisor',
     when='midnight',
 )
 fileHandler.suffix = '%Y%m%d.log'
