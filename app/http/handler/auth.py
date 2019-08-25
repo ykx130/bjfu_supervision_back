@@ -1,7 +1,8 @@
-from app.http.handler import user_blueprint
+from app.http.handler import user_blueprint, captcha_bp
 from flask_login import current_user, login_user, logout_user, login_required
-from flask import request, jsonify
+from flask import request, jsonify, Blueprint
 import app.core.controller as controller
+import app.core.services as service
 from app.utils import CustomError
 
 
@@ -9,7 +10,18 @@ from app.utils import CustomError
 def login():
     username = request.json.get("username")
     password = request.json.get("password")
+    # captcha = request.json.get("captcha")
+    # uuid = request.json.get('uuid', '')
+
     try:
+        ok = True
+       # ok = service.CaptchaService.verify(uuid, captcha)
+        if not ok:
+            return jsonify({
+                "code": 500,
+                "msg": "验证码错误"
+            })
+
         controller.AuthController.login(username=username, password=password)
     except CustomError as e:
         return jsonify({
@@ -53,3 +65,20 @@ def get_current():
         'msg': '',
         'current_user': user
     }), 200
+
+
+@user_blueprint.route("/401", methods=["GET"])
+def error_401():
+    return jsonify({
+        'code': 401,
+        'msg': '',
+    }), 401
+
+
+@captcha_bp.route('/captcha', methods=['GET'])
+def get_captcha():
+    try:
+        (id, path) = controller.CaptchaController.new_captcha()
+    except Exception as e:
+        return jsonify(code=500, msg=str(e)), 500
+    return jsonify(code=200, uuid=id, path=path)

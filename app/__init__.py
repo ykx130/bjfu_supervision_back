@@ -12,10 +12,11 @@ from app.utils.logger import consoleHandler, fileHandler
 from kafka import KafkaConsumer, KafkaProducer
 import json
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+basedir = os.path.abspath(os.getcwd())
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
+login_manager.login_view = '/401'
 redis_cli = get_redis_con(config['default'].REDIS_URL)
 
 
@@ -65,8 +66,9 @@ def create_app(config_name):
     from app.http.handler.page_data import page_data_blueprint
     app.register_blueprint(page_data_blueprint)
 
+    from app.http.handler import captcha_bp
+    app.register_blueprint(captcha_bp)
     return app
-
 
 app = create_app('default')
 app.logger.addHandler(consoleHandler)
