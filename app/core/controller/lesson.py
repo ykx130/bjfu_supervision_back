@@ -203,7 +203,7 @@ class LessonController(object):
         if lesson_level is not None and lesson_level == '关注课程':
             notice_lesson_data = dict()
             notice_lesson_data['term'] = lesson['term']
-            notice_lesson_data['assign_group'] = data['assign_group']
+            notice_lesson_data['group_name'] = data['group_name']
             notice_lesson_data['lesson_attention_reason'] = data['lesson_attention_reason']
             notice_lesson_data['lesson_id'] = lesson['lesson_id']
             NoticeLessonController.insert_notice_lesson(ctx=False, data=notice_lesson_data)

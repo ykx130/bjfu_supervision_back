@@ -583,7 +583,7 @@ class NoticeLesson(db.Model):
     __tablename__ = 'notice_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.String(32), default=-1)
-    assign_group = db.Column(db.String(32), default='')
+    group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
     using = db.Column(db.Boolean, default=True)
@@ -596,7 +596,7 @@ class NoticeLesson(db.Model):
             'id': notice_lesson.id,
             'lesson_id': notice_lesson.lesson_id,
             'lesson_attention_reason': notice_lesson.lesson_attention_reason,
-            'assign_group': notice_lesson.assign_group
+            'group_name': notice_lesson.group_name
         }
         return notice_lesson_dict
 
@@ -723,7 +723,7 @@ class ModelLesson(db.Model):
     term = db.Column(db.String(32), default='')
     status = db.Column(db.Integer, default=2)  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
-    assign_group = db.Column(db.String(32), default='')
+    group_name = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -735,7 +735,7 @@ class ModelLesson(db.Model):
         model_lesson_dict = {
             'id': model_lesson.id,
             'lesson_id': model_lesson.lesson_id,
-            'assign_group': model_lesson.assign_group,
+            'group_name': model_lesson.group_name,
             'status': status,
             'votes': model_lesson.votes,
         }
@@ -743,7 +743,7 @@ class ModelLesson(db.Model):
 
     @classmethod
     def reformatter_insert(cls, data: dict):
-        allow_column = ['lesson_id', 'assign_group', 'status', 'votes', 'term']
+        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term']
         status_dict = {'推荐为好评课': 1, '待商榷': 2}
         new_data = dict()
         for key, value in data.items():

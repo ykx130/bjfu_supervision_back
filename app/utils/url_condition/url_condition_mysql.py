@@ -53,20 +53,21 @@ class UrlCondition(object):
 def filter_query(query, filter_map, table):
     for map_key, map_value in filter_map.items():
         for key, value in map_value.items():
-            if map_key == '_lt':
-                query = query.filter(getattr(table, key) < value)
-            elif map_key == '_lte':
-                query = query.filter(getattr(table, key) <= value)
-            elif map_key == '_ne':
-                query = query.filter(getattr(table, key) != value)
-            elif map_key == '_gt':
-                query = query.filter(getattr(table, key) > value)
-            elif map_key == '_gte':
-                query = query.filter(getattr(table, key) >= value)
-            elif map_key == '_eq':
-                query = query.filter(getattr(table, key).in_(value))
-            elif map_key == '_like':
-                query = query.filter(getattr(table, key).like(value + '%'))
+            if hasattr(table, key):
+                if map_key == '_lt':
+                    query = query.filter(getattr(table, key) < value)
+                elif map_key == '_lte':
+                    query = query.filter(getattr(table, key) <= value)
+                elif map_key == '_ne':
+                    query = query.filter(getattr(table, key) != value)
+                elif map_key == '_gt':
+                    query = query.filter(getattr(table, key) > value)
+                elif map_key == '_gte':
+                    query = query.filter(getattr(table, key) >= value)
+                elif map_key == '_eq':
+                    query = query.filter(getattr(table, key).in_(value))
+                elif map_key == '_like':
+                    query = query.filter(getattr(table, key).like(value + '%'))
     return query
 
 

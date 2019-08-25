@@ -54,7 +54,7 @@ class User(db.Model, UserMixin):
     @classmethod
     def reformatter_update(cls, data: dict):
         allow_change_list = ['name', 'sex', 'password', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
-                             'skill', 'group', 'work_state', 'term', 'admin', 'leader', 'guider']
+                             'skill', 'group_name', 'work_state', 'term', 'admin', 'leader', 'guider']
         update_data = dict()
         for key, value in data.items():
             if key in allow_change_list:
@@ -196,7 +196,7 @@ login_manager.anonymous_user = AnonymousUserMixin
 class Group(db.Model):
     __tablename__ = 'groups'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    name = db.Column(db.String(64), unique=True, default='')
+    group_name = db.Column(db.String(64), unique=True, default='')
     leader_name = db.Column(db.String(64), default='')
     using = db.Column(db.Boolean, default=True)
 
@@ -205,7 +205,7 @@ class Group(db.Model):
         if group is None:
             return None
         group_dict = {
-            'name': group.name,
+            'group_name': group.group_name,
             'leader_name': group.leader_name
         }
         return group_dict
@@ -240,7 +240,7 @@ class Group(db.Model):
         query = Group.query.filter(Group.using == True)
         try:
             query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Group)
-            (users, total) = page_query(query, url_condition.page_dict)
+            (groups, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [cls.formatter(data) for data in query], total
@@ -277,7 +277,7 @@ class Supervisor(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(64), default='')
     name = db.Column(db.String(64), default='')
-    group = db.Column(db.String(16), default='')
+    group_name = db.Column(db.String(16), default='')
     work_state = db.Column(db.String(8), default='')
     term = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
@@ -290,7 +290,7 @@ class Supervisor(db.Model):
             return None
         supervisor_dict = {
             "id": supervisor.id,
-            'group': supervisor.group,
+            'group_name': supervisor.group_name,
             'username': supervisor.username,
             'is_grouper': supervisor.grouper,
             'is_main_grouper': supervisor.main_grouper,

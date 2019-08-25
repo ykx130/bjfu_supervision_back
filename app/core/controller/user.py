@@ -157,15 +157,15 @@ class UserController():
             if '小组长' in del_role_names:
                 del_role_names.remove('小组长')
                 supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
-                group_name = data['group_name'] if 'group_name' in data else supervisor['group']
+                group_name = data['group_name'] if 'group_name' in data else supervisor['group_name']
                 SupervisorController.update_grouper(ctx=False, username=username, term=term,
                                                     group_name=group_name, role_name='grouper', add=False)
             elif '小组长' in new_role_names:
                 new_role_names.remove('小组长')
                 supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
-                group_name = data.get('group_name', supervisor['group'])
+                group_name = data.get('group_name', supervisor['group_name'])
                 (groupers, num) = dao.Supervisor.query_supervisors(
-                    query_dict={'term_gte': [term], 'grouper': [True], 'group': [group_name]})
+                    query_dict={'term_gte': [term], 'grouper': [True], 'group_name': [group_name]})
                 if num > 0:
                     grouper = groupers[0]
                     SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
@@ -220,7 +220,7 @@ class SupervisorController():
     @classmethod
     def get_supervisor_by_username(cls, query_dict: dict, unscoped: bool = False):
         term = service.TermService.get_now_term()
-        query_dict.update({'term': term.name})
+        query_dict.update({'term': term.get('name')})
         supervisor = dao.Supervisor.get_supervisor(query_dict=query_dict)
         user = dao.User.get_user(query_dict={'username': supervisor['username']}, unscoped=unscoped)
         supervisor['user'] = user
@@ -251,7 +251,7 @@ class SupervisorController():
         term = data.get('term', service.TermService.get_now_term()['name'])
         supervisor = dao.Supervisor.get_supervisor_by_id(query_dict={'id': id})
         username = supervisor['username']
-        group = data.get('group', supervisor['group'])
+        group = data.get('group_name', supervisor['group_name'])
         grouper = supervisor.get('is_grouper')
         main_grouper = supervisor.get('is_main_grouper')
         is_grouper = data.get('is_grouper', False)
@@ -262,7 +262,7 @@ class SupervisorController():
                                    add=False)
             if not grouper and is_grouper:
                 (groupers, num) = dao.Supervisor.query_supervisors(
-                    query_dict={'term_gte': [term], 'grouper': [True], 'group': [group]})
+                    query_dict={'term_gte': [term], 'grouper': [True], 'group_name': [group]})
                 if num > 0:
                     grouper = groupers[0]
                     cls.update_grouper(ctx=False, username=grouper['username'], term=term, group_name=group,
@@ -369,7 +369,7 @@ class SupervisorController():
             main_grouper = data.get('is_main_grouper', False)
             if grouper:
                 dao.Supervisor.update_supervisor(
-                    query_dict={'group': [data.get('group')], 'term_gte': [term], 'grouper': [True]},
+                    query_dict={'group_name': [data.get('group_name')], 'term_gte': [term], 'grouper': [True]},
                     data={'grouper': False})
             if main_grouper:
                 dao.Supervisor.update_supervisor(
@@ -386,7 +386,7 @@ class SupervisorController():
                     dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
                 school_term = school_term + 1
-                lesson_record_data = {'username': username, 'term': school_term.term_name, 'group_name': data['group'],
+                lesson_record_data = {'username': username, 'term': school_term.term_name, 'group_name': data['group_name'],
                                       'name': user['name']}
                 dao.LessonRecord.insert_lesson_record(ctx=False, data=lesson_record_data)
             if ctx:
@@ -412,7 +412,7 @@ class SupervisorController():
                                                  data={role_name: add})
             else:
                 dao.Supervisor.update_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]},
-                                                 data={role_name: add, 'group': group_name})
+                                                 data={role_name: add, 'group_name': group_name})
             if add:
                 dao.Group.update_group(ctx=False, query_dict={'name': [group_name]}, data={'leader_name': [username]})
             else:
@@ -455,7 +455,7 @@ class SupervisorController():
                     if num != 0:
                         continue
                     data['username'] = username
-                    data['group'] = supervisor['group']
+                    data['group_name'] = supervisor['group_name']
                     data['name'] = user['name']
                     dao.Supervisor.insert_supervisor(ctx=False, data=data)
             if ctx:

@@ -97,7 +97,7 @@ class LessonRecordController(object):
                     (_, num) = dao.LessonRecord.query_lesson_records(
                         query_dict={'username': [username], 'term': [term]}, unscoped=False)
                     if num == 0:
-                        data = {'term': term, 'username': username, 'group_name': supervisor['group'],
+                        data = {'term': term, 'username': username, 'group_name': supervisor['group_name'],
                                 'name': user['name']}
                         dao.LessonRecord.insert_lesson_record(ctx=False, data=data)
             if ctx:
@@ -125,7 +125,7 @@ class LessonRecordController(object):
         if supervisor is None:
             raise CustomError(404, 404, 'supervisor not found')
         try:
-            data = {'username': username, 'term': term, 'name': user['name'], 'group_name': supervisor['group']}
+            data = {'username': username, 'term': term, 'name': user['name'], 'group_name': supervisor['group_name']}
             dao.LessonRecord.insert_lesson_record(ctx=False, data=data)
             if ctx:
                 db.session.commit()

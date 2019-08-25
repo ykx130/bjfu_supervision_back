@@ -223,7 +223,7 @@ class ModelLessonController(object):
             raise CustomError(500, 200, 'file must be given')
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                       '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
+                       '指定小组': 'group_name', '投票次数': 'votes', '提交次数': 'notices'}
         filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year']
         row_num = df.shape[0]
         fail_lessons = list()
@@ -291,7 +291,7 @@ class ModelLessonController(object):
             model_lessons, num = dao.ModelLesson.query_model_lessons()
         column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                       '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
+                       '指定小组': 'group_name', '投票次数': 'votes', '提交次数': 'notices'}
         frame_dict = dict()
         for model_lesson in model_lessons:
             lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':model_lesson['lesson_id']}, unscoped=True)
