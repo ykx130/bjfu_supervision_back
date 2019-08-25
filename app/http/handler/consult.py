@@ -1,10 +1,14 @@
 from flask import request, jsonify
 import app.core.controller as controller
 from app.http.handler import consult_blueprint
+from flask_login import login_required
+from app.http.handler.filter import Filter
 from app.utils import CustomError, args_to_dict
 
 
 @consult_blueprint.route('/consults', methods=['POST'])
+@login_required
+@Filter.filter_permission()
 def new_consult():
     try:
         controller.ConsultController.insert_consult(data=request.json)
@@ -20,9 +24,11 @@ def new_consult():
 
 
 @consult_blueprint.route('/consults')
-def get_consults():
+@login_required
+@Filter.filter_permission()
+def get_consults(*args, **kwargs):
     try:
-        (consults, total) = controller.ConsultController.query_consults(query_dict=args_to_dict(request.args))
+        (consults, total) = controller.ConsultController.query_consults(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -37,9 +43,13 @@ def get_consults():
 
 
 @consult_blueprint.route('/consults/<int:id>')
-def get_consult(id):
+@login_required
+@Filter.filter_permission()
+def get_consult(id, *args, **kwargs):
     try:
-        consult = controller.ConsultController.get_consult(id=id)
+        query_dict = kwargs
+        query_dict.update({'id': id})
+        consult = controller.ConsultController.get_consult(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -53,6 +63,7 @@ def get_consult(id):
 
 
 @consult_blueprint.route('/consults/<int:id>', methods=['DELETE'])
+@login_required
 def del_consult(id):
     try:
         controller.ConsultController.delete_consult(id=id)
@@ -68,6 +79,7 @@ def del_consult(id):
 
 
 @consult_blueprint.route('/consults/<int:id>', methods=['PUT'])
+@login_required
 def change_consult(id):
     try:
         controller.ConsultController.update_consult(id=id, data=request.json)
@@ -83,6 +95,7 @@ def change_consult(id):
 
 
 @consult_blueprint.route('/consult_types', methods=['POST'])
+@login_required
 def new_consult_type():
     try:
         controller.ConsultTypeController.insert_consult_type(data=request.json)
@@ -98,10 +111,11 @@ def new_consult_type():
 
 
 @consult_blueprint.route('/consult_types')
-def get_consult_types():
+@login_required
+@Filter.filter_permission()
+def get_consult_types(*args, **kwargs):
     try:
-        (consult_types, total) = controller.ConsultTypeController.query_consult_types(
-            query_dict=args_to_dict(request.args))
+        (consult_types, total) = controller.ConsultTypeController.query_consult_types(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -116,9 +130,13 @@ def get_consult_types():
 
 
 @consult_blueprint.route('/consult_types/<int:id>')
-def get_consult_type(id):
+@login_required
+@Filter.filter_permission()
+def get_consult_type(id, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'id': id})
     try:
-        consult_type = controller.ConsultTypeController.get_consult_type(id=id)
+        consult_type = controller.ConsultTypeController.get_consult_type(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -132,6 +150,7 @@ def get_consult_type(id):
 
 
 @consult_blueprint.route('/consult_types/<int:id>', methods=['DELETE'])
+@login_required
 def del_consult_type(id):
     try:
         controller.ConsultTypeController.delete_consult_type(id=id)
@@ -147,6 +166,7 @@ def del_consult_type(id):
 
 
 @consult_blueprint.route('/consult_types/<int:id>', methods=['PUT'])
+@login_required
 def change_consult_type(id):
     try:
         controller.ConsultTypeController.update_consult_type(id=id, data=request.json)

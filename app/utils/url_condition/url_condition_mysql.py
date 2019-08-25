@@ -10,6 +10,8 @@ class UrlCondition(object):
         order_list = []
         sort_list = []
         for key, value in url_args.items():
+            if type(value) is not list:
+                value = [value]
             for v in value:
                 if key == '_per_page' or key == '_page':
                     self.page_dict[key] = v

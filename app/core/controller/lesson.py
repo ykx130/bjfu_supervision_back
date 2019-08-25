@@ -119,7 +119,7 @@ class LessonController(object):
                     else:
                         lesson_data[k] = v
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
-                new_lesson = dao.Lesson.get_lesson(lesson_id=new_lesson_id)
+                new_lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':new_lesson_id})
                 cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from lessons where lesson_id \
                                             ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
                 lesson_cases = cursor.fetchall()
@@ -169,8 +169,8 @@ class LessonController(object):
         return True
 
     @classmethod
-    def get_lesson(cls, lesson_id: str, unscoped: bool = False):
-        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=unscoped)
+    def get_lesson(cls, query_dict:dict, unscoped: bool = False):
+        lesson = dao.Lesson.get_lesson(query_dict=query_dict, unscoped=unscoped)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         return cls.formatter(lesson)
@@ -196,7 +196,7 @@ class LessonController(object):
         from app.core.controller import NoticeLessonController
         if data is None:
             data = dict()
-        lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':lesson_id}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         lesson_level = data.get('lesson_level', None)

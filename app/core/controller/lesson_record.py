@@ -34,12 +34,12 @@ class LessonRecordController(object):
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
 
     @classmethod
-    def query_lesson_records_term(cls, term: str = None, query_dict: dict = None, unscoped: bool = False):
+    def query_lesson_records_term(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        if term is None:
+        if query_dict.get('term', None) is not None:
             term = service.TermService.get_now_term()['name']
-        query_dict['term'] = [term]
+            query_dict.update({'term': term})
         (lesson_records, num) = dao.LessonRecord.query_lesson_records(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
 
@@ -52,10 +52,12 @@ class LessonRecordController(object):
         return [cls.formatter(lesson_record) for lesson_record in lesson_records], num
 
     @classmethod
-    def get_lesson_record(cls, username: str = None, term: str = None, unscoped: bool = False):
-        if term is None:
+    def get_lesson_record(cls, query_dict, unscoped: bool = False):
+        if query_dict.get('term', None) is None:
             term = service.TermService.get_now_term()['name']
-        lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=unscoped)
+            query_dict.update({'term':term})
+        lesson_record = dao.LessonRecord.get_lesson_record(query_dict=query_dict,
+                                                           unscoped=unscoped)
         if lesson_record is None:
             raise CustomError(404, 404, 'lesson_record not found')
         return cls.formatter(lesson_record)
@@ -64,7 +66,8 @@ class LessonRecordController(object):
     def delete_lesson_record(cls, ctx: bool = True, username: str = None, term: str = None):
         if term is None:
             term = service.TermService.get_now_term()['name']
-        lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=False)
+        lesson_record = dao.LessonRecord.get_lesson_record(query_dict={'username': username, 'term': term},
+                                                           unscoped=False)
         if lesson_record is None:
             raise CustomError(404, 404, 'lesson_record not found')
         try:
@@ -81,12 +84,12 @@ class LessonRecordController(object):
         return True
 
     @classmethod
-    def update_lesson_records(cls, ctx: bool = True, usernames: list = []):
+    def update_lesson_records(cls, ctx: bool = True, usernames: list = None):
         term = service.TermService.get_now_term()['name']
         try:
             for username in usernames:
                 supervisor_query_dict = {'term': [term], 'username': [username]}
-                user = dao.User.get_user(username=username, unscoped=False)
+                user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
                 if user is None:
                     raise CustomError(404, 404, 'lesson_record not found')
                 (supervisors, num) = dao.Supervisor.query_supervisors(query_dict=supervisor_query_dict, unscoped=False)
@@ -115,10 +118,10 @@ class LessonRecordController(object):
         data = cls.reformatter_insert(data)
         username = data.get('username', None)
         term = data.get('term', service.TermService.get_now_term()['name'])
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'lesson_record not found')
-        supervisor = dao.Supervisor.get_supervisor(username=username, term=term, unscoped=False)
+        supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term}, unscoped=False)
         if supervisor is None:
             raise CustomError(404, 404, 'supervisor not found')
         try:
@@ -139,7 +142,8 @@ class LessonRecordController(object):
     def update_lesson_record(cls, ctx: bool = True, username: str = None, term: str = None, data: dict = None):
         if data is None:
             data = {}
-        lesson_record = dao.LessonRecord.get_lesson_record(username=username, term=term, unscoped=False)
+        lesson_record = dao.LessonRecord.get_lesson_record(query_dict={'username': username, 'term': term},
+                                                           unscoped=False)
         if lesson_record is None:
             raise CustomError(404, 404, 'lesson_record not found')
         try:

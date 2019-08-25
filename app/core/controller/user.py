@@ -1,9 +1,12 @@
 import app.core.dao as dao
-from app.utils import CustomError, db
+from app.utils import CustomError, db, args_to_dict
 from app.utils.kafka import send_kafka_message
 from flask_login import current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import app.core.services as service
+from functools import wraps
+from flask import request
+from flask import jsonify
 
 
 class SchoolTerm():
@@ -42,7 +45,7 @@ class AuthController():
 
     @classmethod
     def get_current_user(cls):
-        user = UserController.get_user(username=current_user.username)
+        user = UserController.get_user(query_dict={'username': current_user.username})
         return user
 
 
@@ -57,7 +60,7 @@ class UserController():
             if user.get(role_name_e, False):
                 role_names.append(role_name_c)
         if user['is_guider']:
-            supervisor = dao.Supervisor.get_supervisor(user['username'], term)
+            supervisor = dao.Supervisor.get_supervisor(query_dict={'username': user['username'], 'term': term})
             if supervisor:
                 for role_name_e, role_name_c in role_list_dict.items():
                     if supervisor.get(role_name_e, False):
@@ -70,7 +73,7 @@ class UserController():
         role_names = cls.role_list(user, term)
         user['role_names'] = role_names
         if user['is_guider']:
-            supervisor = dao.Supervisor.get_supervisor(user['username'], term)
+            supervisor = dao.Supervisor.get_supervisor(query_dict={'username': user['username'], 'term': term})
             user['guider'] = supervisor
         return user
 
@@ -86,8 +89,8 @@ class UserController():
         return [cls.formatter(user) for user in users], num
 
     @classmethod
-    def get_user(cls, username, unscoped=False):
-        user = dao.User.get_user(username=username, unscoped=unscoped)
+    def get_user(cls, query_dict, unscoped=False):
+        user = dao.User.get_user(query_dict=query_dict, unscoped=unscoped)
         return cls.formatter(user)
 
     @classmethod
@@ -99,14 +102,14 @@ class UserController():
         if username is None:
             raise CustomError(500, 200, 'username should be given')
         try:
-            dao.User.get_user(username=username)
+            dao.User.get_user(query_dict={'username': username})
         except CustomError as e:
             if e is not None:
                 raise CustomError(500, 200, 'username has been used')
             elif e is not None and e.status_code != 404:
                 raise e
         try:
-            if not data.get('password', None):
+            if data.get('password', None) is not None:
                 data['password'] = default_password
             dao.User.insert_user(ctx=ctx, data=data)
             if ctx:
@@ -135,7 +138,7 @@ class UserController():
                 raise CustomError(500, 500, 'username or role_names should be given')
 
             term = data['term']
-            user = dao.User.get_user(username=username, unscoped=False)
+            user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
             if user is None:
                 raise CustomError(404, 404, 'user is not found')
             dao.User.update_user(ctx=False, username=username, data=data)
@@ -153,13 +156,13 @@ class UserController():
                 SupervisorController.insert_supervisor(ctx=False, data=data)
             if '小组长' in del_role_names:
                 del_role_names.remove('小组长')
-                supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
+                supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
                 group_name = data['group_name'] if 'group_name' in data else supervisor['group']
                 SupervisorController.update_grouper(ctx=False, username=username, term=term,
                                                     group_name=group_name, role_name='grouper', add=False)
             elif '小组长' in new_role_names:
                 new_role_names.remove('小组长')
-                supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
+                supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
                 group_name = data.get('group_name', supervisor['group'])
                 (groupers, num) = dao.Supervisor.query_supervisors(
                     query_dict={'term_gte': [term], 'grouper': [True], 'group': [group_name]})
@@ -196,7 +199,7 @@ class UserController():
 
     @classmethod
     def delete_user(cls, ctx: bool = True, username: str = ''):
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user is not found')
         try:
@@ -215,9 +218,18 @@ class UserController():
 
 class SupervisorController():
     @classmethod
-    def get_supervisor(cls, id, unscoped: bool = False):
-        supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
-        user = dao.User.get_user(username=supervisor['username'], unscoped=unscoped)
+    def get_supervisor_by_username(cls, query_dict: dict, unscoped: bool = False):
+        term = service.TermService.get_now_term()
+        query_dict.update({'term': term.name})
+        supervisor = dao.Supervisor.get_supervisor(query_dict=query_dict)
+        user = dao.User.get_user(query_dict={'username': supervisor['username']}, unscoped=unscoped)
+        supervisor['user'] = user
+        return supervisor
+
+    @classmethod
+    def get_supervisor(cls, query_dict: dict, unscoped: bool = False):
+        supervisor = dao.Supervisor.get_supervisor_by_id(query_dict=query_dict)
+        user = dao.User.get_user(query_dict={'username': supervisor['username']}, unscoped=unscoped)
         supervisor['user'] = user
         return supervisor
 
@@ -228,7 +240,7 @@ class SupervisorController():
         (supervisors, num) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=unscoped)
         for supervisor in supervisors:
             username = supervisor.get("username")
-            user = dao.User.get_user(username=username, unscoped=False)
+            user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
             supervisor['user'] = user
         return supervisors, num
 
@@ -237,7 +249,7 @@ class SupervisorController():
         if data is None:
             data = dict()
         term = data.get('term', service.TermService.get_now_term()['name'])
-        supervisor = dao.Supervisor.get_supervisor_by_id(id=id)
+        supervisor = dao.Supervisor.get_supervisor_by_id(query_dict={'id': id})
         username = supervisor['username']
         group = data.get('group', supervisor['group'])
         grouper = supervisor.get('is_grouper')
@@ -310,7 +322,7 @@ class SupervisorController():
         (supervisors, num) = dao.Supervisor.query_supervisors(query_dict=query_dict, unscoped=False)
         for supervisor in supervisors:
             username = supervisor.get('username')
-            user = dao.User.get_user(username=username, unscoped=False)
+            user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
             supervisor['user'] = user
         return supervisors, num
 
@@ -318,7 +330,7 @@ class SupervisorController():
     def delete_supervisor(cls, ctx: bool = True, username: str = '', term: str = None):
         if term is None:
             term = service.TermService.get_now_term()['name']
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user is not found')
         try:
@@ -340,7 +352,7 @@ class SupervisorController():
         if data is None:
             data = dict()
         username = data.get('username', None)
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user is not found')
         term = data.get('term', service.TermService.get_now_term()['name'])
@@ -428,9 +440,9 @@ class SupervisorController():
             term = service.TermService.get_now_term()['name']
         try:
             for username in usernames:
-                user = dao.User.get_user(username=username)
+                user = dao.User.get_user(query_dict={'username': username})
                 school_term = SchoolTerm(term)
-                supervisor = dao.Supervisor.get_supervisor(username=username, term=term)
+                supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
                 for i in range(0, 4):
                     school_term = school_term + 1
                     data['term'] = school_term.term_name
@@ -469,7 +481,7 @@ class SupervisorController():
 class GroupController():
     @classmethod
     def formatter(cls, group: dict):
-        leader = dao.User.get_user(username=group['leader_name'], unscoped=True)
+        leader = dao.User.get_user({'username':group['leader_name']}, unscoped=True)
         return {'name': group['name'], 'leader': leader}
 
     @classmethod

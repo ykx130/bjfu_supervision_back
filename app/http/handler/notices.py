@@ -4,7 +4,6 @@ from app.http.handler import notices_blueprint
 from app.core.controller import NoticeController
 from app.utils import CustomError, args_to_dict
 
-
 @notices_blueprint.route('/notices')
 @login_required
 def get_notices_num():

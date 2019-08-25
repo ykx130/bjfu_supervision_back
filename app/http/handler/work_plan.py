@@ -2,12 +2,16 @@ from flask import jsonify, request
 from app.http.handler import form_meta_blueprint
 import app.core.controller as controller
 from app.utils import args_to_dict, CustomError
+from app.http.handler.filter import Filter
+from flask_login import login_required
 
 
 @form_meta_blueprint.route('/work_plans', methods=['GET'])
-def find_work_plans():
+@login_required
+@Filter.filter_permission()
+def find_work_plans(**kwargs):
     try:
-        (work_plans, num) = controller.WorkPlanController.query_work_plan(query_dict=args_to_dict(request.args))
+        (work_plans, num) = controller.WorkPlanController.query_work_plan(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -22,9 +26,13 @@ def find_work_plans():
 
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['GET'])
-def find_work_plan(id):
+@login_required
+@Filter.filter_permission()
+def find_work_plan(id, **kwargs):
     try:
-        work_plan = controller.WorkPlanController.get_work_plan(id=id)
+        query_dict = kwargs
+        query_dict.update({'id': id})
+        work_plan = controller.WorkPlanController.get_work_plan(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -38,6 +46,7 @@ def find_work_plan(id):
 
 
 @form_meta_blueprint.route('/work_plans', methods=['POST'])
+@login_required
 def insert_work_plan():
     try:
         controller.WorkPlanController.insert_work_plan(data=request.json)
@@ -53,6 +62,7 @@ def insert_work_plan():
 
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['DELETE'])
+@login_required
 def delete_work_plan(id):
     try:
         controller.WorkPlanController.delete_work_plan(id=id)
@@ -68,6 +78,7 @@ def delete_work_plan(id):
 
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['PUT'])
+@login_required
 def update_work_plan(id):
     try:
         controller.WorkPlanController.update_work_plan(id=id, data=request.json)
@@ -83,9 +94,13 @@ def update_work_plan(id):
 
 
 @form_meta_blueprint.route('/work_plan/details/<string:term>', methods=['GET'])
-def find_work_plans_detail(term):
+@login_required
+@Filter.filter_permission()
+def find_work_plans_detail(term, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'term':term})
     try:
-        (work_plans, total) = controller.WorkPlanController.query_work_plan_detail(term)
+        (work_plans, total) = controller.WorkPlanController.query_work_plan_detail(query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,

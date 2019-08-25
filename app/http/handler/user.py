@@ -3,12 +3,16 @@ from flask import request, jsonify, url_for, json
 from app.utils.misc import convert_datetime_to_string
 from app.http.handler import user_blueprint
 from app.utils import args_to_dict, CustomError
+from flask_login import login_required
+from app.http.handler.filter import Filter
 
 
 @user_blueprint.route('/users')
-def query_users():
+@login_required
+@Filter.filter_permission()
+def query_users(*args, **kwargs):
     try:
-        (users, total) = controller.UserController.query_users(query_dict=args_to_dict(request.args))
+        (users, total) = controller.UserController.query_users(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -23,9 +27,13 @@ def query_users():
 
 
 @user_blueprint.route('/users/<string:username>')
-def get_user(username):
+@login_required
+@Filter.filter_permission()
+def get_user(username, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'username': username})
     try:
-        user = controller.UserController.get_user(username=username)
+        user = controller.UserController.get_user(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -39,6 +47,7 @@ def get_user(username):
 
 
 @user_blueprint.route('/users', methods=['POST'])
+@login_required
 def new_user():
     try:
         controller.UserController.insert_user(data=request.json)
@@ -54,6 +63,7 @@ def new_user():
 
 
 @user_blueprint.route('/users/<string:username>', methods=['PUT'])
+@login_required
 def change_user(username):
     try:
         controller.UserController.update_user(username=username, data=request.json)
@@ -69,6 +79,7 @@ def change_user(username):
 
 
 @user_blueprint.route('/users/<string:username>', methods=['DELETE'])
+@login_required
 def del_user(username):
     try:
         controller.UserController.delete_user(username=username)
@@ -84,9 +95,11 @@ def del_user(username):
 
 
 @user_blueprint.route('/supervisors', methods=['GET'])
-def get_supervisors():
+@login_required
+@Filter.filter_permission()
+def get_supervisors(*args, **kwargs):
     try:
-        (supervisors, total) = controller.SupervisorController.query_supervisors(query_dict=args_to_dict(request.args))
+        (supervisors, total) = controller.SupervisorController.query_supervisors(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -101,10 +114,12 @@ def get_supervisors():
 
 
 @user_blueprint.route('/supervisors/expire', methods=['GET'])
-def find_supervisors_expire():
+@login_required
+@Filter.filter_permission()
+def find_supervisors_expire(*args, **kwargs):
     try:
         (supervisors, total) = controller.SupervisorController.query_supervisors_expire(
-            query_dict=args_to_dict(request.args))
+            query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -119,6 +134,7 @@ def find_supervisors_expire():
 
 
 @user_blueprint.route('/supervisors/batch_renewal', methods=['POST'])
+@login_required
 def batch_renewal():
     try:
         controller.SupervisorController.batch_renewal(data=request.json)
@@ -134,6 +150,7 @@ def batch_renewal():
 
 
 @user_blueprint.route('/supervisors', methods=['POST'])
+@login_required
 def insert_supervisor():
     try:
         controller.SupervisorController.insert_supervisor(data=request.json)
@@ -148,10 +165,14 @@ def insert_supervisor():
     }), 200
 
 
-@user_blueprint.route('/supervisors/<int:id>', methods=['GET',])
-def get_supervisor(id):
+@user_blueprint.route('/supervisors/<int:id>', methods=['GET'])
+@login_required
+@Filter.filter_permission()
+def get_supervisor(id, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'id': id})
     try:
-        supervisor = controller.SupervisorController.get_supervisor(id=id)
+        supervisor = controller.SupervisorController.get_supervisor(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -165,6 +186,7 @@ def get_supervisor(id):
 
 
 @user_blueprint.route('/supervisors/<int:id>', methods=['PUT'])
+@login_required
 def update_supervisor(id):
     try:
         controller.SupervisorController.update_supervisor(id=id, data=request.json)
@@ -180,9 +202,11 @@ def update_supervisor(id):
 
 
 @user_blueprint.route('/groups', methods=['GET'])
-def get_groups():
+@login_required
+@Filter.filter_permission()
+def get_groups(*args, **kwargs):
     try:
-        (groups, total) = controller.GroupController.query_groups(query_dict=args_to_dict(request.args))
+        (groups, total) = controller.GroupController.query_groups(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,

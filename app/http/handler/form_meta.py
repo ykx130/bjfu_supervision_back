@@ -5,6 +5,7 @@ import app.core.controller as controller
 from flask_login import login_required, current_user
 from datetime import datetime
 from app.utils import CustomError, args_to_dict
+from app.http.handler.filter import Filter
 
 
 @form_meta_blueprint.route('/form_metas', methods=['POST'])
@@ -29,9 +30,11 @@ def insert_form_meta():
 
 
 @form_meta_blueprint.route('/form_metas')
-def find_form_metas():
+@login_required
+@Filter.filter_permission_mongo()
+def find_form_metas(*args, **kwargs):
     try:
-        (form_metas, total) = controller.FormMetaController.query_form_metas(query_dict=args_to_dict(request.args))
+        (form_metas, total) = controller.FormMetaController.query_form_metas(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -46,9 +49,13 @@ def find_form_metas():
 
 
 @form_meta_blueprint.route('/form_metas/<string:name>')
-def find_form_meta_name(name):
+@login_required
+@Filter.filter_permission_mongo()
+def find_form_meta_name(name, *args, **kwargs):
     try:
-        form_meta = controller.FormMetaController.get_form_meta(name=name)
+        query_dict = kwargs
+        query_dict.update({'name': name})
+        form_meta = controller.FormMetaController.get_form_meta(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -62,9 +69,11 @@ def find_form_meta_name(name):
 
 
 @form_meta_blueprint.route('/form_metas/history')
-def find_history_form_metas():
+@login_required
+@Filter.filter_permission_mongo()
+def find_history_form_metas(*args, **kwargs):
     try:
-        (form_metas, num) = controller.FormMetaController.query_form_metas()
+        (form_metas, num) = controller.FormMetaController.query_form_metas(kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -79,10 +88,13 @@ def find_history_form_metas():
 
 
 @form_meta_blueprint.route('/form_metas/<string:name>/history')
-def find_history_form_meta_by_name(name):
+@login_required
+@Filter.filter_permission_mongo()
+def find_history_form_meta_by_name(name, *args, **kwargs):
     try:
-        (form_metas, total) = controller.FormMetaController.get_history_form_meta(name=name,
-                                                                                  query_dict=args_to_dict(request.args))
+        query_dict = kwargs
+        query_dict.update({'name': name})
+        (form_metas, total) = controller.FormMetaController.get_history_form_meta(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -97,9 +109,13 @@ def find_history_form_meta_by_name(name):
 
 
 @form_meta_blueprint.route('/form_metas/<string:name>/version/<string:version>')
-def get_form_meta(name, version):
+@login_required
+@Filter.filter_permission_mongo()
+def get_form_meta(name, version, *args, **kwargs):
     try:
-        form_meta = controller.FormMetaController.get_form_meta(name=name, version=version)
+        query_dict = kwargs
+        query_dict.update({'name': name, 'version':version})
+        form_meta = controller.FormMetaController.get_form_meta(query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -113,6 +129,7 @@ def get_form_meta(name, version):
 
 
 @form_meta_blueprint.route('/form_metas/<string:name>/version/<string:version>', methods=['DELETE'])
+@login_required
 def delete_form_meta(name, version):
     try:
         controller.FormMetaController.delete_form_meta(name, version)
@@ -129,6 +146,7 @@ def delete_form_meta(name, version):
 
 
 @form_meta_blueprint.route('/form_metas/<string:name>', methods=['PUT'])
+@login_required
 def change_form_meta(name):
     try:
         controller.FormMetaController.update_form_meta(name=name, data=request.json)

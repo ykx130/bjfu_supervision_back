@@ -4,9 +4,11 @@ from app.utils.misc import convert_datetime_to_string
 import app.core.controller as controller
 from app.utils.url_condition.url_condition_mongodb import dict_serializable
 from app.utils import CustomError, args_to_dict
-
+from flask_login import login_required
+from app.http.handler.filter import Filter
 
 @lesson_blueprint.route('/lessons', methods=['POST'])
+@login_required
 def new_lesson():
     try:
         controller.LessonController.update_database(info=request.json)
@@ -22,9 +24,11 @@ def new_lesson():
 
 
 @lesson_blueprint.route('/lessons')
-def get_lessons():
+@login_required
+@Filter.filter_permission()
+def get_lessons(*args, **kwargs):
     try:
-        (lessons, num) = controller.LessonController.query_lessons(query_dict=args_to_dict(request.args))
+        (lessons, num) = controller.LessonController.query_lessons(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -39,9 +43,11 @@ def get_lessons():
 
 
 @lesson_blueprint.route('/lessons_with_case')
-def get_lessons_with_case():
+@login_required
+@Filter.filter_permission()
+def get_lessons_with_case(*args, **kwargs):
     try:
-        (lessons, num) = controller.LessonController.query_lessons_with_cases(query_dict=args_to_dict(request.args))
+        (lessons, num) = controller.LessonController.query_lessons_with_cases(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -56,9 +62,11 @@ def get_lessons_with_case():
 
 
 @lesson_blueprint.route('/lesson_cases')
-def query_lesson_cases():
+@login_required
+@Filter.filter_permission()
+def query_lesson_cases(*args, **kwargs):
     try:
-        (lessons, num) = controller.LessonCaseController.query_lesson_cases(query_dict=args_to_dict(request.args))
+        (lessons, num) = controller.LessonCaseController.query_lesson_cases(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -73,9 +81,13 @@ def query_lesson_cases():
 
 
 @lesson_blueprint.route('/lessons/<string:lesson_id>')
-def get_lesson(lesson_id):
+@login_required
+@Filter.filter_permission()
+def get_lesson(lesson_id, *args, **kwargs):
     try:
-        lesson = controller.LessonController.get_lesson(lesson_id=lesson_id)
+        query_dict = kwargs
+        query_dict.update({'lesson_id':lesson_id})
+        lesson = controller.LessonController.get_lesson(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -89,6 +101,7 @@ def get_lesson(lesson_id):
 
 
 @lesson_blueprint.route('/lessons/<string:lesson_id>', methods=['PUT'])
+@login_required
 def update_lesson(lesson_id):
     try:
         controller.LessonController.update_lesson(lesson_id=lesson_id, data=request.json)
@@ -104,9 +117,11 @@ def update_lesson(lesson_id):
 
 
 @lesson_blueprint.route('/teacher_names', methods=['GET'])
-def get_teacher_names():
+@login_required
+@Filter.filter_permission()
+def get_teacher_names(*args, **kwargs):
     try:
-        (teacher_names, total) = controller.LessonController.query_teacher_names(query_dict=args_to_dict(request.args),
+        (teacher_names, total) = controller.LessonController.query_teacher_names(query_dict=kwargs,
                                                                                  unscoped=False)
     except CustomError as e:
         return jsonify({
@@ -122,6 +137,7 @@ def get_teacher_names():
 
 
 @lesson_blueprint.route('/terms')
+@login_required
 def get_terms():
     query_dict = args_to_dict(request.args)
     query_dict['_sort'] = ['name']
@@ -142,6 +158,7 @@ def get_terms():
 
 
 @lesson_blueprint.route('/terms/current')
+@login_required
 def get_term_now():
     try:
         term = controller.TermController.get_now_term()

@@ -5,6 +5,7 @@ from datetime import datetime
 from flask_login import current_user
 import app.core.services as service
 
+
 class ActivityController(object):
     @classmethod
     def formatter(cls, activity: dict):
@@ -78,7 +79,7 @@ class ActivityController(object):
     def update_activity(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
             data = {}
-        activity = dao.Activity.get_activity(id=id, unscoped=False)
+        activity = dao.Activity.get_activity(query_dict={'id':id}, unscoped=False)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
         data = cls.reformatter(data)
@@ -97,7 +98,7 @@ class ActivityController(object):
 
     @classmethod
     def delete_activity(cls, ctx: bool = True, id: int = 0):
-        activity = dao.Activity.get_activity(id=id, unscoped=False)
+        activity = dao.Activity.get_activity(query_dict={'id':id}, unscoped=False)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
         try:
@@ -115,8 +116,8 @@ class ActivityController(object):
         return True
 
     @classmethod
-    def get_activity(cls, id: int = 0, unscoped: bool = False):
-        activity = dao.Activity.get_activity(id=id, unscoped=unscoped)
+    def get_activity(cls, query_dict, unscoped: bool = False):
+        activity = dao.Activity.get_activity(query_dict=query_dict, unscoped=unscoped)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
         return cls.formatter(activity)
@@ -132,7 +133,7 @@ class ActivityController(object):
 class ActivityUserController(object):
     @classmethod
     def formatter(cls, activity_user):
-        user = dao.User.get_user(username=activity_user['username'], unscoped=False)
+        user = dao.User.get_user(query_dict={'username':activity_user['username']}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
         activity_user_dict = {
@@ -150,17 +151,15 @@ class ActivityUserController(object):
         return data
 
     @classmethod
-    def query_activity_users(cls, activity_id: int = 0, query_dict: dict = None, unscoped: bool = False):
+    def query_activity_users(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        query_dict['activity_id'] = [activity_id]
         (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(activity_user) for activity_user in activity_users], num
 
     @classmethod
-    def get_activity_user(cls, activity_id: int = 0, username: str = None, unscoped: bool = False):
-        activity_user = dao.ActivityUser.get_activity_user(activity_id=activity_id, username=username,
-                                                           unscoped=unscoped)
+    def get_activity_user(cls, query_dict, unscoped: bool = False):
+        activity_user = dao.ActivityUser.get_activity_user(query_dict=query_dict, unscoped=unscoped)
         if activity_user is None:
             raise CustomError(404, 404, 'activity_user not found')
         return cls.formatter(activity_user)
@@ -169,11 +168,11 @@ class ActivityUserController(object):
     def insert_activity_user(cls, ctx: bool = True, activity_id: int = 0, data: dict = None):
         if data is None:
             data = {}
-        activity = dao.Activity.get_activity(id=activity_id, unscoped=False)
+        activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
         username = data.get('username', current_user.username)
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
         if activity['apply_state'] in ['报名未开始', '报名已结束']:
@@ -208,13 +207,14 @@ class ActivityUserController(object):
     def update_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None, data: dict = None):
         if data is None:
             data = {}
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
-        activity = dao.Activity.get_activity(id=activity_id, unscoped=False)
+        activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
-        activity_user = dao.ActivityUser.get_activity_user(activity_id=activity_id, username=username, unscoped=False)
+        activity_user = dao.ActivityUser.get_activity_user(
+            query_dict={'activity_id': activity_id, 'username': username}, unscoped=False)
         if activity_user is None:
             raise CustomError(404, 404, 'activity_user not found')
         new_data = dict()
@@ -238,13 +238,14 @@ class ActivityUserController(object):
 
     @classmethod
     def delete_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None):
-        user = dao.User.get_user(username=username, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
-        activity = dao.Activity.get_activity(id=activity_id, unscoped=False)
+        activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
-        activity_user = dao.ActivityUser.get_activity_user(activity_id=activity_id, username=username, unscoped=False)
+        activity_user = dao.ActivityUser.get_activity_user(
+            query_dict={'activity_id': activity_id, 'username': username}, unscoped=False)
         if activity_user is None:
             raise CustomError(404, 404, 'activity_user not found')
         attend_num = activity['attend_num'] - 1
@@ -276,9 +277,9 @@ class ActivityUserController(object):
 
         if state == 'hasAttended':
             (activity_users, _) = dao.ActivityUser.query_activity_users(
-                query_dict={'username': [username],  'state_ne': ['未报名']}, unscoped=False)
+                query_dict={'username': [username], 'state_ne': ['未报名']}, unscoped=False)
             for activity_user in activity_users:
-                activity = dao.Activity.get_activity(id=activity_user['activity_id'], unscoped=False)
+                activity = dao.Activity.get_activity(query_dict={'id':activity_user['activity_id']}, unscoped=False)
                 if activity is None:
                     raise CustomError(404, 404, 'activity not found')
                 current_user_activity = {

@@ -50,7 +50,8 @@ def user_service_server(method, args):
     if not method:
         return
     if method == 'add_supervisor':
-        supervisor = dao.Supervisor.get_supervisor(username=args.get("username"), term=args.get("term"))
+        supervisor = dao.Supervisor.get_supervisor(
+            query_dict={'username': args.get("username"), 'term': args.get("term")})
         dao.LessonRecord.insert_lesson_record(data={
             "username": supervisor.get("username"),
             "name": supervisor.get("name"),
@@ -63,7 +64,8 @@ def user_service_server(method, args):
         })
 
     if method == "update_supervisor":
-        supervisor = dao.Supervisor.get_supervisor(username=args.get("username"), term=args.get("term"))
+        supervisor = dao.Supervisor.get_supervisor(
+            query_dict={'username': args.get("username"), 'term': args.get("term")})
         dao.LessonRecord.update_lesson_record(
             query_dict={
                 "username": supervisor.get("username"),

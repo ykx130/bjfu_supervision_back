@@ -30,6 +30,8 @@ class UrlCondition(object):
         sort_list = []
         filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne']
         for key, value in url_args.items():
+            if type(value) is not list:
+                value = [value]
             for v in value:
                 if key == '_per_page' or key == '_page':
                     self.page_dict[key] = v

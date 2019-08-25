@@ -168,13 +168,14 @@ class LessonRecord(db.Model):
         return total
 
     @classmethod
-    def get_lesson_record(cls, username: str, term: str, unscoped: bool = False):
+    def get_lesson_record(cls, query_dict: dict, unscoped: bool = False):
         lesson_record = LessonRecord.query
         if not unscoped:
             lesson_record = lesson_record.filter(LessonRecord.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            lesson_record = lesson_record.filter(LessonRecord.username == username).filter(
-                LessonRecord.term == term).first()
+            lesson_record = process_query(lesson_record, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                          LessonRecord).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(lesson_record)
@@ -329,12 +330,14 @@ class Lesson(db.Model):
         return total
 
     @classmethod
-    def get_lesson(cls, lesson_id: str, unscoped: bool = False):
+    def get_lesson(cls, query_dict: dict, unscoped: bool = False):
         lesson = Lesson.query
         if not unscoped:
             lesson = lesson.filter(Lesson.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            lesson = lesson.filter(Lesson.lesson_id == lesson_id).first()
+            lesson = process_query(lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                   Lesson).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(lesson)
@@ -484,12 +487,14 @@ class LessonCase(db.Model):
         return total
 
     @classmethod
-    def get_lesson_case(cls, id: int, unscoped: bool = False):
+    def get_lesson_case(cls, query_dict: dict, unscoped: bool = False):
         lesson_case = LessonCase.query
         if not unscoped:
-            lesson_case = lesson_case.filter(Term.using == True)
+            lesson_case = lesson_case.filter(LessonCase.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            lesson_case = lesson_case.filter(LessonCase.id == id).first()
+            lesson_case = process_query(lesson_case, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                        LessonCase).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(lesson_case)
@@ -618,12 +623,14 @@ class NoticeLesson(db.Model):
         return total
 
     @classmethod
-    def get_notice_lesson(cls, id: int, unscoped: bool = False):
+    def get_notice_lesson(cls, query_dict: dict, unscoped: bool = False):
         notice_lesson = NoticeLesson.query
         if not unscoped:
             notice_lesson = notice_lesson.filter(NoticeLesson.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            notice_lesson = notice_lesson.filter(NoticeLesson.id == id).first()
+            notice_lesson = process_query(notice_lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                          NoticeLesson).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(notice_lesson)
@@ -773,23 +780,27 @@ class ModelLesson(db.Model):
         return total
 
     @classmethod
-    def get_model_lesson(cls, id: int, unscoped: bool = False):
+    def get_model_lesson(cls, query_dict: dict, unscoped: bool = False):
         model_lesson = ModelLesson.query
         if not unscoped:
             model_lesson = model_lesson.filter(ModelLesson.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            model_lesson = model_lesson.filter(ModelLesson.id == id).first()
+            model_lesson = process_query(model_lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                         ModelLesson).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(model_lesson)
 
     @classmethod
-    def get_model_lesson_by_lesson_id(cls, lesson_id: str, unscoped: bool = False):
+    def get_model_lesson_by_lesson_id(cls, query_dict:dict, unscoped: bool = False):
         model_lesson = ModelLesson.query
         if not unscoped:
             model_lesson = model_lesson.filter(ModelLesson.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            model_lesson = model_lesson.filter(ModelLesson.lesson_id == lesson_id).first()
+            model_lesson = process_query(model_lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                         ModelLesson).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(model_lesson)

@@ -72,18 +72,17 @@ class FormMeta(object):
         return json_dict
 
     @classmethod
-    def get_form_meta(cls, name: str = None, version: str = None, unscoped: bool = False):
-        from app.utils.mongodb import mongo
-        if name is None:
+    def get_form_meta(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = dict()
+        if not query_dict.get('name', None):
             raise CustomError(500, 200, 'name must be given')
-        condition = dict()
+        from app.utils.mongodb import mongo
         if not unscoped:
-            condition['using'] = True
-        condition['name'] = name
-        if version is not None:
-            condition['version'] = version
+            query_dict['using'] = [True]
+        url_condition = mongodb_url_condition.UrlCondition(query_dict)
         try:
-            data = mongo.db.form_meta.find_one(condition)
+            data = mongo.db.form_meta.find_one(url_condition.filter_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter_total(data)
@@ -208,12 +207,15 @@ class WorkPlan(db.Model):
         return [cls.formatter(data) for data in res], total
 
     @classmethod
-    def get_work_plan(cls, id: int, unscoped: bool = False):
+    def get_work_plan(cls, query_dict: dict, unscoped: bool = False):
         work_plan = WorkPlan.query
         if not unscoped:
             work_plan = work_plan.filter(WorkPlan.using == True)
+        url_condition = mysql_url_condition.UrlCondition(query_dict)
         try:
-            work_plan = work_plan.filter(WorkPlan.id == int(id)).first()
+            work_plan = mysql_url_condition.process_query(work_plan, url_condition.filter_dict,
+                                                          url_condition.sort_limit_dict,
+                                                          WorkPlan).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(work_plan)
@@ -353,16 +355,17 @@ class Form(object):
         return json_dict
 
     @classmethod
-    def get_form(cls, _id=None, unscoped: bool = False):
-        from app.utils.mongodb import mongo
-        if _id is None:
+    def get_form(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = dict()
+        if query_dict.get('_id', None) is not None:
             raise CustomError(500, 500, '_id must be given')
-        condition = dict()
+        from app.utils.mongodb import mongo
         if not unscoped:
-            condition['using'] = True
-        condition['_id'] = _id
+            query_dict['using'] = [True]
+        url_condition = mongodb_url_condition.UrlCondition(query_dict)
         try:
-            data = mongo.db.form.find_one(condition)
+            data = mongo.db.form.find_one(url_condition.filter_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter_total(data)

@@ -99,12 +99,14 @@ class User(db.Model, UserMixin):
         logout_user()
 
     @classmethod
-    def get_user(cls, username: str, unscoped=False):
+    def get_user(cls, query_dict: dict, unscoped=False):
         user = User.query
         if not unscoped:
             user = user.filter(User.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            user = user.filter(User.username == username).first()
+            user = process_query(user, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                 User).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(user)
@@ -325,23 +327,27 @@ class Supervisor(db.Model):
         return [cls.formatter(supervisor) for supervisor in supervisors], total
 
     @classmethod
-    def get_supervisor(cls, username: str = None, term: str = None, unscoped: bool = False):
+    def get_supervisor(cls, query_dict: dict, unscoped: bool = False):
         supervisor = Supervisor.query
         if not unscoped:
             supervisor = supervisor.filter(Supervisor.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            supervisor = supervisor.filter(Supervisor.username == username).filter(Supervisor.term == term).first()
+            supervisor = process_query(supervisor, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                       Supervisor).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(supervisor)
 
     @classmethod
-    def get_supervisor_by_id(cls, id: int, unscoped: bool = False):
+    def get_supervisor_by_id(cls, query_dict: dict, unscoped: bool = False):
         supervisor = Supervisor.query
         if not unscoped:
             supervisor = supervisor.filter(Supervisor.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            supervisor = supervisor.filter(Supervisor.id == id).first()
+            supervisor = process_query(supervisor, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                       Supervisor).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(supervisor)
@@ -450,14 +456,15 @@ class Event(db.Model):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
-
     @classmethod
-    def get_event(cls, id: int, unscoped: bool = False):
+    def get_event(cls, query_dict: dict, unscoped: bool = False):
         event = Event.query
         if not unscoped:
             event = event.filter(Event.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            event = event.filter(Event.id == id).filter(Event.using == True).first()
+            event = process_query(event, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                  Event).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(event)

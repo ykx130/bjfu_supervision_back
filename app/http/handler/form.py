@@ -6,6 +6,7 @@ from app.http.handler import form_blueprint
 from app.utils import CustomError, args_to_dict
 from werkzeug.datastructures import ImmutableMultiDict
 from datetime import datetime
+from app.http.handler.filter import Filter
 
 
 @form_blueprint.route('/forms', methods=['POST'])
@@ -31,12 +32,10 @@ def new_form():
 
 
 @form_blueprint.route('/forms')
-def query_forms():
-    query_dict = args_to_dict(request.args)
-    if not current_user.admin:
-        user = controller.UserController.get_user(username=current_user.username)
-        if '小组长' in user['role_names']:
-            query_dict['meta.guider_group']: [current_user.username]
+@login_required
+@Filter.filter_permission_mongo()
+def query_forms(*args, **kwargs):
+    query_dict = kwargs
     try:
         (forms, total) = controller.FormController.query_forms(query_dict=query_dict)
     except CustomError as e:
@@ -53,9 +52,13 @@ def query_forms():
 
 
 @form_blueprint.route('/forms/<string:_id>')
-def get_form(_id):
+@login_required
+@Filter.filter_permission_mongo()
+def get_form(_id, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'_id':_id})
     try:
-        form = controller.FormController.find_form(_id=ObjectId(_id))
+        form = controller.FormController.find_form(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -69,6 +72,7 @@ def get_form(_id):
 
 
 @form_blueprint.route('/forms/<string:_id>', methods=['DELETE'])
+@login_required
 def delete_from(_id):
     try:
         controller.FormController.delete_form(_id=ObjectId(_id))
@@ -84,6 +88,7 @@ def delete_from(_id):
 
 
 @form_blueprint.route('/forms/<string:_id>', methods=['PUT'])
+@login_required
 def change_form(_id):
     try:
         controller.FormController.update_form(_id=ObjectId(_id), data=request.json)
@@ -119,5 +124,6 @@ def get_my_forms():
 
 
 @form_blueprint.route('/graph/form/<string:name>/map')
+@login_required
 def get_form_map(name):
     return jsonify(controller.FormController.get_form_map(name))

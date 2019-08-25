@@ -89,12 +89,14 @@ class Activity(db.Model):
         return True
 
     @classmethod
-    def get_activity(cls, id: int, unscoped: bool = False):
+    def get_activity(cls, query_dict: dict, unscoped: bool = False):
         activity = Activity.query
         if not unscoped:
             activity = activity.filter(Activity.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            activity = activity.filter(Activity.id == id).first()
+            activity = process_query(activity, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                     Activity).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(activity)
@@ -228,13 +230,14 @@ class ActivityUser(db.Model):
         return True
 
     @classmethod
-    def get_activity_user(cls, activity_id: int, username: str, unscoped: bool = False):
+    def get_activity_user(cls, query_dict: dict, unscoped: bool = False):
         activity_user = ActivityUser.query
         if not unscoped:
             activity_user = activity_user.filter(ActivityUser.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            activity_user = activity_user.filter(ActivityUser.activity_id == activity_id).filter(
-                ActivityUser.username == username).first()
+            activity_user = process_query(activity_user, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                          ActivityUser).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(activity_user)

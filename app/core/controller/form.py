@@ -90,15 +90,15 @@ class FormController(object):
         return [cls.formatter(form) for form in forms], total
 
     @classmethod
-    def find_form(cls, _id=None, unscoped=False):
-        form = dao.Form.get_form(_id=_id, unscoped=unscoped)
+    def find_form(cls, query_dict, unscoped=False):
+        form = dao.Form.get_form(query_dict=query_dict, unscoped=unscoped)
         if form is None:
             raise CustomError(404, 404, 'form not found')
         return cls.formatter(form)
 
     @classmethod
     def delete_form(cls, _id=None):
-        form = dao.Form.get_form(_id=_id)
+        form = dao.Form.get_form(query_dict={'_id':_id})
         if form is None:
             raise CustomError(404, 404, 'form not found')
         dao.Form.delete_form(where_dict={'_id': _id})
@@ -108,12 +108,12 @@ class FormController(object):
     def update_form(cls, _id=None, data: dict = None):
         if data is None:
             data = dict()
-        form = dao.Form.get_form(_id=_id)
+        form = dao.Form.get_form(query_dict={'_id':_id})
         if form is None:
             raise CustomError(404, 404, 'form not found')
         dao.Form.update_form({'_id': _id}, data)
         if 'status' in data:
-            form = dao.Form.get_form(_id)
+            form = dao.Form.get_form(query_dict={'_id': _id})
             if form is None:
                 raise CustomError(404, 404, 'form not found')
             lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)

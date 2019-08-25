@@ -6,8 +6,8 @@ import app.core.services as service
 class FormMetaController(object):
 
     @classmethod
-    def get_form_meta(cls, name: str = None, version: str = None):
-        form_meta = dao.FormMeta.get_form_meta(name, version)
+    def get_form_meta(cls, query_dict):
+        form_meta = dao.FormMeta.get_form_meta(query_dict=query_dict)
         if form_meta is None:
             raise CustomError(404, 404, 'form_meta not found')
         return form_meta
@@ -51,7 +51,10 @@ class FormMetaController(object):
 
     @classmethod
     def delete_form_meta(cls, name: str = None, version: str = None):
-        form_meta = dao.FormMeta.get_form_meta(name=name, version=version)
+        query_dict = {'name': name}
+        if version is not None:
+            query_dict.update({'version': version})
+        form_meta = dao.FormMeta.get_form_meta(query_dict)
         if form_meta is None:
             raise CustomError(404, 404, 'form_meta not found')
         return dao.FormMeta.delete_form_meta({'name': name, 'version': version})
@@ -60,7 +63,7 @@ class FormMetaController(object):
     def update_form_meta(cls, name: str = None, data: dict = None):
         if data is None:
             data = dict()
-        form_meta = dao.FormMeta.get_form_meta(name)
+        form_meta = dao.FormMeta.get_form_meta(query_dict={'name': name})
         if form_meta is None:
             raise CustomError(404, 404, 'form_meta not found')
         dao.FormMeta.delete_form_meta({'name': name, 'version': form_meta['version']})
@@ -83,8 +86,8 @@ class WorkPlanController(object):
         return data
 
     @classmethod
-    def get_work_plan(cls, id: int, unscoped: bool = False):
-        work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=unscoped)
+    def get_work_plan(cls, query_dict: dict, unscoped: bool = False):
+        work_plan = dao.WorkPlan.get_work_plan(query_dict=query_dict, unscoped=unscoped)
         if work_plan is None:
             raise CustomError(404, 404, 'work_plan not found')
         return cls.formatter(work_plan)
@@ -96,7 +99,7 @@ class WorkPlanController(object):
 
     @classmethod
     def delete_work_plan(cls, ctx: bool = True, id: int = 0):
-        work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        work_plan = dao.WorkPlan.get_work_plan(query_dict={'id': id}, unscoped=False)
         if work_plan is None:
             raise CustomError(404, 404, 'work_plan not found')
         try:
@@ -116,7 +119,7 @@ class WorkPlanController(object):
     def update_work_plan(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
             data = dict()
-        work_plan = dao.WorkPlan.get_work_plan(id=id, unscoped=False)
+        work_plan = dao.WorkPlan.get_work_plan(query_dict={'id': id}, unscoped=False)
         if work_plan is None:
             raise CustomError(404, 404, 'work_plan not found')
         try:
@@ -156,14 +159,16 @@ class WorkPlanController(object):
         return True
 
     @classmethod
-    def query_work_plan_detail(cls, term: str = None, unscoped=False):
-        if term is None:
+    def query_work_plan_detail(cls, query_dict, unscoped=False):
+        if query_dict.get('term', None):
             term = service.TermService.get_now_term()['name']
-        (work_plans, num) = dao.WorkPlan.query_work_plan(query_dict={'term': [term]})
+            query_dict.update({'term': term})
+        (work_plans, num) = dao.WorkPlan.query_work_plan(query_dict=query_dict)
         results = list()
         for work_plan in work_plans:
-            form_meta = dao.FormMeta.get_form_meta(name=work_plan['form_meta_name'],
-                                                   version=work_plan['form_meta_version'], unscoped=unscoped)
+            form_meta = dao.FormMeta.get_form_meta(query_dict={'name': work_plan['form_meta_name'],
+                                                               'version': work_plan['form_meta_version']},
+                                                   unscoped=unscoped)
             if form_meta is None:
                 raise CustomError(404, 404, 'form_meta not found')
             work_plan['form_meta'] = form_meta

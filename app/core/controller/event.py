@@ -23,8 +23,8 @@ class EventController(object):
         return data
 
     @classmethod
-    def get_event(cls, id: int, unscoped: bool = False):
-        event = dao.Event.get_event(id=id, unscoped=unscoped)
+    def get_event(cls,query_dict, unscoped: bool = False):
+        event = dao.Event.get_event(query_dict=query_dict, unscoped=unscoped)
         if event is None:
             raise CustomError(404, 404, 'event not found')
         return cls.formatter(event)
@@ -35,8 +35,7 @@ class EventController(object):
         return [cls.formatter(event) for event in events], num
 
     @classmethod
-    def query_user_events(cls, username: str, query_dict: dict, unscoped=False):
-        query_dict['username'] = [username]
+    def query_user_events(cls, query_dict: dict, unscoped=False):
         (events, num) = dao.Event.query_events(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(event) for event in events], num
 
@@ -63,7 +62,7 @@ class EventController(object):
         if data is None:
             data = {}
         data = cls.reformatter_update(data)
-        event = dao.Event.get_event(id=id, unscoped=False)
+        event = dao.Event.get_event(query_dict={'id':id}, unscoped=False)
         if event is None:
             raise CustomError(404, 404, 'event not found')
         try:
@@ -81,7 +80,7 @@ class EventController(object):
 
     @classmethod
     def delete_event(cls, ctx: bool = True, id: int = 0):
-        event = dao.Event.get_event(id=id, unscoped=False)
+        event = dao.Event.get_event(query_dict={'id':id}, unscoped=False)
         if event is None:
             raise CustomError(404, 404, 'event not found')
         try:

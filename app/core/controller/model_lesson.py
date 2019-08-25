@@ -10,7 +10,7 @@ class ModelLessonController(object):
 
     @classmethod
     def formatter(cls, model_lesson):
-        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson.get('lesson_id', 0), unscoped=True)
+        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson.get('lesson_id', 0)}, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
@@ -35,8 +35,8 @@ class ModelLessonController(object):
         return data
 
     @classmethod
-    def get_model_lesson(cls, id: int, unscoped: bool = False):
-        model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=unscoped)
+    def get_model_lesson(cls, query_dict:dict, unscoped: bool = False):
+        model_lesson = dao.ModelLesson.get_model_lesson(query_dict=query_dict, unscoped=unscoped)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
         return cls.formatter(model_lesson=model_lesson)
@@ -53,7 +53,7 @@ class ModelLessonController(object):
         term = data.get('term', service.TermService.get_now_term()['name'])
         data['term'] = term
         data = cls.reformatter_insert(data=data)
-        lesson = dao.Lesson.get_lesson(lesson_id=data['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': data['lesson_id']}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         status = data.get('status', '推荐课')
@@ -87,10 +87,10 @@ class ModelLessonController(object):
         data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         try:
             for lesson_id in lesson_ids:
-                lesson = dao.Lesson.get_lesson(lesson_id=lesson_id, unscoped=False)
+                lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': lesson_id}, unscoped=False)
                 if lesson is None:
                     raise CustomError(404, 404, 'lesson not found')
-                (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
+                (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': lesson_id}, unscoped=False)
                 if num != 0:
                     continue
                 data['lesson_id'] = lesson_id
@@ -114,10 +114,10 @@ class ModelLessonController(object):
     def update_model_lesson(cls, ctx: bool = True, id: int = 0, data: dict = None):
         if data is None:
             data = dict()
-        model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
+        model_lesson = dao.ModelLesson.get_model_lesson(query_dict={'id': id}, unscoped=False)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
-        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         status = data.get('status', lesson['lesson_model'])
@@ -139,10 +139,10 @@ class ModelLessonController(object):
 
     @classmethod
     def delete_model_lesson(cls, ctx: bool = True, id: int = 0):
-        model_lesson = dao.ModelLesson.get_model_lesson(id=id, unscoped=False)
+        model_lesson = dao.ModelLesson.get_model_lesson(query_dict={'id': id}, unscoped=False)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
-        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         try:
@@ -167,10 +167,10 @@ class ModelLessonController(object):
         model_lesson_ids = data.get('model_lesson_ids', [])
         try:
             for model_lesson_id in model_lesson_ids:
-                model_lesson = dao.ModelLesson.get_model_lesson(id=model_lesson_id, unscoped=False)
+                model_lesson = dao.ModelLesson.get_model_lesson(query_dict={'id': model_lesson_id}, unscoped=False)
                 if model_lesson is None:
                     raise CustomError(404, 404, 'model_lesson not found')
-                lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
+                lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=False)
                 if lesson is None:
                     raise CustomError(404, 404, 'lesson not found')
                 dao.ModelLesson.delete_model_lesson(ctx=False, query_dict={'id': [model_lesson_id]})
@@ -189,10 +189,11 @@ class ModelLessonController(object):
 
     @classmethod
     def model_lesson_vote(cls, ctx: bool = True, lesson_id: str = 0, vote: bool = True):
-        model_lesson = dao.ModelLesson.get_model_lesson_by_lesson_id(lesson_id=lesson_id, unscoped=False)
+        model_lesson = dao.ModelLesson.get_model_lesson_by_lesson_id(query_dict={'lesson_id': lesson_id},
+                                                                     unscoped=False)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
-        lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=False)
+        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         try:
@@ -247,7 +248,8 @@ class ModelLessonController(object):
                     continue
                 model_lesson_data['term'] = term
                 try:
-                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]}, data={'lesson_model': '推荐课'})
+                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                                             data={'lesson_model': '推荐课'})
                     dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
                 except:
                     fail_lessons.append(lesson_filter)
@@ -292,7 +294,7 @@ class ModelLessonController(object):
                        '指定小组': 'assign_group', '投票次数': 'votes', '提交次数': 'notices'}
         frame_dict = dict()
         for model_lesson in model_lessons:
-            lesson = dao.Lesson.get_lesson(lesson_id=model_lesson['lesson_id'], unscoped=True)
+            lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':model_lesson['lesson_id']}, unscoped=True)
             if lesson is None:
                 raise CustomError(404, 404, 'lesson not found')
             for key, value in column_dict.items():

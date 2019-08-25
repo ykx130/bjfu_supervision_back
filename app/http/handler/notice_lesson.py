@@ -2,13 +2,15 @@ from app.http.handler import notice_lesson_blueprint
 from flask import request, jsonify
 import app.core.controller as controller
 from app.utils import CustomError, args_to_dict
-
+from flask_login import login_required
+from app.http.handler.filter import Filter
 
 @notice_lesson_blueprint.route('/notice_lessons')
-def find_notice_lessons():
+@login_required
+@Filter.filter_permission()
+def find_notice_lessons(*args, **kwargs):
     try:
-        (notice_lessons, total) = controller.NoticeLessonController.query_notice_lessons(
-            query_dict=args_to_dict(request.args))
+        (notice_lessons, total) = controller.NoticeLessonController.query_notice_lessons(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -23,6 +25,7 @@ def find_notice_lessons():
 
 
 @notice_lesson_blueprint.route('/notice_lessons', methods=['POST'])
+@login_required
 def insert_notice_lesson():
     try:
         controller.NoticeLessonController.insert_notice_lesson(data=request.json)
@@ -38,6 +41,7 @@ def insert_notice_lesson():
 
 
 @notice_lesson_blueprint.route('/notice_lessons/batch', methods=['POST'])
+@login_required
 def insert_notice_lessons():
     try:
         controller.NoticeLessonController.insert_notice_lessons(data=request.json)
@@ -53,9 +57,13 @@ def insert_notice_lessons():
 
 
 @notice_lesson_blueprint.route('/notice_lessons/<int:id>')
-def find_notice_lesson(id):
+@login_required
+@Filter.filter_permission()
+def find_notice_lesson(id, *args, **kwargs):
     try:
-        notice_lesson = controller.NoticeLessonController.get_notice_lesson(id=id)
+        query_dict = kwargs
+        query_dict.update({'id':id})
+        notice_lesson = controller.NoticeLessonController.get_notice_lesson(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -69,6 +77,7 @@ def find_notice_lesson(id):
 
 
 @notice_lesson_blueprint.route('/notice_lessons/<int:id>', methods=['DELETE'])
+@login_required
 def delete_notice_lesson(id):
     try:
         controller.NoticeLessonController.delete_notice_lesson(id=id)
@@ -84,6 +93,7 @@ def delete_notice_lesson(id):
 
 
 @notice_lesson_blueprint.route('/notice_lessons', methods=['DELETE'])
+@login_required
 def delete_notice_lessons():
     try:
         controller.NoticeLessonController.delete_notice_lessons(data=request.json)
@@ -99,6 +109,7 @@ def delete_notice_lessons():
 
 
 @notice_lesson_blueprint.route('/notice_lessons/<int:id>', methods=['PUT'])
+@login_required
 def update_notice_lesson(id):
     try:
         controller.NoticeLessonController.update_notice_lesson(id=id, data=request.json)
@@ -114,6 +125,7 @@ def update_notice_lesson(id):
 
 
 @notice_lesson_blueprint.route('/notice_lessons/excel/import', methods=['POST'])
+@login_required
 def import_lesson_excel():
     try:
         path = controller.NoticeLessonController.import_lesson_excel(data=request)
@@ -137,6 +149,7 @@ def import_lesson_excel():
 
 
 @notice_lesson_blueprint.route('/notice_lessons/excel/export', methods=['POST'])
+@login_required
 def export_lesson_excel():
     try:
         filename = controller.NoticeLessonController.export_lesson_excel(data=request.json)
@@ -153,6 +166,7 @@ def export_lesson_excel():
 
 
 @notice_lesson_blueprint.route('/notice_lessons/<int:id>/vote', methods=['POST'])
+@login_required
 def notice_lesson_vote(id):
     try:
         controller.NoticeLessonController.notice_lesson_vote(id=id)

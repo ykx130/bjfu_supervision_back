@@ -44,12 +44,14 @@ class ConsultType(db.Model):
         return total
 
     @classmethod
-    def get_consult_type(cls, id: int, unscoped: bool = False):
+    def get_consult_type(cls, query_dict, unscoped: bool = False):
         consult_type = ConsultType.query
         if not unscoped:
             consult_type = consult_type.filter(ConsultType.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            consult_type = consult_type.filter(ConsultType.id == id).first()
+            consult_type = process_query(consult_type, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                         ConsultType).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(consult_type)
@@ -194,12 +196,14 @@ class Consult(db.Model):
         return total
 
     @classmethod
-    def get_consult(cls, id: int, unscoped: bool = False):
+    def get_consult(cls, query_dict:dict, unscoped: bool = False):
         consult = Consult.query
         if not unscoped:
             consult = consult.filter(Consult.using == True)
+        url_condition = UrlCondition(query_dict)
         try:
-            consult = consult.filter(Consult.id == id).first()
+            consult = process_query(consult, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                     Consult).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(consult)

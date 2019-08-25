@@ -10,7 +10,7 @@ import os
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     PATIENTS_PRE_PAGE = 20
-    MONGO_URI = "mongodb://superversion:bjfupj2018@localhost:27017/supervision"
+    MONGO_URI = "mongodb://superversion:bjfupj2018@202.204.121.155:27017/supervision"
     MONGO_HOST = "localhost"
     MONGO_USERNAME = 'superversion'
     MONGO_DBNAME = 'supervision'

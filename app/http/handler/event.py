@@ -2,9 +2,12 @@ from app.http.handler import event_blueprint
 from flask import request, jsonify
 import app.core.controller as controller
 from app.utils import CustomError, args_to_dict
+from flask_login import login_required
+from app.http.handler.filter import Filter
 
 
 @event_blueprint.route('/events', methods=['POST'])
+@login_required
 def new_event():
     try:
         controller.EventController.insert_event(data=request.json)
@@ -20,9 +23,11 @@ def new_event():
 
 
 @event_blueprint.route('/events')
-def get_events():
+@login_required
+@Filter.filter_permission()
+def get_events(*args, **kwargs):
     try:
-        (events, total) = controller.EventController.query_events(query_dict=args_to_dict(request.args))
+        (events, total) = controller.EventController.query_events(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -37,10 +42,13 @@ def get_events():
 
 
 @event_blueprint.route('/users/<string:username>/events')
-def get_user_events(username):
+@login_required
+@Filter.filter_permission()
+def get_user_events(username, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'username': username})
     try:
-        (events, total) = controller.EventController.query_user_events(username=username,
-                                                                       query_dict=args_to_dict(request.args))
+        (events, total) = controller.EventController.query_user_events(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -55,9 +63,13 @@ def get_user_events(username):
 
 
 @event_blueprint.route('/events/<int:id>')
-def get_user(id):
+@login_required
+@Filter.filter_permission()
+def get_user(id, *args, **kwargs):
+    query_dict = kwargs
+    query_dict.update({'id': id})
     try:
-        event = controller.EventController.get_event(id=id)
+        event = controller.EventController.get_event(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -71,6 +83,7 @@ def get_user(id):
 
 
 @event_blueprint.route('/events/<int:id>', methods=['DELETE'])
+@login_required
 def del_event(id):
     try:
         controller.EventController.delete_event(id=id)
@@ -86,6 +99,7 @@ def del_event(id):
 
 
 @event_blueprint.route('/events/<int:id>', methods=['PUT'])
+@login_required
 def change_event(id):
     try:
         controller.EventController.update_event(id=id, data=request.json)
