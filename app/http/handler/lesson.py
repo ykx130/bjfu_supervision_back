@@ -168,3 +168,4 @@ def get_term_now():
         'msg': '',
         'term': term
     }), 200
+

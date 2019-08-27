@@ -94,3 +94,4 @@ class Filter(object):
             return wrapper
 
         return filter_func
+
