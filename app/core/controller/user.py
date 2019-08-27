@@ -197,11 +197,13 @@ class UserController():
                 raise CustomError(500, 500, err_info=str(e))
         return True
 
+
+
     @classmethod
     def delete_user(cls, ctx: bool = True, username: str = ''):
         user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
-            raise CustomError(404, 404, 'user is not found')
+            raise CustomError(404, 404, '用户未找到')
         try:
             dao.User.delete_user(ctx=ctx, username=username)
             if ctx:
@@ -214,6 +216,17 @@ class UserController():
             else:
                 raise CustomError(500, 500, str(e))
         return True
+
+    @classmethod
+    def change_user_password(cls, username, password):
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, '用户未找到')
+        dao.User.update_user(ctx=False, username=username, data={
+            'password_hash': generate_password_hash(password=password)
+        })
+        return True
+
 
 
 class SupervisorController():

@@ -61,6 +61,22 @@ def new_user():
         'msg': ''
     }), 200
 
+@user_blueprint.route('/users/<string:username>/password', methods=['POST'])
+@login_required
+def change_user_password(username):
+    try:
+        password = request.json.get('password', 'root')
+        controller.UserController.change_user_password(username, password)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': ''
+    }), 200
+
 
 @user_blueprint.route('/users/<string:username>', methods=['PUT'])
 @login_required
