@@ -31,7 +31,8 @@ class FormMeta(object):
             'name': None,
             'version': None,
             'using': True,
-            'items': []
+            'items': [],
+            'pages': []
         }
         for key, value in data.items():
             if key == 'items':
@@ -50,6 +51,7 @@ class FormMeta(object):
                 'version': data.get('version', None),
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
+                               'pages': data.get('pages', ['正面']),
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -65,7 +67,8 @@ class FormMeta(object):
                 'version': data.get('version', None),
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
-                'items': data.get('items', [])
+                'items': data.get('items', []),
+                          'pages': data.get('pages', ['正面']),
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -307,7 +310,8 @@ class Form(object):
             },
             'status': None,
             'using': True,
-            'values': []
+            'values': [],
+            'pages': []
         }
         for key, value in data.items():
             if key == 'values':
@@ -324,6 +328,7 @@ class Form(object):
             json_dict = {
                 '_id': str(data.get('_id', None)),
                 'meta': data.get('meta', {}),
+                'pages': data.get('pages', ['正面']),
                 'status': data.get('status'),
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
@@ -335,8 +340,7 @@ class Form(object):
             raise CustomError(500, 500, str(e))
         return json_dict
 
-    @classmethod
-    def formatter_total(cls, data: dict):
+
         if data is None:
             return None
         try:
@@ -344,6 +348,7 @@ class Form(object):
                 '_id': str(data.get('_id', None)),
                 'meta': data.get('meta', {}),
                 'status': data.get('status'),
+                                'pages': data.get('pages', ['正面']),
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
                 'bind_meta_version': data.get('bind_meta_version', None),

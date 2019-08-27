@@ -13,7 +13,6 @@ class Filter(object):
             @wraps(func)
             def wrapper(*args, **kwargs):
                 user = AuthController.get_current_user()
-                print(user)
                 query_dict = dict()
                 query_dict.update(kwargs)
                 if user is not None:
@@ -42,13 +41,12 @@ class Filter(object):
                                 query_dict={'group_name': [group], 'term': term})
                             usernames = [supervisor.get('username') for supervisor in supervisors]
                             query_dict.update(
-                                {'group_name': [group], 'username': [usernames]})
+                                {'group_name': [group], 'username': usernames})
                         else:
                             query_dict.update(
                                 {'group_name': [group], 'username': [username], 'user_id': [user_id]})
                     else:
                         query_dict.update({'username': [username], 'user_id': [user_id]})
-                print(query_dict)
                 result = func(*args, **query_dict)
                 return result
 
@@ -64,14 +62,17 @@ class Filter(object):
                 user = AuthController.get_current_user()
                 query_dict = dict()
                 query_dict.update(kwargs)
-                if user is None:
+                if user is not None:
                     username = user.get('username')
-                    user_id = user.get('id')
                     role_names = user.get('role_names', list())
                     is_supervisor = ('督导' in role_names)
                     is_grouper = ('小组长' in role_names)
                     is_main_grouper = ('大组长' in role_names)
-                    query_dict = args_to_dict(request.args)
+                    query_dict.update(args_to_dict(request.args))
+                    term = query_dict.get('term')
+                    if term is None:
+                        term = TermService.get_now_term()['name']
+                        query_dict.update({'term': term})
                     if is_supervisor:
                         current_supervisor = SupervisorController.get_supervisor_by_username(
                             query_dict={'username': username})
@@ -82,13 +83,15 @@ class Filter(object):
                             supervisors, _ = SupervisorController.query_supervisors(query_dict={'group_name': [group]})
                             usernames = [supervisor.get('username') for supervisor in supervisors]
                             query_dict.update(
-                                {'meta.guider_group': [group], 'meta.guider_name': [usernames]})
+                                {'meta.guider_group': group, 'meta.guider': usernames, 'meta.term': term})
                         else:
                             query_dict.update(
-                                {'meta.guider_group': [group], 'meta.guider_name': [username]})
+                                {'meta.guider_group': group, 'meta.guider': username, 'meta.term': term})
+                print(query_dict)
                 result = func(*args, **query_dict)
                 return result
 
             return wrapper
 
         return filter_func
+
