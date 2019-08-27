@@ -51,7 +51,7 @@ class FormMeta(object):
                 'version': data.get('version', None),
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
-                               'pages': data.get('pages', ['正面']),
+                'pages': data.get('pages', ['正面']),
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -68,7 +68,7 @@ class FormMeta(object):
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
                 'items': data.get('items', []),
-                          'pages': data.get('pages', ['正面']),
+                'pages': data.get('pages', ['正面']),
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -340,7 +340,8 @@ class Form(object):
             raise CustomError(500, 500, str(e))
         return json_dict
 
-
+    @classmethod
+    def formatter_total(cls, data: dict):
         if data is None:
             return None
         try:
@@ -348,7 +349,7 @@ class Form(object):
                 '_id': str(data.get('_id', None)),
                 'meta': data.get('meta', {}),
                 'status': data.get('status'),
-                                'pages': data.get('pages', ['正面']),
+                'pages': data.get('pages', ['正面']),
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
                 'bind_meta_version': data.get('bind_meta_version', None),
