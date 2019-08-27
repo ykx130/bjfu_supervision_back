@@ -109,7 +109,7 @@ class UserController():
             elif e is not None and e.status_code != 404:
                 raise e
         try:
-            if data.get('password', None) is not None:
+            if data.get('password', None) is None:
                 data['password'] = default_password
             dao.User.insert_user(ctx=ctx, data=data)
             if ctx:
@@ -450,7 +450,7 @@ class SupervisorController():
                     if num == 0:
                         dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                     (_, num) = dao.Supervisor.query_supervisors(
-                        query_dict={'username': [username], 'term': [data['term']]},
+                        query_dict={'username': username, 'term': [data['term']]},
                         unscoped=False)
                     if num != 0:
                         continue
@@ -482,7 +482,7 @@ class GroupController():
     @classmethod
     def formatter(cls, group: dict):
         leader = dao.User.get_user({'username':group['leader_name']}, unscoped=True)
-        return {'name': group['name'], 'leader': leader}
+        return {'group_name': group['group_name'], 'leader': leader}
 
     @classmethod
     def query_groups(cls, query_dict):

@@ -358,7 +358,7 @@ class Form(object):
     def get_form(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = dict()
-        if query_dict.get('_id', None) is not None:
+        if query_dict.get('_id', None) is None:
             raise CustomError(500, 500, '_id must be given')
         from app.utils.mongodb import mongo
         if not unscoped:

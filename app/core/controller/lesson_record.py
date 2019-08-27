@@ -37,7 +37,7 @@ class LessonRecordController(object):
     def query_lesson_records_term(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        if query_dict.get('term', None) is not None:
+        if query_dict.get('term', None) is None:
             term = service.TermService.get_now_term()['name']
             query_dict.update({'term': term})
         (lesson_records, num) = dao.LessonRecord.query_lesson_records(query_dict=query_dict, unscoped=unscoped)

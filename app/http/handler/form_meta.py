@@ -31,10 +31,9 @@ def insert_form_meta():
 
 @form_meta_blueprint.route('/form_metas')
 @login_required
-@Filter.filter_permission_mongo()
 def find_form_metas(*args, **kwargs):
     try:
-        (form_metas, total) = controller.FormMetaController.query_form_metas(query_dict=kwargs)
+        (form_metas, total) = controller.FormMetaController.query_form_metas(query_dict=args_to_dict(request.args))
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -50,10 +49,9 @@ def find_form_metas(*args, **kwargs):
 
 @form_meta_blueprint.route('/form_metas/<string:name>')
 @login_required
-@Filter.filter_permission_mongo()
 def find_form_meta_name(name, *args, **kwargs):
     try:
-        query_dict = kwargs
+        query_dict = args_to_dict(request.args)
         query_dict.update({'name': name})
         form_meta = controller.FormMetaController.get_form_meta(query_dict=query_dict)
     except CustomError as e:
@@ -70,10 +68,9 @@ def find_form_meta_name(name, *args, **kwargs):
 
 @form_meta_blueprint.route('/form_metas/history')
 @login_required
-@Filter.filter_permission_mongo()
 def find_history_form_metas(*args, **kwargs):
     try:
-        (form_metas, num) = controller.FormMetaController.query_form_metas(kwargs)
+        (form_metas, num) = controller.FormMetaController.query_form_metas(args_to_dict(request.args))
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -89,10 +86,9 @@ def find_history_form_metas(*args, **kwargs):
 
 @form_meta_blueprint.route('/form_metas/<string:name>/history')
 @login_required
-@Filter.filter_permission_mongo()
 def find_history_form_meta_by_name(name, *args, **kwargs):
     try:
-        query_dict = kwargs
+        query_dict = args_to_dict(request.args)
         query_dict.update({'name': name})
         (form_metas, total) = controller.FormMetaController.get_history_form_meta(query_dict=query_dict)
     except CustomError as e:
@@ -110,10 +106,9 @@ def find_history_form_meta_by_name(name, *args, **kwargs):
 
 @form_meta_blueprint.route('/form_metas/<string:name>/version/<string:version>')
 @login_required
-@Filter.filter_permission_mongo()
 def get_form_meta(name, version, *args, **kwargs):
     try:
-        query_dict = kwargs
+        query_dict = args_to_dict(request.args)
         query_dict.update({'name': name, 'version':version})
         form_meta = controller.FormMetaController.get_form_meta(query_dict)
     except CustomError as e:

@@ -91,7 +91,7 @@ class User(db.Model, UserMixin):
     def login(cls, username: str, password: str):
         user = User.query.filter(User.username == username).filter(User.using == True).first()
         if user is None or not check_password_hash(user.password_hash, password):
-            raise CustomError(401, 401, 'username or password may be wrong')
+            raise CustomError(401, 401, '用户名或密码错误')
         login_user(user, remember=False)
 
     @classmethod
