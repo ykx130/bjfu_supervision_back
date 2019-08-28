@@ -15,8 +15,8 @@ class NoticeLessonController(object):
         lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':notice_lesson.get('lesson_id', 0)}, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
-        lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_name', 'lesson_teacher_id',
-                       'notices']
+        lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
+                       'lesson_teacher_id', 'notices', 'term', 'lesson_class', 'lesson_unit', 'lesson_teacher_name']
         for lesson_key in lesson_keys:
             notice_lesson[lesson_key] = lesson.get(lesson_key, '')
         return notice_lesson

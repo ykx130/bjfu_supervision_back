@@ -14,7 +14,7 @@ class ModelLessonController(object):
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
-                       'lesson_teacher_id', 'notices', 'term']
+                       'lesson_teacher_id', 'notices', 'term', 'lesson_class', 'lesson_unit', 'lesson_teacher_name']
         for lesson_key in lesson_keys:
             model_lesson[lesson_key] = lesson.get(lesson_key, '')
         return model_lesson
