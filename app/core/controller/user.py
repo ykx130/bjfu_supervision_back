@@ -354,7 +354,7 @@ class SupervisorController():
         if user is None:
             raise CustomError(404, 404, 'user is not found')
         try:
-            dao.User.update_user(ctx=False, username=username, data={'guider': False})
+            dao.User.update_user(ctx=False, username=username, data={'is_guider': False})
             dao.Supervisor.delete_supervisor(ctx=False, query_dict={'username': [username], 'term_gte': [term]})
             if ctx:
                 db.session.commit()
@@ -395,7 +395,7 @@ class SupervisorController():
                 dao.Supervisor.update_supervisor(
                     query_dict={'term_gte': [term], 'main_grouper': [True]},
                     data={'main_grouper': False})
-            dao.User.update_user(ctx=False, username=username, data={'guider': True})
+            dao.User.update_user(ctx=False, username=username, data={'is_guider': True})
             school_term = SchoolTerm(term)
             data['grouper'] = grouper
             data['main_grouper'] = main_grouper
@@ -405,10 +405,11 @@ class SupervisorController():
                 if num == 0:
                     dao.Term.insert_term(ctx=False, data={'name': school_term.term_name})
                 dao.Supervisor.insert_supervisor(ctx=False, data=data)
-                school_term = school_term + 1
-                lesson_record_data = {'username': username, 'term': school_term.term_name, 'group_name': data['group_name'],
+                lesson_record_data = {'username': username, 'term': school_term.term_name,
+                                      'group_name': data['group_name'],
                                       'name': user['name']}
                 dao.LessonRecord.insert_lesson_record(ctx=False, data=lesson_record_data)
+                school_term = school_term + 1
             if ctx:
                 db.session.commit()
         except Exception as e:

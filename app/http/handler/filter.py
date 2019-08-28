@@ -90,7 +90,7 @@ class Filter(object):
                     term = query_dict.get('term')
                     if term is None:
                         term = TermService.get_now_term()['name']
-                        query_dict.update({'term': term})
+                        query_dict.update({'meta.term': term})
                     if is_admin:
                         pass
                     elif is_leader:

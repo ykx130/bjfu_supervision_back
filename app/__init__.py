@@ -27,8 +27,8 @@ def create_app(config_name):
     db.init_app(app)
     mongo.init_app(app)
     login_manager.init_app(app)
-    # app.kafka_producer = KafkaProducer(bootstrap_servers=app.config['KAFLKA_HOST'],
-    #                                    value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    app.kafka_producer = KafkaProducer(bootstrap_servers=app.config['KAFLKA_HOST'],
+                                        value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
     from app.http.handler.form_meta import form_meta_blueprint
     app.register_blueprint(form_meta_blueprint)
