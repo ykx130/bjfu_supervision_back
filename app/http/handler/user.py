@@ -65,6 +65,7 @@ def new_user():
         'msg': ''
     }), 200
 
+
 @user_blueprint.route('/users/<string:username>/password', methods=['POST'])
 @login_required
 def change_user_password(username):
