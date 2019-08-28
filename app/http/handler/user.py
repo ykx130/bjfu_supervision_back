@@ -13,7 +13,7 @@ def query_users(*args, **kwargs):
     query_dict = request.args
     query_dict.update(kwargs)
     try:
-        (users, total) = controller.UserController.query_users(query_dict=kwargs)
+        (users, total) = controller.UserController.query_users(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
