@@ -8,7 +8,6 @@ from app.utils import CustomError, args_to_dict
 
 @model_lesson_blueprint.route('/model_lessons')
 @login_required
-@Filter.filter_permission()
 def find_model_lessons(*args, **kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))

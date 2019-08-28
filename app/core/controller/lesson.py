@@ -35,6 +35,21 @@ def week_to_date(term_begin_time, week, weekday):
 class LessonController(object):
     @classmethod
     def formatter(cls, lesson: dict = None):
+        """
+        拼接notice
+        :param lesson:
+        :return:
+        """
+        return lesson
+    @classmethod
+    def formater_with_level_and_model(cls, lesson:dict=None):
+        if lesson['lesson_level'] == '关注课程':
+            noice_lesson = dao.NoticeLesson.get_notice_lesson(query_dict={
+                'lesson_id': lesson['lesson_id']
+            })
+            lesson['group_name'] = noice_lesson['group_name']
+            lesson['lesson_attention_reason'] = noice_lesson['lesson_attention_reason']
+
         return lesson
 
     @classmethod
@@ -173,7 +188,7 @@ class LessonController(object):
         lesson = dao.Lesson.get_lesson(query_dict=query_dict, unscoped=unscoped)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
-        return cls.formatter(lesson)
+        return cls.formater_with_level_and_model(lesson)
 
     @classmethod
     def query_lessons(cls, query_dict: dict = None, unscoped: bool = False):
