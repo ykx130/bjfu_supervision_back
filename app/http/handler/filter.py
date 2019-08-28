@@ -40,7 +40,7 @@ class Filter(object):
                     if is_admin:
                         query_dict = query_dict
                     elif is_leader:
-                        query_dict.update({'meta.lesson.lesson_teacher_unit':[user.get('unit')]})
+                        query_dict.update({'unit': user['unit']})
                     elif is_supervisor:
                         current_supervisor = SupervisorController.get_supervisor_by_username(
                             query_dict={'username': username})
@@ -95,7 +95,7 @@ class Filter(object):
                     if is_admin:
                         pass
                     elif is_leader:
-                        query_dict.update({'unit': user['unit']})
+                        query_dict.update({'meta.lesson.lesson_teacher_unit':user.get('unit')})
                     elif is_supervisor:
                         current_supervisor = SupervisorController.get_supervisor_by_username(
                             query_dict={'username': username})
