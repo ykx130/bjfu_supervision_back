@@ -9,7 +9,6 @@ from app.http.handler.filter import Filter
 
 @user_blueprint.route('/users')
 @login_required
-@Filter.filter_permission()
 def query_users(*args, **kwargs):
     try:
         (users, total) = controller.UserController.query_users(query_dict=kwargs)
