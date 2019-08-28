@@ -128,6 +128,9 @@ class FormController(object):
             if data.get('status') == '已提交':
                 send_kafka_message(topic='form_service',
                                    method='add_form',
+                                   term=form.get('meta', {}).get('term', None),
+                                   username=form.get('meta', {}).get('guider', None),
+                                   form=form,
                                    lesson_id=lesson_id)
 
         return True
