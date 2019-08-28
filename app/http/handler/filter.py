@@ -58,6 +58,7 @@ class Filter(object):
                                 {'group_name': [group], 'username': [username], 'user_id': [user_id]})
                     else:
                         query_dict.update({'username': [username], 'user_id': [user_id]})
+                print(query_dict)
                 result = func(*args, **query_dict)
                 return result
 
