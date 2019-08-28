@@ -45,16 +45,16 @@ class User(db.Model, UserMixin):
             'status': user.status,
             'prorank': user.prorank,
             'skill': user.skill,
-            'is_guider': user.guider,
-            'is_leader': user.leader,
-            'is_admin': user.admin
+            'is_guider': user.is_guider,
+            'is_leader': user.is_leader,
+            'is_admin': user.is_admin
         }
         return user_dict
 
     @classmethod
     def reformatter_update(cls, data: dict):
         allow_change_list = ['name', 'sex', 'password', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
-                             'skill', 'group_name', 'work_state', 'term', 'admin', 'leader', 'guider']
+                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider']
         update_data = dict()
         for key, value in data.items():
             if key in allow_change_list:
@@ -138,7 +138,7 @@ class User(db.Model, UserMixin):
             if hasattr(user, key):
                 setattr(user, key, value)
         role_names = data.get('role_names', [])
-        role_name_dict = {'教师': 'teacher', '管理员': 'admin', '学院领导': 'leader'}
+        role_name_dict = {'教师': 'teacher', '管理员': 'is_admin', '学院领导': 'is_leader'}
         for role_name in role_names:
             role_name_e = role_name_dict[role_name]
             if hasattr(user, role_name_e):

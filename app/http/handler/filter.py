@@ -15,6 +15,7 @@ class Filter(object):
                 user = AuthController.get_current_user()
                 query_dict = dict()
                 query_dict.update(kwargs)
+
                 if user is not None:
                     username = user.get('username')
                     user_id = user.get('id')
@@ -23,6 +24,8 @@ class Filter(object):
                     is_grouper = ('小组长' in role_names)
                     is_main_grouper = ('大组长' in role_names)
                     is_admin = ('管理员' in role_names)
+                    is_leader = user.get('is_leader', False )
+
                     query_dict.update(args_to_dict(request.args))
                     term = query_dict.get('term')
                     if term is None:
