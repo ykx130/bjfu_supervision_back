@@ -137,12 +137,6 @@ class User(db.Model, UserMixin):
                 user.password = value
             if hasattr(user, key):
                 setattr(user, key, value)
-        role_names = data.get('role_names', [])
-        role_name_dict = {'教师': 'teacher', '管理员': 'is_admin', '学院领导': 'is_leader'}
-        for role_name in role_names:
-            role_name_e = role_name_dict[role_name]
-            if hasattr(user, role_name_e):
-                setattr(user, role_name_e, True)
         db.session.add(user)
         if ctx:
             try:

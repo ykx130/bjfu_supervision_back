@@ -111,6 +111,13 @@ class UserController():
         try:
             if data.get('password', None) is None:
                 data['password'] = default_password
+
+            role_names = data.get('role_names', [])
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader'}
+            for role_name in role_names:
+                role_name_filed = role_name_dict[role_name]
+                data[role_name_filed] = True
+
             dao.User.insert_user(ctx=ctx, data=data)
             if ctx:
                 db.session.commit()
