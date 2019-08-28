@@ -17,22 +17,22 @@ class FormController(object):
         :return:
         """
         tmpl = '课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被{created_by} 评价， 评价者{guider}, 督导小组{group}.'
-        send_kafka_message(topic='notice_service', method='send_msg',
-                           username=form_model.get('meta', {}).get('guider'),
-                           msg={
-                               'title': '问卷新增',
-                               'body': tmpl.format(
-                                   lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),
-                                   created_at=form_model.get('meta', {}).get('created_at'),
-                                   created_by=form_model.get('meta', {}).get('created_by'),
-                                   guider=form_model.get('meta', {}).get('guider_name'),
-                                   group=form_model.get('meta', {}).get('guider_group'),
-                                   lesson_level=form_model.get('meta', {}).get('lesson', {}).get('lesson_level', ''),
-                                   lesson_teacher=form_model.get('meta', {}).get('lesson', {}).get(
-                                       'lesson_teacher_name', '')
-                               )
-                           }
-                           )
+        NoticeService.push_new_message(
+            username=form_model.get('meta', {}).get('guider'),
+            notice={
+                'title': '问卷新增',
+                'body': tmpl.format(
+                    lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),
+                    created_at=form_model.get('meta', {}).get('created_at'),
+                    created_by=form_model.get('meta', {}).get('created_by'),
+                    guider=form_model.get('meta', {}).get('guider_name'),
+                    group=form_model.get('meta', {}).get('guider_group'),
+                    lesson_level=form_model.get('meta', {}).get('lesson', {}).get('lesson_level', ''),
+                    lesson_teacher=form_model.get('meta', {}).get('lesson', {}).get(
+                        'lesson_teacher_name', '')
+                )
+            }
+        )
 
     @classmethod
     def push_put_back_form_message(cls, form_model):
@@ -43,21 +43,21 @@ class FormController(object):
         """
         tmpl = '问卷 课程{lesson_name}, 级别:{lesson_level}, 教师: {lesson_teacher} ，于{created_at} 被打回， 评价者{guider}, 督导小组{group}.'
         NoticeService.push_new_message(
-                           username=form_model.get('meta', {}).get('guider'),
-                           notice={
-                               'title': '问卷打回',
-                               'body': tmpl.format(
-                                   lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),
-                                   created_at=form_model.get('meta', {}).get('created_at'),
-                                   created_by=form_model.get('meta', {}).get('created_by'),
-                                   guider=form_model.get('meta', {}).get('guider_name'),
-                                   group=form_model.get('meta', {}).get('guider_group'),
-                                   lesson_level=form_model.get('meta', {}).get('lesson', {}).get('lesson_level', ''),
-                                   lesson_teacher=form_model.get('meta', {}).get('lesson', {}).get(
-                                       'lesson_teacher_name', '')
-                               )
-                           }
-                           )
+            username=form_model.get('meta', {}).get('guider'),
+            notice={
+                'title': '问卷打回',
+                'body': tmpl.format(
+                    lesson_name=form_model.get('meta', {}).get('lesson', {}).get('lesson_name', ''),
+                    created_at=form_model.get('meta', {}).get('created_at'),
+                    created_by=form_model.get('meta', {}).get('created_by'),
+                    guider=form_model.get('meta', {}).get('guider_name'),
+                    group=form_model.get('meta', {}).get('guider_group'),
+                    lesson_level=form_model.get('meta', {}).get('lesson', {}).get('lesson_level', ''),
+                    lesson_teacher=form_model.get('meta', {}).get('lesson', {}).get(
+                        'lesson_teacher_name', '')
+                )
+            }
+        )
 
     @classmethod
     def insert_form(cls, data: dict = None):
@@ -66,7 +66,7 @@ class FormController(object):
         meta = data.get('meta', {})
         lesson_id = meta.get('lesson', {}).get('lesson_id', None)
         if lesson_id is None:
-            raise CustomError(500, 200, 'lesson_id should be given')
+            raise CustomError(500, 200, '课程不能为空')
         dao.Form.insert_form(data)
         form_model = dao.Form.formatter_total(data)
         send_kafka_message(topic='form_service',
@@ -98,7 +98,7 @@ class FormController(object):
 
     @classmethod
     def delete_form(cls, _id=None):
-        form = dao.Form.get_form(query_dict={'_id':_id})
+        form = dao.Form.get_form(query_dict={'_id': _id})
         if form is None:
             raise CustomError(404, 404, 'form not found')
         dao.Form.delete_form(where_dict={'_id': _id})
@@ -108,7 +108,7 @@ class FormController(object):
     def update_form(cls, _id=None, data: dict = None):
         if data is None:
             data = dict()
-        form = dao.Form.get_form(query_dict={'_id':_id})
+        form = dao.Form.get_form(query_dict={'_id': _id})
         if form is None:
             raise CustomError(404, 404, 'form not found')
         dao.Form.update_form({'_id': _id}, data)

@@ -19,7 +19,7 @@ def new_form():
                  'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')})
     request_json['meta'] = meta
     try:
-        controller.FormController.insert_form(data=request.json)
+        controller.FormController.insert_form(data=request_json)
     except CustomError as e:
         return jsonify({
             'code': e.code,
