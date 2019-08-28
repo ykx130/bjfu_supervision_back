@@ -11,7 +11,7 @@ from app.http.handler.filter import Filter
 @login_required
 def query_users(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (users, total) = controller.UserController.query_users(query_dict=query_dict)
@@ -33,7 +33,7 @@ def query_users(*args, **kwargs):
 @Filter.filter_permission()
 def get_user(username, *args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     query_dict.update({'username': username})
     try:
@@ -119,7 +119,7 @@ def del_user(username):
 @Filter.filter_permission()
 def get_supervisors(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (supervisors, total) = controller.SupervisorController.query_supervisors(query_dict=query_dict)
@@ -141,7 +141,7 @@ def get_supervisors(*args, **kwargs):
 @Filter.filter_permission()
 def find_supervisors_expire(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (supervisors, total) = controller.SupervisorController.query_supervisors_expire(
@@ -232,7 +232,7 @@ def update_supervisor(id):
 @Filter.filter_permission()
 def get_groups(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (groups, total) = controller.GroupController.query_groups(query_dict=query_dict)

@@ -10,7 +10,7 @@ from flask_login import login_required
 @login_required
 def find_work_plans(**kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (work_plans, num) = controller.WorkPlanController.query_work_plan(query_dict=query_dict)
@@ -31,7 +31,7 @@ def find_work_plans(**kwargs):
 @login_required
 def find_work_plan(id, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         query_dict = kwargs

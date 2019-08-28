@@ -26,7 +26,7 @@ def new_consult():
 @login_required
 def get_consults(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (consults, total) = controller.ConsultController.query_consults(query_dict=query_dict)
@@ -115,7 +115,7 @@ def new_consult_type():
 def get_consult_types(*args, **kwargs):
     try:
         query_dict = {}
-        query_dict.update(request.args)
+        query_dict.update(args_to_dict(request.args))
         query_dict.update(kwargs)
         (consult_types, total) = controller.ConsultTypeController.query_consult_types(query_dict=kwargs)
     except CustomError as e:

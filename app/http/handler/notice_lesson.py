@@ -10,7 +10,7 @@ from app.http.handler.filter import Filter
 @Filter.filter_permission()
 def find_notice_lessons(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (notice_lessons, total) = controller.NoticeLessonController.query_notice_lessons(query_dict=kwargs)
@@ -64,7 +64,7 @@ def insert_notice_lessons():
 @Filter.filter_permission()
 def find_notice_lesson(id, *args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         query_dict = kwargs

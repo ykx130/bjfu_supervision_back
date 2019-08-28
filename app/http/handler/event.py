@@ -26,7 +26,7 @@ def new_event():
 @login_required
 def get_events(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (events, total) = controller.EventController.query_events(query_dict=query_dict)

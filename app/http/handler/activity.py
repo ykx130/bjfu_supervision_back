@@ -11,7 +11,7 @@ from app.http.handler.filter import Filter
 @login_required
 def find_activities(**kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (activities, total) = controller.ActivityController.query_activities(query_dict=query_dict)
@@ -103,7 +103,7 @@ def update_activity(id, **kwargs):
 def find_activity_users(id, **kwargs):
     try:
         query_dict = {}
-        query_dict.update(request.args)
+        query_dict.update(args_to_dict(request.args))
         query_dict.update(kwargs)
         activity = controller.ActivityController.get_activity(query_dict={'id': id})
         (activity_users, total) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
@@ -140,7 +140,7 @@ def insert_activity_user(id, **kwargs):
 @login_required
 def find_activity_user(id, username, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         activity = controller.ActivityController.get_activity(query_dict=query_dict)

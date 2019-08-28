@@ -11,7 +11,7 @@ from app.utils import CustomError, args_to_dict
 @Filter.filter_permission()
 def find_model_lessons(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (model_lessons, total) = controller.ModelLessonController.query_model_lessons(query_dict=query_dict)
@@ -66,7 +66,7 @@ def insert_model_lessons():
 def find_model_lesson(id, *args, **kwargs):
     try:
         query_dict = kwargs
-        query_dict.update(request.args)
+        query_dict.update(args_to_dict(request.args))
         query_dict.update({'id':id})
         model_lesson = controller.ModelLessonController.get_model_lesson(query_dict=query_dict)
     except CustomError as e:

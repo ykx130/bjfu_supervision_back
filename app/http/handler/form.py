@@ -36,7 +36,7 @@ def new_form():
 @Filter.filter_permission_mongo()
 def query_forms(*args, **kwargs):
     query_dict = {}
-    query_dict.update(request.args)
+    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
         (forms, total) = controller.FormController.query_forms(query_dict=query_dict)
