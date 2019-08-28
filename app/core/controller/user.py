@@ -109,7 +109,7 @@ class UserController():
             elif e is not None and e.status_code != 404:
                 raise e
         try:
-            if data.get('password', None) is not None:
+            if data.get('password', None) is None:
                 data['password'] = default_password
             dao.User.insert_user(ctx=ctx, data=data)
             if ctx:
