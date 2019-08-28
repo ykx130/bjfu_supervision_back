@@ -9,6 +9,9 @@ from app.http.handler.filter import Filter
 @login_required
 @Filter.filter_permission()
 def find_notice_lessons(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
         (notice_lessons, total) = controller.NoticeLessonController.query_notice_lessons(query_dict=kwargs)
     except CustomError as e:
@@ -60,6 +63,9 @@ def insert_notice_lessons():
 @login_required
 @Filter.filter_permission()
 def find_notice_lesson(id, *args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
         query_dict = kwargs
         query_dict.update({'id':id})

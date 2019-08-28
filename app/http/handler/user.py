@@ -10,7 +10,8 @@ from app.http.handler.filter import Filter
 @user_blueprint.route('/users')
 @login_required
 def query_users(*args, **kwargs):
-    query_dict = request.args
+    query_dict = {}
+    query_dict.update(request.args)
     query_dict.update(kwargs)
     try:
         (users, total) = controller.UserController.query_users(query_dict=query_dict)
@@ -31,7 +32,9 @@ def query_users(*args, **kwargs):
 @login_required
 @Filter.filter_permission()
 def get_user(username, *args, **kwargs):
-    query_dict = kwargs
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     query_dict.update({'username': username})
     try:
         user = controller.UserController.get_user(query_dict=query_dict)
@@ -115,8 +118,11 @@ def del_user(username):
 @login_required
 @Filter.filter_permission()
 def get_supervisors(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
-        (supervisors, total) = controller.SupervisorController.query_supervisors(query_dict=kwargs)
+        (supervisors, total) = controller.SupervisorController.query_supervisors(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -134,9 +140,12 @@ def get_supervisors(*args, **kwargs):
 @login_required
 @Filter.filter_permission()
 def find_supervisors_expire(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
         (supervisors, total) = controller.SupervisorController.query_supervisors_expire(
-            query_dict=kwargs)
+            query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -222,8 +231,11 @@ def update_supervisor(id):
 @login_required
 @Filter.filter_permission()
 def get_groups(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
-        (groups, total) = controller.GroupController.query_groups(query_dict=kwargs)
+        (groups, total) = controller.GroupController.query_groups(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,

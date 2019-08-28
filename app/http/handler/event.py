@@ -24,10 +24,12 @@ def new_event():
 
 @event_blueprint.route('/events')
 @login_required
-@Filter.filter_permission()
 def get_events(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
-        (events, total) = controller.EventController.query_events(query_dict=kwargs)
+        (events, total) = controller.EventController.query_events(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -43,7 +45,6 @@ def get_events(*args, **kwargs):
 
 @event_blueprint.route('/users/<string:username>/events')
 @login_required
-@Filter.filter_permission()
 def get_user_events(username, *args, **kwargs):
     query_dict = kwargs
     query_dict.update({'username': username})
@@ -64,7 +65,6 @@ def get_user_events(username, *args, **kwargs):
 
 @event_blueprint.route('/events/<int:id>')
 @login_required
-@Filter.filter_permission()
 def get_user(id, *args, **kwargs):
     query_dict = kwargs
     query_dict.update({'id': id})

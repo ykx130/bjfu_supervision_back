@@ -35,7 +35,9 @@ def new_form():
 @login_required
 @Filter.filter_permission_mongo()
 def query_forms(*args, **kwargs):
-    query_dict = kwargs
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
         (forms, total) = controller.FormController.query_forms(query_dict=query_dict)
     except CustomError as e:

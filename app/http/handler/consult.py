@@ -8,7 +8,6 @@ from app.utils import CustomError, args_to_dict
 
 @consult_blueprint.route('/consults', methods=['POST'])
 @login_required
-@Filter.filter_permission()
 def new_consult():
     try:
         controller.ConsultController.insert_consult(data=request.json)
@@ -25,10 +24,12 @@ def new_consult():
 
 @consult_blueprint.route('/consults')
 @login_required
-@Filter.filter_permission()
 def get_consults(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
-        (consults, total) = controller.ConsultController.query_consults(query_dict=kwargs)
+        (consults, total) = controller.ConsultController.query_consults(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -44,7 +45,6 @@ def get_consults(*args, **kwargs):
 
 @consult_blueprint.route('/consults/<int:id>')
 @login_required
-@Filter.filter_permission()
 def get_consult(id, *args, **kwargs):
     try:
         query_dict = kwargs
@@ -112,9 +112,11 @@ def new_consult_type():
 
 @consult_blueprint.route('/consult_types')
 @login_required
-@Filter.filter_permission()
 def get_consult_types(*args, **kwargs):
     try:
+        query_dict = {}
+        query_dict.update(request.args)
+        query_dict.update(kwargs)
         (consult_types, total) = controller.ConsultTypeController.query_consult_types(query_dict=kwargs)
     except CustomError as e:
         return jsonify({
@@ -131,7 +133,6 @@ def get_consult_types(*args, **kwargs):
 
 @consult_blueprint.route('/consult_types/<int:id>')
 @login_required
-@Filter.filter_permission()
 def get_consult_type(id, *args, **kwargs):
     query_dict = kwargs
     query_dict.update({'id': id})

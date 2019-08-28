@@ -8,10 +8,12 @@ from flask_login import login_required
 
 @form_meta_blueprint.route('/work_plans', methods=['GET'])
 @login_required
-@Filter.filter_permission()
 def find_work_plans(**kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
-        (work_plans, num) = controller.WorkPlanController.query_work_plan(query_dict=kwargs)
+        (work_plans, num) = controller.WorkPlanController.query_work_plan(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -27,12 +29,14 @@ def find_work_plans(**kwargs):
 
 @form_meta_blueprint.route('/work_plans/<int:id>', methods=['GET'])
 @login_required
-@Filter.filter_permission()
 def find_work_plan(id, **kwargs):
+    query_dict = {}
+    query_dict.update(request.args)
+    query_dict.update(kwargs)
     try:
         query_dict = kwargs
         query_dict.update({'id': id})
-        work_plan = controller.WorkPlanController.get_work_plan(query_dict=kwargs)
+        work_plan = controller.WorkPlanController.get_work_plan(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -48,6 +52,7 @@ def find_work_plan(id, **kwargs):
 @form_meta_blueprint.route('/work_plans', methods=['POST'])
 @login_required
 def insert_work_plan():
+
     try:
         controller.WorkPlanController.insert_work_plan(data=request.json)
     except CustomError as e:
