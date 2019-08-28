@@ -25,9 +25,9 @@ class User(db.Model, UserMixin):
     prorank = db.Column(db.String(8), default='')
     skill = db.Column(db.String(16), default='')
     using = db.Column(db.Boolean, default=True)
-    admin = db.Column(db.Boolean, default=False)
-    leader = db.Column(db.Boolean, default=False)
-    guider = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_leader = db.Column(db.Boolean, default=False)
+    is_guider = db.Column(db.Boolean, default=False)
 
     @classmethod
     def formatter(cls, user):
