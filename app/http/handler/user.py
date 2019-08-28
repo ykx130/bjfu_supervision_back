@@ -10,6 +10,8 @@ from app.http.handler.filter import Filter
 @user_blueprint.route('/users')
 @login_required
 def query_users(*args, **kwargs):
+    query_dict = request.args
+    query_dict.update(kwargs)
     try:
         (users, total) = controller.UserController.query_users(query_dict=kwargs)
     except CustomError as e:

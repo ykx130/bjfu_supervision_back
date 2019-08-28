@@ -32,7 +32,6 @@ class Filter(object):
                     is_admin = ('管理员' in role_names)
                     is_leader = ('学院领导' in role_names)
 
-                    query_dict.update(args_to_dict(request.args))
                     term = query_dict.get('term')
                     if term is None:
                         term = TermService.get_now_term()['name']
@@ -88,7 +87,6 @@ class Filter(object):
                     is_grouper = ('小组长' in role_names)
                     is_main_grouper = ('大组长' in role_names)
                     is_leader = ('学院领导' in role_names)
-                    query_dict.update(args_to_dict(request.args))
                     term = query_dict.get('term')
                     if term is None:
                         term = TermService.get_now_term()['name']

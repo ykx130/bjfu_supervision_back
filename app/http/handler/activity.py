@@ -9,10 +9,11 @@ from app.http.handler.filter import Filter
 
 @activity_blueprint.route('/activities')
 @login_required
-@Filter.filter_permission()
 def find_activities(**kwargs):
+    query_dict = request.args
+    query_dict.update(kwargs)
     try:
-        (activities, total) = controller.ActivityController.query_activities(query_dict=kwargs)
+        (activities, total) = controller.ActivityController.query_activities(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
