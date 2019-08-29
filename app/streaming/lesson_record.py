@@ -16,20 +16,20 @@ def lesson_record_by_form_server(method, args):
     if method == 'add_form' or method == 'repulse_form':
         # 更新听课记录
         _, total = dao.Form.query_forms(query_dict={
-            "username": args.get("username"),
+            "meta.guider": args.get("username"),
             "term": args.get("term")
         })
 
         _, has_submit = dao.Form.query_forms(query_dict={
-            "username": args.get("username"),
-            "term": args.get("term"),
+            "meta.guider": args.get("username"),
+            "meta.term": args.get("term"),
             "status": "已提交"
         })
 
         _, wait_submit = dao.Form.query_forms(query_dict={
-            "username": args.get("username"),
-            "term": args.get("term"),
-            "status": "未提交"
+            "meta.guider": args.get("username"),
+            "meta.term": args.get("term"),
+            "status": "待提交"
         })
 
         dao.LessonRecord.update_lesson_record(
