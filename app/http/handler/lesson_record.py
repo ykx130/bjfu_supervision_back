@@ -14,8 +14,9 @@ def find_term_lesson_records(**kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
+    print(kwargs)
     try:
-        (lesson_records, num) = controller.LessonRecordController.query_lesson_records_term(query_dict=kwargs)
+        (lesson_records, num) = controller.LessonRecordController.query_lesson_records_term(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
