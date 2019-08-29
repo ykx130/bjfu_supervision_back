@@ -25,7 +25,8 @@ def lesson_form_service_server(method, args):
         dao.Lesson.update_lesson(query_dict={
             'lesson_id': args.get("lesson_id")
         }, data={
-            "lesson_state": "已完成" if total else "未完成"
+            "lesson_state": "已完成" if total else "未完成",
+            "notices": total
         })
 
 
