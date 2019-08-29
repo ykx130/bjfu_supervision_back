@@ -11,6 +11,9 @@ from app.http.handler.filter import Filter
 @login_required
 @Filter.filter_permission()
 def find_term_lesson_records(**kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
     try:
         (lesson_records, num) = controller.LessonRecordController.query_lesson_records_term(query_dict=kwargs)
     except CustomError as e:
