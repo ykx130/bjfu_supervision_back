@@ -34,6 +34,7 @@ class FormMeta(object):
             'items': [],
             'pages': []
         }
+        print(data)
         for key, value in data.items():
             if key == 'items':
                 items = cls.items_init(value)
@@ -447,3 +448,4 @@ class Form(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return True
+

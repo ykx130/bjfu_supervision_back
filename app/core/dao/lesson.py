@@ -885,3 +885,4 @@ class ModelLesson(db.Model):
             except Exception as e:
                 raise CustomError(500, 500, str(e))
         return True
+

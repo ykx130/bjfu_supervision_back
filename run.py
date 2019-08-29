@@ -22,7 +22,7 @@ def create_all():
 
 
 def make_shell_context():
-    return dict(app=app, mongo=mongo, db=db, create_all=create_all, insert_user=insert_user)
+    return dict(app=app, mongo=mongo, db=db, create_all=create_all)
 
 
 manager.add_command("shell", Shell(make_context=make_shell_context))

@@ -510,3 +510,4 @@ class GroupController():
         groups, num = dao.Group.query_groups(query_dict)
         return [cls.formatter(group) for group in groups], num
 
+

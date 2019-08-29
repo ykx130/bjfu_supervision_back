@@ -79,3 +79,4 @@ if __name__ != '__main__':
     app.logger.handlers.extend(gunicorn_logger.handlers)
     app.logger.addHandler(fileHandler)
     app.logger.setLevel(gunicorn_logger.level)
+
