@@ -44,13 +44,14 @@ class FormService:
                     # 处理多选
                     if not item_map.get(item['item_name']):
                         point = {o['label']: {"option": o, "num": 0} for o in item.get("payload", {}).get("options", [])}
-                        for value in item["value"]:
-                            if  value in point:
-                                point[value]["num"] = point[value]["num"] + 1
-                        item_map[item['item_name']] = {
-                            "item_name": item['item_name'],
-                            "point": list(point.values())
-                        }
+                        if item["value"]:
+                            for value in item["value"]:
+                                if  value in point:
+                                    point[value]["num"] = point[value]["num"] + 1
+                            item_map[item['item_name']] = {
+                                "item_name": item['item_name'],
+                                "point": list(point.values())
+                            }
                     else:
                         point = item_map[item['item_name']]["point"]
                         for p in point:
