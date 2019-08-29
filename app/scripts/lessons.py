@@ -1,4 +1,4 @@
-    import app.core.dao as dao
+import app.core.dao as dao
 import pymysql
 from app.utils.misc import convert_string_to_datetime
 from app.utils.Error import CustomError
@@ -176,7 +176,7 @@ def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_t
 
 def insert_lesson(data: dict):
     dao.Lesson.insert_lesson(data=data)
-    lesson = dao.Lesson.get_lesson(lesson_id=data['lesson_id'])
+    lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':data['lesson_id']})
     return lesson
 
 
@@ -224,7 +224,7 @@ def update_database(info: dict = None):
                                           'lesson_class': [lesson_data['lesson_class']]}, data=lesson_data)
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
-            new_lesson = dao.Lesson.get_lesson(lesson_id=lesson_data['lesson_id'])
+            new_lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':lesson_data['lesson_id']})
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
                                                            teacher_name=lesson_data['lesson_teacher_name'])
             del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})
@@ -252,3 +252,4 @@ if __name__ == '__main__':
     info = {'term': args.term, 'host': args.host, 'user': args.user, 'passwd': args.passwd, 'db': args.db,
             'charset': args.charset}
     update_database(info=info)
+

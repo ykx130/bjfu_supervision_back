@@ -809,7 +809,9 @@ class ModelLesson(db.Model):
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = {}
+        print(data)
         data = cls.reformatter_insert(data)
+        print(data)
         model_lesson = ModelLesson()
         for key, value in data.items():
             if hasattr(model_lesson, key):
@@ -883,3 +885,4 @@ class ModelLesson(db.Model):
             except Exception as e:
                 raise CustomError(500, 500, str(e))
         return True
+

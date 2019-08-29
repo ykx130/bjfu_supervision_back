@@ -23,7 +23,7 @@ class ModelLessonController(object):
     def reformatter_insert(cls, data: dict):
         if 'lesson_id' not in data:
             raise CustomError(500, 200, 'lesson id should be given')
-        data['status'] = data.get('status', '推荐课')
+        data['status'] = data.get('status', '推荐为好评课')
         return data
 
     @classmethod
@@ -56,15 +56,15 @@ class ModelLessonController(object):
         lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': data['lesson_id']}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
-        status = data.get('status', '推荐课')
+        status = data.get('status', '推荐为好评课')
         lesson_id = data.get('lesson_id', None)
         if lesson_id is None:
             raise CustomError(500, 200, 'lesson_id must be given')
         try:
-            dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
             (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
             if num != 0:
                 raise CustomError(500, 200, 'lesson has been model lesson')
+            dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
                                      data={'lesson_model': status})
             if ctx:
@@ -83,7 +83,7 @@ class ModelLessonController(object):
         if data is None:
             data = dict()
         lesson_ids = data.get("lesson_ids", [])
-        status = data.get('status', '推荐课')
+        status = data.get('status', '推荐为好评课')
         data['term'] = data.get('term', service.TermService.get_now_term()['name'])
         try:
             for lesson_id in lesson_ids:
@@ -312,3 +312,4 @@ class ModelLessonController(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return filename
+

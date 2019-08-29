@@ -34,6 +34,7 @@ class FormMeta(object):
             'items': [],
             'pages': []
         }
+        print(data)
         for key, value in data.items():
             if key == 'items':
                 items = cls.items_init(value)
@@ -362,6 +363,7 @@ class Form(object):
 
     @classmethod
     def get_form(cls, query_dict: dict = None, unscoped: bool = False):
+        print(query_dict)
         if query_dict is None:
             query_dict = dict()
         if query_dict.get('_id', None) is None:
@@ -370,6 +372,10 @@ class Form(object):
         if not unscoped:
             query_dict['using'] = [True]
         url_condition = mongodb_url_condition.UrlCondition(query_dict)
+        if '_id' in url_condition.filter_dict:
+            url_condition.filter_dict['_id']['$in'] = [mongodb_url_condition.ObjectId(item) for item in
+                                                       url_condition.filter_dict['_id']['$in']]
+        print(url_condition.filter_dict)
         try:
             data = mongo.db.form.find_one(url_condition.filter_dict)
         except Exception as e:
@@ -442,3 +448,4 @@ class Form(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return True
+
