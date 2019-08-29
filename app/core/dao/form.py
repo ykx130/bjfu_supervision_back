@@ -287,7 +287,7 @@ class Form(object):
                 'item_name': None,
                 'type': None,
                 'value': None,
-                'pyload': dict()
+                'payload': dict()
             }
             for item_key, item_value in item.items():
                 new_item[item_key] = item_value
