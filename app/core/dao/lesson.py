@@ -724,6 +724,7 @@ class ModelLesson(db.Model):
     status = db.Column(db.Integer, default=2)  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
     group_name = db.Column(db.String(32), default='')
+    is_lock = db.Column(db.Integer, default=0) # 锁定 未锁定
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -738,6 +739,7 @@ class ModelLesson(db.Model):
             'group_name': model_lesson.group_name,
             'status': status,
             'votes': model_lesson.votes,
+            'is_lock': model_lesson.is_lock
         }
         return model_lesson_dict
 
