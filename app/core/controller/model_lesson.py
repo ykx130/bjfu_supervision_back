@@ -10,7 +10,10 @@ class ModelLessonController(object):
 
     @classmethod
     def formatter(cls, model_lesson):
-        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson.get('lesson_id', 0)}, unscoped=True)
+        lesson = dao.Lesson.get_lesson(query_dict={
+            'lesson_id': model_lesson.get('lesson_id', ''),
+            'term': model_lesson.get('term', '')
+        }, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
@@ -35,7 +38,7 @@ class ModelLessonController(object):
         return data
 
     @classmethod
-    def get_model_lesson(cls, query_dict:dict, unscoped: bool = False):
+    def get_model_lesson(cls, query_dict: dict, unscoped: bool = False):
         model_lesson = dao.ModelLesson.get_model_lesson(query_dict=query_dict, unscoped=unscoped)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
@@ -294,7 +297,7 @@ class ModelLessonController(object):
                        '指定小组': 'group_name', '投票次数': 'votes', '提交次数': 'notices'}
         frame_dict = dict()
         for model_lesson in model_lessons:
-            lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':model_lesson['lesson_id']}, unscoped=True)
+            lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=True)
             if lesson is None:
                 raise CustomError(404, 404, 'lesson not found')
             for key, value in column_dict.items():
@@ -312,4 +315,3 @@ class ModelLessonController(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return filename
-

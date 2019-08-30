@@ -12,7 +12,10 @@ import json
 class NoticeLessonController(object):
     @classmethod
     def formatter(cls, notice_lesson):
-        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':notice_lesson.get('lesson_id', 0)}, unscoped=True)
+        lesson = dao.Lesson.get_lesson(query_dict={
+            'lesson_id':notice_lesson.get('lesson_id', 0),
+            'term': notice_lesson.get('term', '')
+        }, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
