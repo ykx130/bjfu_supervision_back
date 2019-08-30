@@ -14,7 +14,6 @@ class NoticeLessonController(object):
     def formatter(cls, notice_lesson):
         lesson = dao.Lesson.get_lesson(query_dict={
             'lesson_id':notice_lesson.get('lesson_id', 0),
-            'term': notice_lesson.get('term', '')
         }, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
