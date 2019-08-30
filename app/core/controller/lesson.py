@@ -218,6 +218,8 @@ class LessonController(object):
         from app.core.controller import NoticeLessonController
         if data is None:
             data = dict()
+        if 'id' in data:
+            del data['id']
         lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':lesson_id}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
