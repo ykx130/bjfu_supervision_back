@@ -158,3 +158,29 @@ class LessonRecordController(object):
             else:
                 raise CustomError(500, 500, str(e))
         return True
+
+    @classmethod
+    def export_lesson_record(cls, data: dict = None):
+        if data is None:
+            data = dict()
+        lesson_records,num=dao.LessonRecord.query_lesson_records(query_dict=data)
+        column_dict={'用户名称':'username','所在分组':'group_name',
+                     '当前学期': 'term','未提交':'to_be_submitted',
+                     '已提交':'has_submitted','提交总次数':'total_times'}
+        frame_dict = dict()
+        for lesson_record in lesson_records:
+            for key, value in column_dict.items():
+                excel_value = lesson_record[value] if value in lesson_record else lesson_record.get(value, "")
+                if key not in frame_dict:
+                    frame_dict[key] = [excel_value]
+                else:
+                    frame_dict[key].append(excel_value)
+        try:
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123', index=False, header=True)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return filename
