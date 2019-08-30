@@ -194,10 +194,12 @@ def update_activity_user(id, username, **kwargs):
 @login_required
 def get_current_user_activities(**kwargs):
     username = request.args['username'] if 'username' in request.args else current_user.username
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
     try:
         (activities, total) = controller.ActivityUserController.query_current_user_activities(username=username,
-                                                                                              query_dict=args_to_dict(
-                                                                                                  request.args))
+                                                                                              query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,

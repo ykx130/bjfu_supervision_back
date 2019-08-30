@@ -117,7 +117,7 @@ def get_consult_types(*args, **kwargs):
         query_dict = {}
         query_dict.update(args_to_dict(request.args))
         query_dict.update(kwargs)
-        (consult_types, total) = controller.ConsultTypeController.query_consult_types(query_dict=kwargs)
+        (consult_types, total) = controller.ConsultTypeController.query_consult_types(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
