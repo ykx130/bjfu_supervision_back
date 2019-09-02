@@ -230,7 +230,7 @@ class UserController():
         if user is None:
             raise CustomError(404, 404, '用户未找到')
         dao.User.update_user(ctx=False, username=username, data={
-            'password_hash': generate_password_hash(password=password)
+            'password': generate_password_hash(password=password)
         })
         return True
 
