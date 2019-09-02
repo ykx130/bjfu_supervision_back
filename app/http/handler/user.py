@@ -66,7 +66,7 @@ def new_user():
     }), 200
 
 
-@user_blueprint.route('/users/<string:username>/password', methods=['POST'])
+@user_blueprint.route('/users/<string:username>/password', methods=['PUT'])
 @login_required
 def change_user_password(username):
     try:
