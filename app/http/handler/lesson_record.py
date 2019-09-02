@@ -136,3 +136,20 @@ def update_lesson_record(username, term, **kwargs):
         'code': 200,
         'msg': '',
     }), 200
+
+
+@lesson_record_blueprint.route('/lesson_records/excel/export', methods=['POST'])
+@login_required
+def export_lesson_excel():
+    try:
+        filename = controller.LessonRecordController.export_lesson_record(data=request.json)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'filename': filename
+    }), 200
