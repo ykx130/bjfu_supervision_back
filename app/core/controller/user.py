@@ -85,8 +85,8 @@ class UserController():
     def query_users(cls, query_dict: dict = None, unscoped=False):
         if query_dict is None:
             query_dict = dict()
-        if current_user['is_leader'] and not current_user['is_admin']:
-            query_dict['unit'] = current_user['unit']
+        if current_user.is_leader and not current_user.is_admin:
+            query_dict['unit'] = current_user.unit
         (users, num) = dao.User.query_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(user) for user in users], num
 
