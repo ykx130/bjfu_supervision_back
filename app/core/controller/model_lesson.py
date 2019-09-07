@@ -67,6 +67,7 @@ class ModelLessonController(object):
             (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
             if num != 0:
                 raise CustomError(500, 200, 'lesson has been model lesson')
+            data['unit'] = lesson['lesson_unit']
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
                                      data={'lesson_model': status})
@@ -97,6 +98,7 @@ class ModelLessonController(object):
                 if num != 0:
                     continue
                 data['lesson_id'] = lesson_id
+                data['unit'] = lesson['lesson_unit']
                 data = cls.reformatter_insert(data=data)
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
@@ -245,6 +247,7 @@ class ModelLessonController(object):
                 lesson_id = lessons[0]['lesson_id']
                 term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
+                data['unit'] = lessons[0]['lesson_unit']
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
                     fail_lessons.append(lesson_filter)

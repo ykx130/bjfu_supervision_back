@@ -118,3 +118,54 @@ class Filter(object):
         return filter_func
 
 
+
+class NewFilter(object):
+
+    @classmethod
+    def filter_permission(cls):
+        def filter_func(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                """
+
+                :param args:
+                :param kwargs:
+                :return:
+                """
+                user = AuthController.get_current_user()
+                current_role = request.args.get('current_role')
+                query_dict = {}
+                pass
+                result = func(*args, **query_dict)
+                return result
+
+            return wrapper
+
+        return filter_func
+
+    @classmethod
+    def filter_permission_mongo(cls):
+        def filter_func(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                """
+                领导只过滤自己院的, 督导过滤自己院和自己组的
+                :param args:
+                :param kwargs:
+                :return:
+                """
+                user = AuthController.get_current_user()
+                current_role = request.args.get('current_role')
+                query_dict = {}
+                if current_role == "大组长":
+                    pass
+                elif current_role == "小组长":
+                    query_dict['group'] = ''
+                pass
+
+                result = func(*args, **query_dict)
+                return result
+
+            return wrapper
+
+        return filter_func

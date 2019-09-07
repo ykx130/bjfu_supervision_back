@@ -586,6 +586,7 @@ class NoticeLesson(db.Model):
     group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
+    unit = db.Column(db.String)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -726,6 +727,7 @@ class ModelLesson(db.Model):
     group_name = db.Column(db.String(32), default='')
     is_lock = db.Column(db.Integer, default=0) # 锁定 未锁定
     using = db.Column(db.Boolean, default=True)
+    unit = db.Column(db.String)
 
     @classmethod
     def formatter(cls, model_lesson):

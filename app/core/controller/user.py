@@ -379,6 +379,7 @@ class SupervisorController():
             raise CustomError(404, 404, 'user is not found')
         term = data.get('term', service.TermService.get_now_term()['name'])
         data['name'] = user['name']
+        data['unit']= user['unit']
         (_, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term': [term]}, unscoped=False)
         if num != 0:
             raise CustomError(500, 200, 'user has been supervisor')
@@ -480,6 +481,7 @@ class SupervisorController():
                     data['username'] = username
                     data['group_name'] = supervisor['group_name']
                     data['name'] = user['name']
+                    data['unit'] = user['unit']
                     dao.Supervisor.insert_supervisor(ctx=False, data=data)
             if ctx:
                 db.session.commit()
