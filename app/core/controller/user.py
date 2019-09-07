@@ -85,6 +85,8 @@ class UserController():
     def query_users(cls, query_dict: dict = None, unscoped=False):
         if query_dict is None:
             query_dict = dict()
+        if current_user['is_leader'] and not current_user['is_admin']:
+            query_dict['unit'] = current_user['unit']
         (users, num) = dao.User.query_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(user) for user in users], num
 
@@ -230,7 +232,7 @@ class UserController():
         if user is None:
             raise CustomError(404, 404, '用户未找到')
         dao.User.update_user(ctx=False, username=username, data={
-            'password': generate_password_hash(password=password)
+            'password': password
         })
         return True
 
