@@ -747,7 +747,7 @@ class ModelLesson(db.Model):
 
     @classmethod
     def reformatter_insert(cls, data: dict):
-        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term']
+        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term', 'unit']
         status_dict = {'推荐为好评课': 1, '待商榷': 2}
         new_data = dict()
         for key, value in data.items():
