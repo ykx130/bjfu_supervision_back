@@ -57,11 +57,12 @@ def query_raw_lessons(cursor, term=None):
         parts = term.split('-')
         if len(parts) != 3:
             raise CustomError(500, 200, 'term format is wrong')
-        lesson_year = parts[0] + parts[1]
+        lesson_year = '-'.join(parts[0:2])
         lesson_semester = parts[2]
         filter_sql = "where lesson_year= '{lesson_year}'and lesson_semester = '{lesson_semester}'".format(
             lesson_year=lesson_year, lesson_semester=lesson_semester)
         sql = " ".join([sql, filter_sql])
+    print(sql)
     cursor.execute(sql)
     datas = cursor.fetchall()
     return datas
@@ -151,7 +152,9 @@ def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_t
             lesson_time_set = set()
             lesson_times_beg = re.findall(r'.{2}', lesson_time)
             for lesson_time_beg in lesson_times_beg:
-                lesson_time_set.add(lesson_time_map[lesson_time_beg])
+                time_beg = lesson_time_map.get(lesson_time_beg, None)
+                if time_beg is not None:
+                    lesson_time_set.add(time_beg)
             for lesson_time in lesson_time_set:
                 lesson_case_data = {'lesson_id': lesson_id}
                 for k, v in raw_lesson_case.items():
@@ -209,6 +212,7 @@ def update_database(info: dict = None):
     for raw_lesson in raw_lessons:
         if raw_lesson['lesson_teacher_name'] == '':
             continue
+        print(raw_lesson['lesson_id'])
         term_name = '-'.join([raw_lesson['lesson_year'], raw_lesson['lesson_semester']]).replace(' ', '')
         term = dao.Term.get_term(term_name=term_name)
         if term is None:
