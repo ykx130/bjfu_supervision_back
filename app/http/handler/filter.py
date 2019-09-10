@@ -4,6 +4,15 @@ from app.core.services.term import TermService
 from flask import jsonify, request, g
 from app.utils import args_to_dict
 
+UserRoleMap = {
+    'admin': "管理员",
+    "grouper": "小组长",
+    "main_grouper": "大组长",
+    "leader": "院级领导",
+    "guider": "督导",
+    "teacher": "教师"
+}
+
 
 class Filter(object):
 
@@ -30,7 +39,7 @@ class Filter(object):
 
                     supervisor_role_names = ['督导', '小组长', '大组长']
 
-                    current_role = request.headers.get('CurrentRole', None)
+                    current_role = UserRoleMap.get(request.headers.get('CurrentRole', None), '教师')
                     if current_role is None or current_role not in role_names:
                         return jsonify({
                             'code': 403,
@@ -88,7 +97,7 @@ class Filter(object):
                     role_names = user.get('role_names', list())
                     supervisor_role_names = ['督导', '小组长', '大组长']
 
-                    current_role = request.headers.get('CurrentRole', None)
+                    current_role = UserRoleMap.get(request.headers.get('CurrentRole', None), '教师')
                     if current_role is None or current_role not in role_names:
                         return jsonify({
                             'code': 403,
@@ -100,14 +109,14 @@ class Filter(object):
                         term = TermService.get_now_term()['name']
                         query_dict.update({'meta.term': term})
                     if current_role == '管理员':
-                        query_dict=query_dict
+                        query_dict = query_dict
                     elif current_role == '学院领导':
                         query_dict.update({'meta.lesson.lesson_teacher_unit': user.get('unit')})
                     elif current_role in supervisor_role_names:
                         current_supervisor = SupervisorController.get_supervisor_by_username(
                             query_dict={'username': username})
                         group = current_supervisor.get('group_name')
-                        if current_role== '大组长':
+                        if current_role == '大组长':
                             query_dict = query_dict
                         elif current_role == '小组长':
                             supervisors, _ = SupervisorController.query_supervisors(query_dict={'group_name': [group]})
@@ -124,4 +133,3 @@ class Filter(object):
             return wrapper
 
         return filter_func
-
