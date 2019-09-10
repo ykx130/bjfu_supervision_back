@@ -8,7 +8,7 @@ UserRoleMap = {
     'admin': "管理员",
     "grouper": "小组长",
     "main_grouper": "大组长",
-    "leader": "院级领导",
+    "leader": "学院领导",
     "guider": "督导",
     "teacher": "教师"
 }
