@@ -276,6 +276,7 @@ class Supervisor(db.Model):
     term = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
     grouper = db.Column(db.Boolean, default=False)
+    unit = db.Column(db.String)
     main_grouper = db.Column(db.Boolean, default=False)
 
     @classmethod

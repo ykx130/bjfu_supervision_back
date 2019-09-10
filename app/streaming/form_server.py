@@ -16,7 +16,7 @@ def calculate_form_server(method, args):
     if method == 'add_form' or method == 'repulse_form':
         # 计算分布
         InterfaceService.update_page_data()
-        FormService.calculate_map(args.get('form', {}).get('bind_meta_name'))
+        FormService.calculate_map(args.get('bind_meta_name'))
 
 
 if __name__ == '__main__':

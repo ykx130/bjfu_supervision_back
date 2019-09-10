@@ -85,6 +85,8 @@ class UserController():
     def query_users(cls, query_dict: dict = None, unscoped=False):
         if query_dict is None:
             query_dict = dict()
+        if current_user.is_leader and not current_user.is_admin:
+            query_dict['unit'] = current_user.unit
         (users, num) = dao.User.query_users(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(user) for user in users], num
 
@@ -230,7 +232,7 @@ class UserController():
         if user is None:
             raise CustomError(404, 404, '用户未找到')
         dao.User.update_user(ctx=False, username=username, data={
-            'password_hash': generate_password_hash(password=password)
+            'password': password
         })
         return True
 
@@ -377,6 +379,7 @@ class SupervisorController():
             raise CustomError(404, 404, 'user is not found')
         term = data.get('term', service.TermService.get_now_term()['name'])
         data['name'] = user['name']
+        data['unit']= user['unit']
         (_, num) = dao.Supervisor.query_supervisors(query_dict={'username': [username], 'term': [term]}, unscoped=False)
         if num != 0:
             raise CustomError(500, 200, 'user has been supervisor')
@@ -478,6 +481,7 @@ class SupervisorController():
                     data['username'] = username
                     data['group_name'] = supervisor['group_name']
                     data['name'] = user['name']
+                    data['unit'] = user['unit']
                     dao.Supervisor.insert_supervisor(ctx=False, data=data)
             if ctx:
                 db.session.commit()
@@ -509,4 +513,5 @@ class GroupController():
     def query_groups(cls, query_dict):
         groups, num = dao.Group.query_groups(query_dict)
         return [cls.formatter(group) for group in groups], num
+
 

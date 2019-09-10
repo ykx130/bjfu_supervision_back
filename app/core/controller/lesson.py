@@ -45,11 +45,18 @@ class LessonController(object):
     def formater_with_level_and_model(cls, lesson:dict=None):
         if lesson['lesson_level'] == '关注课程':
             noice_lesson = dao.NoticeLesson.get_notice_lesson(query_dict={
-                'lesson_id': lesson['lesson_id']
+                'lesson_id': lesson['lesson_id'],
+                "term": lesson["term"]
             })
             lesson['group_name'] = noice_lesson['group_name']
             lesson['lesson_attention_reason'] = noice_lesson['lesson_attention_reason']
-
+        if lesson['lesson_model'] :
+            model_lesson = dao.ModelLesson.get_model_lesson(query_dict={
+                "lesson_id": lesson["lesson_id"],
+                "term": lesson["term"]
+            })
+            if model_lesson:
+                lesson["is_lock"] = model_lesson["is_lock"]
         return lesson
 
     @classmethod
@@ -211,6 +218,8 @@ class LessonController(object):
         from app.core.controller import NoticeLessonController
         if data is None:
             data = dict()
+        if 'id' in data:
+            del data['id']
         lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':lesson_id}, unscoped=False)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')

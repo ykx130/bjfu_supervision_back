@@ -15,24 +15,26 @@ def lesson_record_by_form_server(method, args):
 
     if method == 'add_form' or method == 'repulse_form':
         # 更新听课记录
+        print(args)
         _, total = dao.Form.query_forms(query_dict={
-            "username": args.get("username"),
-            "term": args.get("term")
+            "meta.guider": args.get("username"),
+            "meta.term": args.get("term")
         })
 
         _, has_submit = dao.Form.query_forms(query_dict={
-            "username": args.get("username"),
-            "term": args.get("term"),
-            "status": "已提交"
+            "meta.guider": args.get("username"),
+            "meta.term": args.get("term"),
+            "status": "已完成"
         })
 
         _, wait_submit = dao.Form.query_forms(query_dict={
-            "username": args.get("username"),
-            "term": args.get("term"),
-            "status": "未提交"
+            "meta.guider": args.get("username"),
+            "meta.term": args.get("term"),
+            "status": "待提交"
         })
-
-        dao.LessonRecord.update_lesson_record(
+        
+        print("数量 {} {} {}".format(total, has_submit, wait_submit))
+        ok=dao.LessonRecord.update_lesson_record(
             query_dict={
                 "username": args.get("username"),
                 "term": args.get("term")
@@ -42,8 +44,8 @@ def lesson_record_by_form_server(method, args):
                 "has_submitted": has_submit,
                 "total_times": total
             }
-        )
-
+        ) 
+        print("RES:{}".format(ok))
 
 @sub_kafka('user_service')
 def user_service_server(method, args):

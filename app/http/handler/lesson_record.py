@@ -11,8 +11,12 @@ from app.http.handler.filter import Filter
 @login_required
 @Filter.filter_permission()
 def find_term_lesson_records(**kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    print(kwargs)
     try:
-        (lesson_records, num) = controller.LessonRecordController.query_lesson_records_term(query_dict=kwargs)
+        (lesson_records, num) = controller.LessonRecordController.query_lesson_records_term(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -131,4 +135,21 @@ def update_lesson_record(username, term, **kwargs):
     return jsonify({
         'code': 200,
         'msg': '',
+    }), 200
+
+
+@lesson_record_blueprint.route('/lesson_records/excel/export', methods=['POST'])
+@login_required
+def export_lesson_excel():
+    try:
+        filename = controller.LessonRecordController.export_lesson_record(data=request.json)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'filename': filename
     }), 200

@@ -13,7 +13,7 @@ def find_notice_lessons(*args, **kwargs):
     query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
-        (notice_lessons, total) = controller.NoticeLessonController.query_notice_lessons(query_dict=kwargs)
+        (notice_lessons, total) = controller.NoticeLessonController.query_notice_lessons(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,

@@ -27,8 +27,11 @@ def new_lesson():
 @lesson_blueprint.route('/lessons')
 @login_required
 def get_lessons(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
     try:
-        (lessons, num) = controller.LessonController.query_lessons(query_dict=args_to_dict(request.args))
+        (lessons, num) = controller.LessonController.query_lessons(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -45,8 +48,11 @@ def get_lessons(*args, **kwargs):
 @lesson_blueprint.route('/lessons_with_case')
 @login_required
 def get_lessons_with_case(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
     try:
-        (lessons, num) = controller.LessonController.query_lessons_with_cases(query_dict=args_to_dict(request.args))
+        (lessons, num) = controller.LessonController.query_lessons_with_cases(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -63,8 +69,11 @@ def get_lessons_with_case(*args, **kwargs):
 @lesson_blueprint.route('/lesson_cases')
 @login_required
 def query_lesson_cases(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
     try:
-        (lessons, num) = controller.LessonCaseController.query_lesson_cases(query_dict=args_to_dict(request.args))
+        (lessons, num) = controller.LessonCaseController.query_lesson_cases(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
             'code': e.code,
@@ -116,8 +125,11 @@ def update_lesson(lesson_id):
 @lesson_blueprint.route('/teacher_names', methods=['GET'])
 @login_required
 def get_teacher_names(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
     try:
-        (teacher_names, total) = controller.LessonController.query_teacher_names(query_dict=args_to_dict(request.args),
+        (teacher_names, total) = controller.LessonController.query_teacher_names(query_dict=query_dict,
                                                                                  unscoped=False)
     except CustomError as e:
         return jsonify({

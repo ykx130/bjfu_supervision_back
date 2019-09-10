@@ -1,6 +1,7 @@
 import app.core.dao as dao
 from app.utils import CustomError, db
 from app.utils.Error import CustomError
+from flask_login import current_user
 import pandas
 import datetime
 import app.core.services as service
@@ -10,7 +11,9 @@ class ModelLessonController(object):
 
     @classmethod
     def formatter(cls, model_lesson):
-        lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson.get('lesson_id', 0)}, unscoped=True)
+        lesson = dao.Lesson.get_lesson(query_dict={
+            'lesson_id': model_lesson.get('lesson_id', ''),
+        }, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
@@ -35,7 +38,7 @@ class ModelLessonController(object):
         return data
 
     @classmethod
-    def get_model_lesson(cls, query_dict:dict, unscoped: bool = False):
+    def get_model_lesson(cls, query_dict: dict, unscoped: bool = False):
         model_lesson = dao.ModelLesson.get_model_lesson(query_dict=query_dict, unscoped=unscoped)
         if model_lesson is None:
             raise CustomError(404, 404, 'model_lesson not found')
@@ -64,6 +67,7 @@ class ModelLessonController(object):
             (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
             if num != 0:
                 raise CustomError(500, 200, 'lesson has been model lesson')
+            data['unit'] = lesson['lesson_unit']
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
                                      data={'lesson_model': status})
@@ -94,6 +98,7 @@ class ModelLessonController(object):
                 if num != 0:
                     continue
                 data['lesson_id'] = lesson_id
+                data['unit'] = lesson['lesson_unit']
                 data = cls.reformatter_insert(data=data)
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
@@ -242,6 +247,7 @@ class ModelLessonController(object):
                 lesson_id = lessons[0]['lesson_id']
                 term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
+                data['unit'] = lessons[0]['lesson_unit']
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
                     fail_lessons.append(lesson_filter)
@@ -294,7 +300,7 @@ class ModelLessonController(object):
                        '指定小组': 'group_name', '投票次数': 'votes', '提交次数': 'notices'}
         frame_dict = dict()
         for model_lesson in model_lessons:
-            lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':model_lesson['lesson_id']}, unscoped=True)
+            lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=True)
             if lesson is None:
                 raise CustomError(404, 404, 'lesson not found')
             for key, value in column_dict.items():

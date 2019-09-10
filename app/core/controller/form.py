@@ -72,8 +72,9 @@ class FormController(object):
         send_kafka_message(topic='form_service',
                            method='add_form',
                            term=meta.get('term', None),
+                           bind_meta_name=form_model.get('bind_meta_name', None),
                            username=meta.get('guider', None),
-                           form=form_model,
+                           form_id=form_model.get('_id', ''),
                            lesson_id=lesson_id)
         cls.push_new_form_message(form_model)
         return True
@@ -121,13 +122,18 @@ class FormController(object):
                 send_kafka_message(topic='form_service',
                                    method='repulse_form',
                                    term=form.get('meta', {}).get('term', None),
+                                   bind_meta_name=form.get('bind_meta_name', None),
                                    username=form.get('meta', {}).get('guider', None),
-                                   form=form,
+                                   form_id=form.get('_id', ''),
                                    lesson_id=lesson_id)
                 cls.push_put_back_form_message(form)
             if data.get('status') == '已提交':
                 send_kafka_message(topic='form_service',
                                    method='add_form',
+                                   term=form.get('meta', {}).get('term', None),
+                                   bind_meta_name=form.get('bind_meta_name', None),
+                                   username=form.get('meta', {}).get('guider', None),
+                                   form_id=form.get('_id', ''),
                                    lesson_id=lesson_id)
 
         return True

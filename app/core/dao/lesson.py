@@ -586,6 +586,7 @@ class NoticeLesson(db.Model):
     group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
+    unit = db.Column(db.String)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -724,7 +725,9 @@ class ModelLesson(db.Model):
     status = db.Column(db.Integer, default=2)  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
     group_name = db.Column(db.String(32), default='')
+    is_lock = db.Column(db.Integer, default=0) # 锁定 未锁定
     using = db.Column(db.Boolean, default=True)
+    unit = db.Column(db.String)
 
     @classmethod
     def formatter(cls, model_lesson):
@@ -738,12 +741,13 @@ class ModelLesson(db.Model):
             'group_name': model_lesson.group_name,
             'status': status,
             'votes': model_lesson.votes,
+            'is_lock': model_lesson.is_lock
         }
         return model_lesson_dict
 
     @classmethod
     def reformatter_insert(cls, data: dict):
-        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term']
+        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term', 'unit']
         status_dict = {'推荐为好评课': 1, '待商榷': 2}
         new_data = dict()
         for key, value in data.items():
@@ -885,3 +889,4 @@ class ModelLesson(db.Model):
             except Exception as e:
                 raise CustomError(500, 500, str(e))
         return True
+
