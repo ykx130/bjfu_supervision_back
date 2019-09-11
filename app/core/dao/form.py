@@ -151,6 +151,7 @@ class WorkPlan(db.Model):
     form_meta_name = db.Column(db.String(20))
     form_meta_version = db.Column(db.String(20))
     status = db.Column(db.String(20))
+    lesson_attribute = db.Column(db.String(32))
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -163,7 +164,8 @@ class WorkPlan(db.Model):
                 'term': work_plan.term,
                 'form_meta_name': work_plan.form_meta_name,
                 'form_meta_version': work_plan.form_meta_version,
-                'status': work_plan.status
+                'status': work_plan.status,
+                'lesson_attribute' :work_plan.lesson_attribute
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
