@@ -296,7 +296,7 @@ class Lesson(db.Model):
                        'lesson_year': lesson.lesson_year, 'lesson_type': lesson.lesson_type,
                        'lesson_class': lesson.lesson_class, 'lesson_grade': lesson.lesson_grade,
                        'lesson_model': lesson.lesson_model, 'term': lesson.term, 'notices': lesson.notices,
-                       'raw_lesson_id': lesson.raw_lesson_id, 'guiders': lesson.guiders}
+                       'raw_lesson_id': lesson.raw_lesson_id, }
         return lesson_dict
 
     @classmethod
@@ -742,7 +742,8 @@ class ModelLesson(db.Model):
             'group_name': model_lesson.group_name,
             'status': status,
             'votes': model_lesson.votes,
-            'is_lock': model_lesson.is_lock
+            'is_lock': model_lesson.is_lock,
+            'guiders': model_lesson.guiders
         }
         return model_lesson_dict
 
