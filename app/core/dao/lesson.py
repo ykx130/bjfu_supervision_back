@@ -296,7 +296,7 @@ class Lesson(db.Model):
                        'lesson_year': lesson.lesson_year, 'lesson_type': lesson.lesson_type,
                        'lesson_class': lesson.lesson_class, 'lesson_grade': lesson.lesson_grade,
                        'lesson_model': lesson.lesson_model, 'term': lesson.term, 'notices': lesson.notices,
-                       'raw_lesson_id': lesson.raw_lesson_id}
+                       'raw_lesson_id': lesson.raw_lesson_id, 'guiders': lesson.guiders}
         return lesson_dict
 
     @classmethod
