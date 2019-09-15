@@ -57,6 +57,7 @@ class LessonController(object):
             })
             if model_lesson:
                 lesson["is_lock"] = model_lesson["is_lock"]
+                lesson["is_lock"] = model_lesson["guiders"]
         return lesson
 
     @classmethod
