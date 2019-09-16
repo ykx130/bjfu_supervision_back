@@ -48,8 +48,9 @@ class LessonController(object):
                 'lesson_id': lesson['lesson_id'],
                 "term": lesson["term"]
             })
-            lesson['group_name'] = noice_lesson['group_name']
-            lesson['lesson_attention_reason'] = noice_lesson['lesson_attention_reason']
+            if noice_lesson:
+                lesson['group_name'] = noice_lesson['group_name']
+                lesson['lesson_attention_reason'] = noice_lesson['lesson_attention_reason']
         if lesson['lesson_model'] :
             model_lesson = dao.ModelLesson.get_model_lesson(query_dict={
                 "lesson_id": lesson["lesson_id"],
