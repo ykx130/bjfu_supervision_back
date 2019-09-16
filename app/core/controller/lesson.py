@@ -56,8 +56,9 @@ class LessonController(object):
                 "term": lesson["term"]
             })
             if model_lesson:
+                lesson['group_name'] = model_lesson['group_name']
                 lesson["is_lock"] = model_lesson["is_lock"]
-                lesson["is_lock"] = model_lesson["guiders"]
+                lesson["guiders"] = model_lesson["guiders"]
         return lesson
 
     @classmethod
