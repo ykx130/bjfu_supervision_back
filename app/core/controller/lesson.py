@@ -205,7 +205,7 @@ class LessonController(object):
             query_dict = dict()
         query_dict = cls.reformatter_insert(query_dict)
         (lessons, num) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=unscoped)
-        return [cls.formatter(lesson) for lesson in lessons], num
+        return [cls.formater_with_level_and_model(lesson) for lesson in lessons], num
 
     @classmethod
     def query_lessons_with_cases(cls, query_dict: dict = None, unscoped: bool = False):
