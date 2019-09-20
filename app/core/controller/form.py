@@ -1,11 +1,19 @@
+'''
+@Description: In User Settings Edit
+@Author: your name
+@Date: 2019-09-20 17:42:33
+@LastEditTime: 2019-09-21 17:27:05
+@LastEditors: Please set LastEditors
+'''
 import app.core.dao as dao
 from app.utils.Error import CustomError
 from app.utils.kafka import send_kafka_message
 from app.core.services import NoticeService
+import datetime
 
 from app import redis_cli
 import json
-
+import pandas
 
 class FormController(object):
 
@@ -151,3 +159,67 @@ class FormController(object):
             'item_map': item_map,
             'word_cloud': word_cloud
         }
+    @classmethod
+    def export_forms_excel(cls,data:dict=None):
+        if data is None:
+            data = dict()
+        forms, num = dao.Form.query_forms(
+            query_dict={
+                'meta.term': data['term'],
+                'bind_meta_name': data['bind_meta_name']
+            },
+            foramtter=dao.Form.formatter_total
+            )
+        meta_form_dict = {'当前学期':'term' ,'督导姓名':'guider_name','填表时间':'created_at'}
+                     # '评价状态':'status''关注原因':''
+        lesson_form_dict={'任课教师': 'lesson_teacher_name',	'教师所在学院':'lesson_teacher_unit',
+                      '上课班级':'lesson_class','上课地点':'lesson_room','听课时间':'lesson_date',
+                      '听课节次':'lesson_times','课程名称':'lesson_name','章节目录':'content'}
+        frame_dict = dict()
+        value_form_dict=dict()
+        for form in forms:
+            for key, value in meta_form_dict.items():
+                excel_value = form['meta'].get(meta_form_dict[key]) 
+                if key not in frame_dict:
+                    frame_dict[key] = [excel_value]
+                else:
+                    frame_dict[key].append(excel_value)
+            frame_dict['评价状态'] = form['status']
+            for key, value in lesson_form_dict.items():
+                lesson_value = form['meta']['lesson'].get(lesson_form_dict[key]) 
+                if key not in frame_dict:
+                    frame_dict[key] = [lesson_value]
+                else:
+                    frame_dict[key].append(lesson_value)
+            for meta_k in form:
+                if meta_k=='values':
+                    values_form_list=form['values']
+                    l=len(values_form_list)
+                    for i in range(l):
+                        if values_form_list[i]['item_type']=='radio_option':
+                            key=values_form_list[i]['title']
+                            #val=values_form_list[i]['payload']['options'][values_form_list[i]['value']-1]['label']
+                            p_list = values_form_list[i]['payload']['options']
+                            if values_form_list[i]['value']=='':
+                                val=''
+                            else:
+                                for k in range(len(p_list)):
+                                    if p_list[k]['value']==values_form_list[i]['value']:
+                                        val=p_list[k]['label']
+                            if key not in value_form_dict:
+                                value_form_dict[key] = [val]
+                            else:
+                                value_form_dict[key].append(val)
+            frame_dict.update(value_form_dict)
+            #from ipdb import set_trace
+            #set_trace()
+        try:
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123',
+                           index=False, header=True)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return filename

@@ -1,3 +1,10 @@
+'''
+@Description: In User Settings Edit
+@Author: your name
+@Date: 2019-09-20 17:42:33
+@LastEditTime: 2019-09-21 11:04:49
+@LastEditors: Please set LastEditors
+'''
 import app.core.controller as controller
 from flask_pymongo import ObjectId
 from flask import jsonify, request
@@ -129,3 +136,19 @@ def get_my_forms():
 @login_required
 def get_form_map(name):
     return jsonify(controller.FormController.get_form_map(name))
+
+@form_blueprint.route('/form/excel/export', methods=['POST'])
+@login_required
+def export_forms_excel():
+    try:
+        filename = controller.FormController.export_forms_excel(data=request.json)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'filename': filename
+    }), 200

@@ -1,3 +1,10 @@
+'''
+@Description: In User Settings Edit
+@Author: your name
+@Date: 2019-09-21 11:25:53
+@LastEditTime: 2019-09-21 11:32:28
+@LastEditors: Please set LastEditors
+'''
 from app.utils.mysql import db
 import app.utils.url_condition.url_condition_mysql as mysql_url_condition
 import app.utils.url_condition.url_condition_mongodb as mongodb_url_condition
@@ -115,7 +122,7 @@ class FormMeta(object):
         datas = mongodb_url_condition.sort_limit(datas, url_condition.sort_limit_dict)
         paginate = mongodb_url_condition.Paginate(datas, url_condition.page_dict)
         datas = paginate.data_page
-        return [cls.formatter_simple(data) for data in datas], paginate.total
+        return [cls.formatter_total(data) for data in datas], paginate.total
 
     @classmethod
     def insert_form_meta(cls, data: dict = None):
@@ -385,7 +392,9 @@ class Form(object):
         return cls.formatter_total(data)
 
     @classmethod
-    def query_forms(cls, query_dict: dict = None, unscoped: bool = False):
+    def query_forms(cls, query_dict: dict = None, unscoped: bool = False, foramtter=None):
+        if foramtter is None:
+            foramtter = cls.formatter_simple
         from app.utils.mongodb import mongo
         if query_dict is None:
             query_dict = dict()
@@ -408,7 +417,7 @@ class Form(object):
         datas = mongodb_url_condition.sort_limit(datas, url_condition.sort_limit_dict)
         paginate = mongodb_url_condition.Paginate(datas, url_condition.page_dict)
         datas = paginate.data_page
-        return [cls.formatter_simple(data=data) for data in datas], paginate.total
+        return [foramtter(data=data) for data in datas], paginate.total
 
     @classmethod
     def insert_form(cls, data: dict = None):
