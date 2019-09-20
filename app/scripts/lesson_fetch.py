@@ -1,6 +1,6 @@
 import app.core.dao as dao
 import pymysql
-from app.utils.misc import convert_string_to_datetime
+from app.utils.misc import convert_string_to_datetime, convert_datetime_to_string
 from app.utils.Error import CustomError
 import app.core.services as service
 import json
@@ -23,7 +23,8 @@ def lesson_week_list(lesson_week):
         if len(weeks) == 2:
             week_begin = int(weeks[0])
             week_end = int(weeks[1])
-            [lesson_weeks.append(str(week)) for week in range(week_begin, week_end + 1)]
+            [lesson_weeks.append(str(week))
+             for week in range(week_begin, week_end + 1)]
         else:
             lesson_weeks.append(weeks[0])
     return lesson_weeks
@@ -76,8 +77,10 @@ def format_raw_lesson(data):
     data['lesson_teacher_unit'] = teacher_units
     lesson_id = data['lesson_id']
     data['raw_lesson_id'] = lesson_id
-    term_name = '-'.join([data['lesson_year'], data['lesson_semester']]).replace(' ', '')
-    data['lesson_id'] = [lesson_id + teacher_id + term_name.replace('-', '') for teacher_id in teacher_ids]
+    term_name = '-'.join([data['lesson_year'],
+                          data['lesson_semester']]).replace(' ', '')
+    data['lesson_id'] = [lesson_id + teacher_id +
+                         term_name.replace('-', '') for teacher_id in teacher_ids]
     lesson_datas = list()
     for index in range(len(teachers)):
         lesson_data = dict()
@@ -98,7 +101,8 @@ def format_raw_lesson(data):
 
 
 def update_lesson(query_dict: dict, data: dict):
-    not_allow_column = ['lesson_model', 'notices', 'lesson_level', 'lesson_state']
+    not_allow_column = ['lesson_model',
+                        'notices', 'lesson_level', 'lesson_state']
     new_data = dict()
     for key, value in data.items():
         if key not in not_allow_column:
@@ -118,7 +122,8 @@ def insert_term(term_name):
         end_year = parts[1]
         begin_time = begin_year + '-02-14'
         end_time = end_year + '-09-01'
-    term_data = {'name': term_name, 'begin_time': begin_time, 'end_time': end_time}
+    term_data = {'name': term_name,
+                 'begin_time': begin_time, 'end_time': end_time}
     dao.Term.insert_term(ctx=True, data=term_data)
     term = dao.Term.get_term(term_name=term_name)
     return term
@@ -168,7 +173,8 @@ def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_t
                         lesson_case_data['lesson_time'] = lesson_time
                         continue
                     lesson_case_data[k] = v
-                date = week_to_date(term_begin_time, week, lesson_case_data['lesson_weekday'])
+                date = week_to_date(term_begin_time, week,
+                                    lesson_case_data['lesson_weekday'])
                 lesson_case_data['lesson_date'] = date
                 lesson_case_datas.append(lesson_case_data)
     return lesson_case_datas
@@ -176,7 +182,7 @@ def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_t
 
 def insert_lesson(data: dict):
     dao.Lesson.insert_lesson(data=data)
-    lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':data['lesson_id']})
+    lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': data['lesson_id']})
     return lesson
 
 
@@ -198,10 +204,8 @@ def if_has_lesson(query_dict: dict):
 
 def update_database(info: dict = None):
     lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
-                       '06': '0607',
-                       '07': '0607', '08': '0809', '09': '0809', '10': '1011', '11': '1011',
-                       '12': '12',
-                       '13': '13'}
+                       '06': '0607', '07': '0607', '08': '0809', '09': '0809', '10': '10',
+                       '11': '1112', '12': '1112', '13': '13', '14': '14'}
 
     cursor = get_cursor(info=info)
 
@@ -210,7 +214,8 @@ def update_database(info: dict = None):
     for raw_lesson in raw_lessons:
         if raw_lesson['lesson_teacher_name'] == '':
             continue
-        term_name = '-'.join([raw_lesson['lesson_year'], raw_lesson['lesson_semester']]).replace(' ', '')
+        term_name = '-'.join([raw_lesson['lesson_year'],
+                              raw_lesson['lesson_semester']]).replace(' ', '')
         term = dao.Term.get_term(term_name=term_name)
         if term is None:
             term = insert_term(term_name=term_name)
@@ -225,7 +230,8 @@ def update_database(info: dict = None):
                                           'lesson_class': [lesson_data['lesson_class']]}, data=lesson_data)
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
-            new_lesson = dao.Lesson.get_lesson(query_dict={'lesson_id':lesson_data['lesson_id']})
+            new_lesson = dao.Lesson.get_lesson(
+                query_dict={'lesson_id': lesson_data['lesson_id']})
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
                                                            teacher_name=lesson_data['lesson_teacher_name'])
             del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})

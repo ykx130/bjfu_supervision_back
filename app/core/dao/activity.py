@@ -1,12 +1,14 @@
 from app.utils.mysql import db
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
+from app.utils.misc import convert_string_to_datetime, convert_datetime_to_string
 from datetime import datetime
 
 
 class Activity(db.Model):
     __tablename__ = 'activities'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    id = db.Column(db.Integer, primary_key=True,
+                   autoincrement=True, index=True)
     name = db.Column(db.String(64), default='')
     teacher = db.Column(db.String(64), default='')
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
@@ -40,8 +42,8 @@ class Activity(db.Model):
                 'id': activity.id,
                 'name': activity.name,
                 'teacher': activity.teacher,
-                'start_time': activity.start_time,
-                'end_time': activity.end_time,
+                'start_time': convert_datetime_to_string(activity.start_time),
+                'end_time': convert_datetime_to_string(activity.end_time),
                 'place': activity.place,
                 'state': activity.state,
                 'information': activity.information,
@@ -49,9 +51,9 @@ class Activity(db.Model):
                 'attend_num': activity.attend_num,
                 'remainder_num': activity.remainder_num,
                 'term': activity.term,
-                'apply_start_time': activity.apply_start_time,
-                'apply_end_time': activity.apply_end_time,
-                'apply_state': activity.apply_state
+                'apply_start_time': convert_datetime_to_string(activity.apply_start_time),
+                'apply_end_time': convert_datetime_to_string(activity.apply_end_time),
+                'apply_state': convert_datetime_to_string(activity.apply_state)
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -66,7 +68,8 @@ class Activity(db.Model):
             query = query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            total = count_query(query, url_condition.filter_dict,
+                                url_condition.sort_limit_dict, Activity)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -110,7 +113,8 @@ class Activity(db.Model):
             query = query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
             (activities, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -123,7 +127,8 @@ class Activity(db.Model):
         query = Activity.query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
             (activities, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -147,7 +152,8 @@ class Activity(db.Model):
         query = Activity.query.filter(Activity.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, Activity)
             (activities, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -166,7 +172,8 @@ class Activity(db.Model):
 
 class ActivityUser(db.Model):
     __tablename__ = 'activity_users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    id = db.Column(db.Integer, primary_key=True,
+                   autoincrement=True, index=True)
     username = db.Column(db.String(64), default='')
     activity_id = db.Column(db.Integer, default=-1)
     state = db.Column(db.String(16), default='')
@@ -207,7 +214,8 @@ class ActivityUser(db.Model):
             query = query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            total = count_query(query, url_condition.filter_dict,
+                                url_condition.sort_limit_dict, ActivityUser)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
@@ -251,8 +259,10 @@ class ActivityUser(db.Model):
             query = query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
-            (activity_users, total) = page_query(query, url_condition.page_dict)
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            (activity_users, total) = page_query(
+                query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [cls.formatter(activity_user) for activity_user in activity_users], total
@@ -264,8 +274,10 @@ class ActivityUser(db.Model):
         query = ActivityUser.query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
-            (activity_users, total) = page_query(query, url_condition.page_dict)
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            (activity_users, total) = page_query(
+                query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for activity_user in activity_users:
@@ -288,8 +300,10 @@ class ActivityUser(db.Model):
         query = ActivityUser.query.filter(ActivityUser.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
-            (activity_users, total) = page_query(query, url_condition.page_dict)
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUser)
+            (activity_users, total) = page_query(
+                query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for activity_user in activity_users:
