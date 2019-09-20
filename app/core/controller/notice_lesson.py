@@ -1,3 +1,10 @@
+'''
+@Description: In User Settings Edit
+@Author: your name
+@Date: 2019-09-20 16:59:08
+@LastEditTime: 2019-09-20 17:01:04
+@LastEditors: Please set LastEditors
+'''
 import app.core.dao as dao
 from app.utils import CustomError, db
 from app import redis_cli
@@ -238,6 +245,18 @@ class NoticeLessonController(object):
 
     @classmethod
     def import_lesson_excel(cls, ctx: bool = True, data=None):
+        """[导入excel 返回失败的excel列表]
+        
+        Keyword Arguments:
+            ctx {bool} -- [description] (default: {True})
+            data {[type]} -- [description] (default: {None})
+        
+        Raises:
+            CustomError: [description]
+        
+        Returns:
+            [type] -- [description]
+        """
         if 'filename' in data.files:
             from app import basedir
             filename = basedir + '/static/' + \
@@ -247,31 +266,31 @@ class NoticeLessonController(object):
             df = pandas.read_excel(filename)
         else:
             raise CustomError(500, 200, 'file must be given')
-        column_dict = {'课程名称': 'lesson_name', '开课学年': 'lesson_year',
-                       '开课学期': 'lesson_semester' '任课教师所在学院': 'lesson_teacher_unit',
+        column_dict = {'开课学年': 'lesson_year',
+                       '开课学期': 'lesson_semester', 
                        '指定小组': 'group_name', '关注原因': 'lesson_attention_reason'}
         filter_list = ['lesson_teacher_name', 'lesson_semester', 'lesson_year']
         row_num = df.shape[0]
         fail_lessons = list()
-        try:
-            for i in range(0, row_num):
-                lesson_filter = dict()
-                notice_lesson_data = dict()
-                for col_name_c, col_name_e in column_dict.items():
-                    notice_lesson_data[col_name_e] = str(
-                        df.iloc[i][col_name_c])
-                    if col_name_e in filter_list:
-                        lesson_filter[col_name_e] = [
-                            str(df.iloc[i][col_name_c])]
-                (lessons, total) = dao.Lesson.query_lessons(
-                    query_dict=lesson_filter, unscoped=False)
-                if total == 0:
-                    fail_lessons.append(lesson_filter)
-                    continue
-                lesson_id = lessons[0]['lesson_id']
-                term = lessons[0]['term']
+        for i in range(0, row_num):
+            lesson_filter = dict()
+            notice_lesson_data = dict()
+            for col_name_c, col_name_e in column_dict.items():
+                notice_lesson_data[col_name_e] = str(
+                    df.iloc[i][col_name_c])
+                if col_name_e in filter_list:
+                    lesson_filter[col_name_e] = [
+                        str(df.iloc[i][col_name_c])]
+            (lessons, total) = dao.Lesson.query_lessons(
+                query_dict=lesson_filter, unscoped=False)
+            if total == 0:
+                fail_lessons.append(lesson_filter)
+                continue
+            for lesson in lessons:
+                lesson_id = lesson['lesson_id']
+                term = lesson['term']
                 notice_lesson_data['lesson_id'] = lesson_id
-                notice_lesson_data['unit'] = lessons[0]['lesson_unit']
+                notice_lesson_data['unit'] = lesson['lesson_unit']
 
                 (_, num) = dao.NoticeLesson.query_notice_lessons(
                     query_dict={'lesson_id': [lesson_id]}, unscoped=False)
@@ -280,22 +299,15 @@ class NoticeLessonController(object):
                     continue
                 notice_lesson_data['term'] = term
                 try:
-                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
-                                             data={'lesson_level': '关注课程'})
                     dao.NoticeLesson.insert_notice_lesson(
                         ctx=False, data=notice_lesson_data)
+                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                                             data={'lesson_level': '关注课程'})
                 except:
                     fail_lessons.append(lesson_filter)
                     continue
             if ctx:
                 db.session.commit()
-        except Exception as e:
-            if ctx:
-                db.session.rollback()
-            if isinstance(e, CustomError):
-                raise e
-            else:
-                raise CustomError(500, 500, str(e))
         file_path = None
         if len(fail_lessons) == 0:
             frame_dict = {}
