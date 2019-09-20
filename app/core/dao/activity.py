@@ -53,7 +53,7 @@ class Activity(db.Model):
                 'term': activity.term,
                 'apply_start_time': convert_datetime_to_string(activity.apply_start_time),
                 'apply_end_time': convert_datetime_to_string(activity.apply_end_time),
-                'apply_state': convert_datetime_to_string(activity.apply_state)
+                'apply_state': activity.apply_state
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
