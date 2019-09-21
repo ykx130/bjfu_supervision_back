@@ -269,7 +269,7 @@ class NoticeLessonController(object):
         column_dict = {'开课学年': 'lesson_year',
                        '开课学期': 'lesson_semester', 
                        '指定小组': 'group_name', '关注原因': 'lesson_attention_reason'}
-        filter_list = ['lesson_teacher_name', 'lesson_semester', 'lesson_year']
+        filter_list = {'任课教师姓名': 'lesson_teacher_name', '开课学期': 'lesson_semester', '开课学年': 'lesson_year'}
         row_num = df.shape[0]
         fail_lessons = list()
         for i in range(0, row_num):
@@ -278,9 +278,10 @@ class NoticeLessonController(object):
             for col_name_c, col_name_e in column_dict.items():
                 notice_lesson_data[col_name_e] = str(
                     df.iloc[i][col_name_c])
-                if col_name_e in filter_list:
-                    lesson_filter[col_name_e] = [
-                        str(df.iloc[i][col_name_c])]
+            for col_name_c , col_name_e in filter_list.items():
+                lesson_filter[col_name_e] = [
+                    str(df.iloc[i][col_name_c])]
+            print(lesson_filter)
             (lessons, total) = dao.Lesson.query_lessons(
                 query_dict=lesson_filter, unscoped=False)
             if total == 0:
@@ -291,7 +292,6 @@ class NoticeLessonController(object):
                 term = lesson['term']
                 notice_lesson_data['lesson_id'] = lesson_id
                 notice_lesson_data['unit'] = lesson['lesson_unit']
-
                 (_, num) = dao.NoticeLesson.query_notice_lessons(
                     query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
