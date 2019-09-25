@@ -4,14 +4,17 @@ import app.core.controller as controller
 from flask_login import login_required
 from app.http.handler.filter import Filter
 from app.utils import CustomError, args_to_dict
+from app.http.handler.filter import Filter
 
 
 @model_lesson_blueprint.route('/model_lessons')
 @login_required
+@Filter.filter_permission()
 def find_model_lessons(*args, **kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
+    print(query_dict)
     try:
         (model_lessons, total) = controller.ModelLessonController.query_model_lessons(query_dict=query_dict)
     except CustomError as e:
