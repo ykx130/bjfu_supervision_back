@@ -9,6 +9,7 @@ from app.http.handler.filter import Filter
 
 @user_blueprint.route('/users')
 @login_required
+@Filter.fiilter_leader_unit_permission()
 def query_users(*args, **kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))
@@ -30,7 +31,6 @@ def query_users(*args, **kwargs):
 
 @user_blueprint.route('/users/<string:username>')
 @login_required
-@Filter.filter_permission()
 def get_user(username, *args, **kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))

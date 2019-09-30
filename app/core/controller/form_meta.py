@@ -167,10 +167,11 @@ class WorkPlanController(object):
         results = list()
         for work_plan in work_plans:
             form_meta = dao.FormMeta.get_form_meta(query_dict={'name': work_plan['form_meta_name'],
-                                                               'version': work_plan['form_meta_version']},
+                                                               'version': work_plan['form_meta_version'],},
                                                    unscoped=unscoped)
             if form_meta is None:
                 raise CustomError(404, 404, 'form_meta not found')
             work_plan['form_meta'] = form_meta
             results.append(work_plan)
+        results.sort(key=lambda x: x.get('form_meta', {}).get('order', 1) )
         return results, num

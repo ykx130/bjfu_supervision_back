@@ -300,7 +300,10 @@ class ModelLessonController(object):
                        '指定小组': 'group_name', '投票次数': 'votes', '提交次数': 'notices'}
         frame_dict = dict()
         for model_lesson in model_lessons:
-            lesson = dao.Lesson.get_lesson(query_dict={'lesson_id': model_lesson['lesson_id']}, unscoped=True)
+            lesson = dao.Lesson.get_lesson(query_dict={
+                'lesson_id': model_lesson['lesson_id'], 
+                'term': model_lesson['term']
+            }, unscoped=True)
             if lesson is None:
                 raise CustomError(404, 404, 'lesson not found')
             for key, value in column_dict.items():

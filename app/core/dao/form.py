@@ -59,6 +59,7 @@ class FormMeta(object):
                 'version': data.get('version', None),
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
+                'order': data.get('order', 1),
                 'pages': data.get('pages', ['正面']),
             }
         except Exception as e:
@@ -76,6 +77,7 @@ class FormMeta(object):
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
                 'items': data.get('items', []),
+                'order': data.get('order', 1),
                 'pages': data.get('pages', ['正面']),
             }
         except Exception as e:

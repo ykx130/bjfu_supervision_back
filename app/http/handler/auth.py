@@ -10,17 +10,8 @@ from app.utils import CustomError
 def login():
     username = request.json.get("username")
     password = request.json.get("password")
-    code = request.json.get("code",'')
-    uuid = request.json.get('uuid', '')
 
     try:
-        ok = service.CaptchaService.verify(uuid, code)
-        if not ok:
-            return jsonify({
-                "code": 500,
-                "msg": "验证码错误"
-            })
-
         controller.AuthController.login(username=username, password=password)
     except CustomError as e:
         return jsonify({
