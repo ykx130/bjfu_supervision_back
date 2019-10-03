@@ -1,3 +1,10 @@
+'''
+@Description: In User Settings Edit
+@Author: your name
+@Date: 2019-09-30 20:45:11
+@LastEditTime: 2019-10-03 21:21:41
+@LastEditors: Please set LastEditors
+'''
 import app.core.dao as dao
 from app.utils import CustomError, db
 from app.utils.Error import CustomError
@@ -226,9 +233,9 @@ class ModelLessonController(object):
             df = pandas.read_excel(filename)
         else:
             raise CustomError(500, 200, 'file must be given')
-        column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '学分': 'lesson_grade', '开课学年': 'lesson_year',
-                       '开课学期': 'lesson_semester', '任课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
-                       '指定小组': 'group_name', '投票次数': 'votes', '提交次数': 'notices'}
+        column_dict = {'课程名称': 'lesson_name', '课程性质': 'lesson_attribute', '开课学年': 'lesson_year',
+                       '开课学期': 'lesson_semester', '授课教师名称': 'lesson_teacher_name', '任课教师所在学院': 'lesson_teacher_unit',
+                       '听课督导组': 'group_name'}
         filter_list = ['lesson_name', 'lesson_teacher_name', 'lesson_semester', 'lesson_year']
         row_num = df.shape[0]
         fail_lessons = list()
@@ -237,9 +244,10 @@ class ModelLessonController(object):
                 lesson_filter = dict()
                 model_lesson_data = dict()
                 for col_name_c, col_name_e in column_dict.items():
-                    model_lesson_data[col_name_e] = str(df.iloc[i][col_name_c])
+                    model_lesson_data[col_name_e] = str(df.iloc[i].get(col_name_c,''))
                     if col_name_e in filter_list:
-                        lesson_filter[col_name_e] = [str(df.iloc[i][col_name_c])]
+                        lesson_filter[col_name_e] = [str(model_lesson_data[col_name_e])]
+                
                 lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
                     fail_lessons.append(lesson_filter)
@@ -247,7 +255,7 @@ class ModelLessonController(object):
                 lesson_id = lessons[0]['lesson_id']
                 term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
-                data['unit'] = lessons[0]['lesson_unit']
+                model_lesson_data['unit'] = lessons[0]['lesson_unit']
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
                     fail_lessons.append(lesson_filter)
@@ -265,10 +273,7 @@ class ModelLessonController(object):
         except Exception as e:
             if ctx:
                 db.session.rollback()
-            if isinstance(e, CustomError):
-                raise e
-            else:
-                raise CustomError(500, 500, str(e))
+            raise e
         file_path = None
         if len(fail_lessons) == 0:
             frame_dict = {}
