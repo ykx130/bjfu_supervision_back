@@ -2,7 +2,7 @@
 @Description: In User Settings Edit
 @Author: your name
 @Date: 2019-09-30 20:45:11
-@LastEditTime: 2019-10-03 21:21:41
+@LastEditTime: 2019-10-05 10:12:57
 @LastEditors: Please set LastEditors
 '''
 import app.core.dao as dao
@@ -250,24 +250,23 @@ class ModelLessonController(object):
                 
                 lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
-                    fail_lessons.append(lesson_filter)
+                    fail_lessons.append({**lesson_filter, 'reason': '没有课程'})
                     continue
                 lesson_id = lessons[0]['lesson_id']
                 term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
                 model_lesson_data['unit'] = lessons[0]['lesson_unit']
-                (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
+                (_, num) = dao.ModelLesson.query_model_lessons(query_dict={
+                    'lesson_id': [lesson_id],
+                    'term': term
+                    }, unscoped=False)
                 if num != 0:
-                    fail_lessons.append(lesson_filter)
+                    fail_lessons.append({**lesson_filter, 'reason': '好评课已经存在'})
                     continue
                 model_lesson_data['term'] = term
-                try:
-                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
-                                             data={'lesson_model': '推荐课'})
-                    dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
-                except:
-                    fail_lessons.append(lesson_filter)
-                    continue
+                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                                            data={'lesson_model': '推荐课'})
+                dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -275,7 +274,7 @@ class ModelLessonController(object):
                 db.session.rollback()
             raise e
         file_path = None
-        if len(fail_lessons) == 0:
+        if fail_lessons:
             frame_dict = {}
             for file_lesson in fail_lessons:
                 for key, value in column_dict.items():
@@ -290,7 +289,7 @@ class ModelLessonController(object):
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             fullname = basedir + filename
             frame.to_excel(fullname, sheet_name='123', index=False, header=True)
-        return file_path
+        return fail_lessons
 
     @classmethod
     def export_lesson_excel(cls, data: dict = None):

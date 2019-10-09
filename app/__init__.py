@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify    
 from flask_sqlalchemy import SQLAlchemy
 import os
 from app.utils.mongodb import mongo
@@ -17,6 +17,7 @@ basedir = os.path.abspath(os.getcwd())
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = '/401'
+
 redis_cli = get_redis_con(config['default'].REDIS_URL)
 
 
@@ -72,6 +73,15 @@ def create_app(config_name):
 
 app = create_app('default')
 app.logger.addHandler(consoleHandler)
+
+
+
+@login_manager.unauthorized_handler
+def user_unauthorized_handler():
+    return jsonify({
+        'msg': '未登录请登陆',
+        'code': 401
+    }), 401
 
 
 if __name__ != '__main__':

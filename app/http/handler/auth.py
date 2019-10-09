@@ -5,7 +5,6 @@ import app.core.controller as controller
 import app.core.services as service
 from app.utils import CustomError
 
-
 @user_blueprint.route("/login", methods=["POST"])
 def login():
     username = request.json.get("username")

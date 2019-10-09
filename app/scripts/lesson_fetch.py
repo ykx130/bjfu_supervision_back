@@ -1,3 +1,10 @@
+'''
+@Description: In User Settings Edit
+@Author: your name
+@Date: 2019-10-03 21:09:28
+@LastEditTime: 2019-10-05 00:23:21
+@LastEditors: Please set LastEditors
+'''
 import app.core.dao as dao
 import pymysql
 from app.utils.misc import convert_string_to_datetime, convert_datetime_to_string
@@ -8,6 +15,8 @@ from datetime import datetime, timedelta
 import re
 import argparse
 from app import app
+from concurrent.futures import ThreadPoolExecutor
+
 
 ctx = app.app_context()
 ctx.push()
@@ -210,10 +219,11 @@ def update_database(info: dict = None):
     cursor = get_cursor(info=info)
 
     raw_lessons = query_raw_lessons(cursor, info.get('term', None))
-
-    for raw_lesson in raw_lessons:
+    
+    def update_one_lesson(raw_lesson):
+        print(raw_lesson['lesson_teacher_name'])
         if raw_lesson['lesson_teacher_name'] == '':
-            continue
+            return
         term_name = '-'.join([raw_lesson['lesson_year'],
                               raw_lesson['lesson_semester']]).replace(' ', '')
         term = dao.Term.get_term(term_name=term_name)
@@ -222,14 +232,18 @@ def update_database(info: dict = None):
 
         term_begin_time = term['begin_time']
         lesson_datas = format_raw_lesson(raw_lesson)
+        print("D",lesson_datas)
 
         for lesson_data in lesson_datas:
+
             if if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
                                          'lesson_class': [lesson_data['lesson_class']]}):
+            
                 update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
                                           'lesson_class': [lesson_data['lesson_class']]}, data=lesson_data)
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
+                print("新增课程")
             new_lesson = dao.Lesson.get_lesson(
                 query_dict={'lesson_id': lesson_data['lesson_id']})
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
@@ -241,22 +255,26 @@ def update_database(info: dict = None):
                 lesson_case_datas = format_raw_lesson_case(raw_lesson_case=raw_lesson_case_data,
                                                            lesson_id=new_lesson['id'], term_begin_time=term_begin_time,
                                                            lesson_time_map=lesson_time_map)
+                print("新增上课地点：{}".format(len(lesson_case_datas)))
                 for lesson_case_data in lesson_case_datas:
                     insert_lesson_case(data=lesson_case_data)
-
+    for raw_lesson in raw_lessons:
+        print('No', raw_lesson['lesson_name'])
+        update_one_lesson(raw_lesson)
+ 
     return True
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--term', '-t', help='请输入学期', default=None)
+    parser.add_argument('--term', '-t', help='请输入学期', default='2019-2020-1')
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
     parser.add_argument('--user', '-u', help='请输入用户名', default='root')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')
-    parser.add_argument('--db', '-d', help='请输入数据库名', default='old_super')
+    parser.add_argument('--db', '-d', help='请输入数据库名', default='raw_supervision')
     parser.add_argument('--charset', '-c', help='请输入编码格式', default='utf8')
     args = parser.parse_args()
     info = {'term': args.term, 'host': args.host, 'user': args.user, 'passwd': args.passwd, 'db': args.db,
             'charset': args.charset}
-    print('begin')
+    print('begin {}'.format(info))
     update_database(info=info)
