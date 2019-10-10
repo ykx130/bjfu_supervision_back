@@ -260,6 +260,48 @@ class LessonRecord(db.Model):
         return True
 
 
+class RawLesson(db.Model):
+    __tablename__ = 'raw_lessons'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_id = db.Column(db.String(32), default='')  # 被关注课程的id
+    lesson_attribute = db.Column(db.String(8), default='')
+    lesson_state = db.Column(db.String(8), default='')
+    lesson_level = db.Column(db.String(8), default='')
+    lesson_name = db.Column(db.String(32), default='')
+    lesson_teacher_id = db.Column(db.String(48), default='')
+    lesson_teacher_letter = db.Column(db.String(32), default='')
+    lesson_teacher_name = db.Column(db.String(8), default='')
+    lesson_teacher_unit = db.Column(db.String(16), default='')
+    lesson_unit = db.Column(db.String(16), default='')
+    lesson_year = db.Column(db.String(32), default='')
+    lesson_semester = db.Column(db.Integer, default='')
+    lesson_week = db.Column(db.String(255), default='')
+    lesson_time = db.Column(db.String(255), default='')
+    lesson_room = db.Column(db.String(255), default='')
+    lesson_class = db.Column(db.String(255), default='')
+    lesson_type = db.Column(db.String(8), default='')
+    lesson_weekday = db.Column(db.String(8), default='')
+    lesson_grade = db.Column(db.String(64), default='')
+    assign_group = db.Column(db.String(32), default='')
+
+    @classmethod
+    def delete_all(cls):
+        RawLesson.query.delete()
+
+    @classmethod
+    def insert(cls, data):
+        raw_lesson = RawLesson()
+        for key, value in data.items():
+            if hasattr(raw_lesson, key):
+                setattr(raw_lesson, key, value)
+        db.session.add(raw_lesson)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
+
+
 class Lesson(db.Model):
     __tablename__ = 'lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)  # lesson_notice id 关注课程id
@@ -725,7 +767,7 @@ class ModelLesson(db.Model):
     status = db.Column(db.Integer, default=2)  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)
     group_name = db.Column(db.String(32), default='')
-    is_lock = db.Column(db.Integer, default=0) # 锁定 未锁定
+    is_lock = db.Column(db.Integer, default=0)  # 锁定 未锁定
     using = db.Column(db.Boolean, default=True)
     unit = db.Column(db.String)
     guiders = db.Column(db.JSON, default=[])
@@ -799,7 +841,7 @@ class ModelLesson(db.Model):
         return cls.formatter(model_lesson)
 
     @classmethod
-    def get_model_lesson_by_lesson_id(cls, query_dict:dict, unscoped: bool = False):
+    def get_model_lesson_by_lesson_id(cls, query_dict: dict, unscoped: bool = False):
         model_lesson = ModelLesson.query
         if not unscoped:
             model_lesson = model_lesson.filter(ModelLesson.using == True)
@@ -891,4 +933,3 @@ class ModelLesson(db.Model):
             except Exception as e:
                 raise CustomError(500, 500, str(e))
         return True
-
