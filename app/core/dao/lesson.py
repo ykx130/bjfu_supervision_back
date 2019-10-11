@@ -892,3 +892,43 @@ class ModelLesson(db.Model):
                 raise CustomError(500, 500, str(e))
         return True
 
+class OriginLessons(db.Model):
+    __tablename__ = 'origin_lessons'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_id = db.Column(db.String(32), default='')  # 被关注课程的id
+    lesson_attribute = db.Column(db.String(8), default='')
+    lesson_state = db.Column(db.String(8), default='')
+    lesson_level = db.Column(db.String(8), default='')
+    lesson_name = db.Column(db.String(32), default='')
+    lesson_teacher_id = db.Column(db.String(48), default='')
+    lesson_teacher_letter = db.Column(db.String(32), default='')
+    lesson_teacher_name = db.Column(db.String(8), default='')
+    lesson_teacher_unit = db.Column(db.String(16), default='')
+    lesson_unit = db.Column(db.String(16), default='')
+    lesson_year = db.Column(db.String(32), default='')
+    lesson_semester = db.Column(db.Integer, default='')
+    lesson_week = db.Column(db.String(255), default='')
+    lesson_time = db.Column(db.String(255), default='')
+    lesson_room = db.Column(db.String(255), default='')
+    lesson_class = db.Column(db.String(255), default='')
+    lesson_type = db.Column(db.String(8), default='')
+    lesson_weekday = db.Column(db.String(8), default='')
+    lesson_grade = db.Column(db.String(64), default='')
+    assign_group = db.Column(db.String(32), default='')
+
+    @classmethod
+    def delete_all(cls):
+        OriginLessons.query.delete()
+
+    @classmethod
+    def insert(cls, data):
+        raw_lesson = OriginLessons()
+        for key, value in data.items():
+            if hasattr(raw_lesson, key):
+                setattr(raw_lesson, key, value)
+        db.session.add(raw_lesson)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
