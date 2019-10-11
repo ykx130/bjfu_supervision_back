@@ -41,7 +41,7 @@ def lesson_week_list(lesson_week):
 
 def week_to_date(term_begin_time, week, weekday):
     time = convert_string_to_datetime(term_begin_time)
-    date = time + timedelta((int(week) - 1) * 7 + int(weekday) - 1)
+    date = time + timedelta((int(week) - 1) * 7 + int(weekday))
     return date.date()
 
 
@@ -138,9 +138,13 @@ def insert_term(term_name):
     return term
 
 
-def query_raw_lesson_cases(cursor, lesson_id, teacher_name):
+def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_semester):
     cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from original_lessons where lesson_id \
-    ='{}' and lesson_teacher_name='{}'".format(lesson_id, teacher_name))
+    ='{}' and lesson_teacher_name='{}' and lesson_year = '{}' and lesson_semester='{}'".format(lesson_id, 
+    teacher_name,
+    lesson_year,
+    lesson_semester
+    ))
     lesson_case_datas = cursor.fetchall()
     return lesson_case_datas
 
@@ -217,8 +221,8 @@ def update_database(info: dict = None):
                        '11': '1112', '12': '1112', '13': '13', '14': '14'}
 
     cursor = get_cursor(info=info)
-
-    raw_lessons = query_raw_lessons(cursor, info.get('term', None))
+    term = info.get('term', None)
+    raw_lessons = query_raw_lessons(cursor, term)
     
     def update_one_lesson(raw_lesson):
         print(raw_lesson['lesson_teacher_name'])
@@ -246,9 +250,11 @@ def update_database(info: dict = None):
                 print("新增课程")
             new_lesson = dao.Lesson.get_lesson(
                 query_dict={'lesson_id': lesson_data['lesson_id']})
-            raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
-                                                           teacher_name=lesson_data['lesson_teacher_name'])
             del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})
+            raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
+                                                           teacher_name=lesson_data['lesson_teacher_name'],
+                                                           lesson_year = raw_lesson['lesson_year'],
+                                                           lesson_semester = raw_lesson['lesson_semester'])
             for raw_lesson_case_data in raw_lesson_case_datas:
                 if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
                     continue
