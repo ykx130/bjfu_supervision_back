@@ -16,11 +16,24 @@ import re
 import argparse
 from app import app
 from concurrent.futures import ThreadPoolExecutor
+import hashlib
 
+
+def get_md5(raw):
+    """
+    获取raw的md5
+    :param raw:
+    :return:
+    """
+    m2 = hashlib.md5()
+    m2.update(raw)
+    return m2.hexdigest()
 
 ctx = app.app_context()
 ctx.push()
 
+def lesson_id_gen(raw_lesson_id, term,  lesson_teacher_id, lesson_week, lesson_weekday, lesson_room):
+    return get_md5(str(raw_lesson_id + term + lesson_teacher_id+ lesson_week + lesson_weekday + lesson_room ).encode('utf-8'))
 
 def lesson_week_list(lesson_week):
     lesson_weeks = list()
@@ -62,7 +75,7 @@ def get_cursor(info: dict):
 def query_raw_lessons(cursor, term=None):
     sql = "select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
          lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
-          lesson_grade from original_lessons"
+          lesson_grade, lesson_week, lesson_weekday, lesson_room from origin_lessons"
     if term is not None:
         parts = term.split('-')
         if len(parts) != 3:
@@ -86,10 +99,19 @@ def format_raw_lesson(data):
     data['lesson_teacher_unit'] = teacher_units
     lesson_id = data['lesson_id']
     data['raw_lesson_id'] = lesson_id
+    
     term_name = '-'.join([data['lesson_year'],
-                          data['lesson_semester']]).replace(' ', '')
-    data['lesson_id'] = [lesson_id + teacher_id +
-                         term_name.replace('-', '') for teacher_id in teacher_ids]
+                          str(data['lesson_semester'])]).replace(' ', '')
+
+    data['lesson_id'] = [lesson_id_gen(
+        raw_lesson_id=lesson_id,
+        term=term_name,
+        lesson_teacher_id=teacher_id,
+        lesson_week=data['lesson_week'],
+        lesson_weekday=data['lesson_weekday'],
+        lesson_room = data['lesson_room']
+    ) for teacher_id in teacher_ids]
+
     lesson_datas = list()
     for index in range(len(teachers)):
         lesson_data = dict()
@@ -139,7 +161,7 @@ def insert_term(term_name):
 
 
 def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_semester):
-    cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from original_lessons where lesson_id \
+    cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from origin_lessons where lesson_id \
     ='{}' and lesson_teacher_name='{}' and lesson_year = '{}' and lesson_semester='{}'".format(lesson_id, 
     teacher_name,
     lesson_year,
@@ -208,12 +230,8 @@ def del_lesson_cases(query_dict: dict):
 
 
 def if_has_lesson(query_dict: dict):
-    _, num = dao.Lesson.query_lessons(query_dict=query_dict)
-    if num != 0:
-        return True
-    else:
-        return False
-
+    lesson = dao.Lesson.get_lesson(query_dict=query_dict)
+    return lesson
 
 def update_database(info: dict = None):
     lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
@@ -229,7 +247,7 @@ def update_database(info: dict = None):
         if raw_lesson['lesson_teacher_name'] == '':
             return
         term_name = '-'.join([raw_lesson['lesson_year'],
-                              raw_lesson['lesson_semester']]).replace(' ', '')
+                              str(raw_lesson['lesson_semester'])]).replace(' ', '')
         term = dao.Term.get_term(term_name=term_name)
         if term is None:
             term = insert_term(term_name=term_name)
@@ -239,12 +257,12 @@ def update_database(info: dict = None):
         print("D",lesson_datas)
 
         for lesson_data in lesson_datas:
-
-            if if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
-                                         'lesson_class': [lesson_data['lesson_class']]}):
-            
-                update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']],
-                                          'lesson_class': [lesson_data['lesson_class']]}, data=lesson_data)
+            old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
+            if old_lesson:
+                print("合并班级")
+                update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
+                    'lesson_class' : old_lesson['lesson_class'] + lesson_data['lesson_class']
+                })
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
                 print("新增课程")
@@ -254,7 +272,8 @@ def update_database(info: dict = None):
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
                                                            teacher_name=lesson_data['lesson_teacher_name'],
                                                            lesson_year = raw_lesson['lesson_year'],
-                                                           lesson_semester = raw_lesson['lesson_semester'])
+                                                           lesson_semester = str(raw_lesson['lesson_semester']))
+
             for raw_lesson_case_data in raw_lesson_case_datas:
                 if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
                     continue
@@ -277,7 +296,7 @@ if __name__ == '__main__':
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
     parser.add_argument('--user', '-u', help='请输入用户名', default='root')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')
-    parser.add_argument('--db', '-d', help='请输入数据库名', default='raw_supervision')
+    parser.add_argument('--db', '-d', help='请输入数据库名', default='supervision')
     parser.add_argument('--charset', '-c', help='请输入编码格式', default='utf8')
     args = parser.parse_args()
     info = {'term': args.term, 'host': args.host, 'user': args.user, 'passwd': args.passwd, 'db': args.db,
