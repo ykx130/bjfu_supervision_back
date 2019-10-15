@@ -583,6 +583,8 @@ class NoticeLesson(db.Model):
     __tablename__ = 'notice_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.String(32), default=-1)
+    lesson_name = db.Column(db.String(32), default='')
+    lesson_teacher_name = db.Column(db.String(8), default='')
     group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
@@ -721,6 +723,8 @@ class ModelLesson(db.Model):
     __tablename__ = 'model_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.String(32), default='')
+    lesson_name = db.Column(db.String(32), default='')
+    lesson_teacher_name = db.Column(db.String(8), default='')
     term = db.Column(db.String(32), default='')
     status = db.Column(db.Integer, default=2)  # 好评课 推荐课
     votes = db.Column(db.Integer, default=0)

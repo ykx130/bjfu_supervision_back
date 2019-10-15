@@ -55,6 +55,7 @@ class FormMeta(object):
                 'meta': data.get('meta', {}),
                 'pages': data.get('pages', ['正面']),
                 'toptip': data.get('toptip', ''),
+                'order': data.get('order', 1)
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -73,6 +74,7 @@ class FormMeta(object):
                 'items': data.get('items', []),
                 'pages': data.get('pages', ['正面']),
                 'toptip': data.get('toptip', ''),
+                'order': data.get('order', 1)
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))

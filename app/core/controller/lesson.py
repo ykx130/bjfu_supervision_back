@@ -149,6 +149,8 @@ class LessonCaseController(object):
 
     @classmethod
     def query_lesson_cases(cls, query_dict: dict = None, unscoped: bool = False):
+        print(query_dict)
+        query_dict['_per_page'] = 10000
         (lesson_cases, num) = dao.LessonCase.query_lesson_cases(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson_case) for lesson_case in lesson_cases], num
 

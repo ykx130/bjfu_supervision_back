@@ -161,8 +161,9 @@ def insert_term(term_name):
 
 
 def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_semester):
-    cursor.execute("select lesson_week, lesson_time, lesson_weekday, lesson_room from origin_lessons where lesson_id \
-    ='{}' and lesson_teacher_name='{}' and lesson_year = '{}' and lesson_semester='{}'".format(lesson_id, 
+    cursor.execute("select distinct lesson_week, lesson_time, lesson_weekday, lesson_room from origin_lessons where lesson_id \
+    ='{}' and lesson_teacher_name='{}' and lesson_year = '{}' and lesson_semester='{}'".format(
+        lesson_id, 
     teacher_name,
     lesson_year,
     lesson_semester
@@ -260,7 +261,7 @@ def update_database(info: dict = None):
             old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
             if old_lesson:
                 print("合并班级")
-                if old_lesson['lesson_class'] not in lesson_data['lesson_class']:
+                if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(old_lesson['lesson_class']) > 100:
                     update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
                         'lesson_class' : old_lesson['lesson_class'] + lesson_data['lesson_class']
                     })

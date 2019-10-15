@@ -172,7 +172,7 @@ class User(db.Model, UserMixin):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         for key, value in data.items():
-            if hasattr(user, key):
+            if hasattr(user, key) or key == 'password':
                 setattr(user, key, value)
         db.session.add(user)
         if ctx:

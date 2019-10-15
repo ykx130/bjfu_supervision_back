@@ -18,6 +18,7 @@ class FormMetaController(object):
             query_dict = {'using': [True]}
         else:
             query_dict['using'] = [True]
+        query_dict['_sort'] = ['order']
         return dao.FormMeta.query_form_metas(query_dict)
 
     @classmethod
