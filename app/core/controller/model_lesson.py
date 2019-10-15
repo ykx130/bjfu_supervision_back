@@ -74,7 +74,7 @@ class ModelLessonController(object):
             (_, num) = dao.ModelLesson.query_model_lessons(query_dict={'lesson_id': [lesson_id]}, unscoped=False)
             if num != 0:
                 raise CustomError(500, 200, 'lesson has been model lesson')
-            data['unit'] = lesson['lesson_unit'
+            data['unit'] = lesson['lesson_unit']
             data['lesson_name'] = lesson['lesson_name']
             data['lesson_teacher_name'] = lesson['lesson_teacher_name']
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
