@@ -75,6 +75,8 @@ class ModelLessonController(object):
             if num != 0:
                 raise CustomError(500, 200, 'lesson has been model lesson')
             data['unit'] = lesson['lesson_unit']
+            data['lesson_name'] = lesson['lesson_name']
+            data['lesson_teacher_name'] = lesson['lesson_teacher_name']
             dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
                                      data={'lesson_model': status})
@@ -106,6 +108,8 @@ class ModelLessonController(object):
                     continue
                 data['lesson_id'] = lesson_id
                 data['unit'] = lesson['lesson_unit']
+                data['lesson_name'] = lesson['lesson_name']
+                data['lesson_teacher_name'] = lesson['lesson_teacher_name']
                 data = cls.reformatter_insert(data=data)
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
@@ -133,7 +137,6 @@ class ModelLessonController(object):
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
         status = data.get('status', lesson['lesson_model'])
-        data['status'] = status
         try:
             dao.ModelLesson.update_model_lesson(ctx=False, query_dict={'id': [id]}, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [model_lesson['lesson_id']]},
@@ -256,6 +259,8 @@ class ModelLessonController(object):
                 term = lessons[0]['term']
                 model_lesson_data['lesson_id'] = lesson_id
                 model_lesson_data['unit'] = lessons[0]['lesson_unit']
+                model_lesson_data['lesson_name'] = lessons[0]['lesson_name']
+                model_lesson_data['lesson_teacher_name'] = lessons[0]['lesson_teacher_name']
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={
                     'lesson_id': [lesson_id],
                     'term': term

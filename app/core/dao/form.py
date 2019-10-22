@@ -32,7 +32,8 @@ class FormMeta(object):
             'version': None,
             'using': True,
             'items': [],
-            'pages': []
+            'pages': [],
+            'toptip': '',
         }
         print(data)
         for key, value in data.items():
@@ -52,8 +53,9 @@ class FormMeta(object):
                 'version': data.get('version', None),
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
-                'order': data.get('order', 1),
                 'pages': data.get('pages', ['正面']),
+                'toptip': data.get('toptip', ''),
+                'order': data.get('order', 1)
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -70,8 +72,9 @@ class FormMeta(object):
                 'name': data.get('name', None),
                 'meta': data.get('meta', {}),
                 'items': data.get('items', []),
-                'order': data.get('order', 1),
                 'pages': data.get('pages', ['正面']),
+                'toptip': data.get('toptip', ''),
+                'order': data.get('order', 1)
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -316,7 +319,8 @@ class Form(object):
             'status': None,
             'using': True,
             'values': [],
-            'pages': []
+            'pages': [],
+            'toptip': '',
         }
         for key, value in data.items():
             if key == 'values':
@@ -340,6 +344,7 @@ class Form(object):
                 'bind_meta_version': data.get('bind_meta_version', None),
                 'values': data.get('values', []),
                 "model_lesson": data.get("model_lesson", {}),
+                'toptip': data.get('toptip', ''),
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -360,6 +365,7 @@ class Form(object):
                 'bind_meta_version': data.get('bind_meta_version', None),
                 'values': data.get('values', []),
                 "model_lesson": data.get("model_lesson", {}),
+                'toptip': data.get('toptip', ''),
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))

@@ -88,5 +88,6 @@ def sort_limit(datas, sort_limit_dict):
     if _limit is not None:
         dataspage = dataspage.limit(_limit)
     if len(_sort_dict)>0:
+        print(_sort_dict)
         dataspage = dataspage.sort(_sort_dict)
     return dataspage

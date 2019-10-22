@@ -79,6 +79,8 @@ class NoticeLessonController(object):
             if num > 0:
                 raise CustomError(500, 200, 'lesson has been noticed')
             data['unit'] = lesson['lesson_unit']
+            data['lesson_name'] = lesson['lesson_name']
+            data['lesson_teacher_name'] = lesson['lesson_teacher_name']
             dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
                                      data={'lesson_level': '关注课程'})
@@ -112,6 +114,8 @@ class NoticeLessonController(object):
                     continue
                 data['lesson_id'] = lesson_id
                 data['unit'] = lesson['lesson_unit']
+                data['lesson_name'] = lesson['lesson_name']
+                data['lesson_teacher_name'] = lesson['lesson_teacher_name']
                 data = cls.reformatter_insert(data)
                 dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
@@ -292,6 +296,8 @@ class NoticeLessonController(object):
                 term = lesson['term']
                 notice_lesson_data['lesson_id'] = lesson_id
                 notice_lesson_data['unit'] = lesson['lesson_unit']
+                notice_lesson_data['lesson_name'] = lesson['lesson_name']
+                notice_lesson_data['lesson_teacher_name'] = lesson['lesson_teacher_name']
                 (_, num) = dao.NoticeLesson.query_notice_lessons(
                     query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:

@@ -6,6 +6,7 @@ from app.utils.url_condition.url_condition_mongodb import dict_serializable
 from app.utils import CustomError, args_to_dict
 from flask_login import login_required
 from app.http.handler.filter import Filter
+from app import cache
 
 
 @lesson_blueprint.route('/lessons', methods=['POST'])
@@ -144,8 +145,10 @@ def get_teacher_names(*args, **kwargs):
     }), 200
 
 
+
 @lesson_blueprint.route('/terms')
 @login_required
+@cache.cached(timeout=1000000000)
 def get_terms():
     query_dict = args_to_dict(request.args)
     query_dict['_sort'] = ['name']
