@@ -280,6 +280,7 @@ class Lesson(db.Model):
     lesson_type = db.Column(db.String(8), default='')
     lesson_grade = db.Column(db.String(64), default='')
     lesson_model = db.Column(db.String(32), default='')
+    note = db.Column(db.String(128), default='')
     term = db.Column(db.String(32), default='')
     notices = db.Column(db.Integer, default=0)
     using = db.Column(db.Boolean, default=True)
@@ -452,6 +453,7 @@ class LessonCase(db.Model):
     lesson_week = db.Column(db.String(48), default='')
     lesson_time = db.Column(db.String(48), default='')
     lesson_date = db.Column(db.Date, default=datetime.now)
+    inner_lesson_id = db.Column(db.String(255), default='') # 这个是为了课表正常显示 做的区分 一个课有所有的lesson_case 课表显示用这个 
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -461,7 +463,8 @@ class LessonCase(db.Model):
         lesson_case_dict = {'lesson_week': lesson_case.lesson_week, 'lesson_time': str(lesson_case.lesson_time),
                             'lesson_date': str(lesson_case.lesson_date.strftime('%Y-%m-%d')),
                             'lesson_weekday': lesson_case.lesson_weekday,
-                            'lesson_room': lesson_case.lesson_room}
+                            'lesson_room': lesson_case.lesson_room,
+                            'inner_lesson_id': lesson_case.inner_lesson_id}
         return lesson_case_dict
 
     @classmethod

@@ -11,6 +11,9 @@ import logging
 from app.utils.logger import consoleHandler, fileHandler
 from kafka import KafkaConsumer, KafkaProducer
 import json
+from flask_caching import Cache
+
+
 
 basedir = os.path.abspath(os.getcwd())
 
@@ -18,6 +21,7 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = '/401'
 
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 redis_cli = get_redis_con(config['default'].REDIS_URL)
 
 
@@ -27,6 +31,7 @@ def create_app(config_name):
     config[config_name].init_app(app)
     db.init_app(app)
     mongo.init_app(app)
+    cache.init_app(app)
     login_manager.init_app(app)
     app.kafka_producer = KafkaProducer(bootstrap_servers=app.config['KAFLKA_HOST'],
                                         value_serializer=lambda v: json.dumps(v).encode('utf-8'))

@@ -161,7 +161,9 @@ def insert_term(term_name):
 
 
 def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_semester):
-    cursor.execute("select distinct lesson_week, lesson_time, lesson_weekday, lesson_room from origin_lessons where lesson_id \
+    cursor.execute("select lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
+         lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
+          lesson_grade, lesson_week, lesson_weekday, lesson_room, lesson_time from origin_lessons where lesson_id \
     ='{}' and lesson_teacher_name='{}' and lesson_year = '{}' and lesson_semester='{}'".format(
         lesson_id, 
     teacher_name,
@@ -172,18 +174,31 @@ def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_
     return lesson_case_datas
 
 
-def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_time_map):
+def format_raw_lesson_case(raw_lesson_case, lesson, lesson_id, term_begin_time, lesson_time_map):
     lesson_case_datas = list()
+    teacher_ids = raw_lesson_case['lesson_teacher_id'].replace(' ', '').split(',')
+    inner_lessson_ids = [lesson_id_gen(
+        raw_lesson_id= str(lesson['raw_lesson_id']),
+        term= lesson['term'],
+        lesson_teacher_id=teacher_id,
+        lesson_week=raw_lesson_case['lesson_week'],
+        lesson_weekday=raw_lesson_case['lesson_weekday'],
+        lesson_room = raw_lesson_case['lesson_room']
+    ) for teacher_id in teacher_ids]
+    inner_lesson_id = inner_lessson_ids[0]
+    if lesson['lesson_id'] in inner_lessson_ids:
+        inner_lesson_id = lesson['lesson_id']
     if raw_lesson_case['lesson_week'] == '':
-        lesson_case_data = {'lesson_id': lesson_id}
+        lesson_case_data = {'lesson_id': lesson_id, 'inner_lesson_id': inner_lesson_id}
         for k, v in raw_lesson_case.items():
-            try:
-                v = json.loads(v)
-            except:
-                v = v
-            if v is None or v is '':
-                continue
-            lesson_case_data[k] = v
+            if k not in lesson_case_data:
+                try:
+                    v = json.loads(v)
+                except:
+                    v = v
+                if v is None or v is '':
+                    continue
+                lesson_case_data[k] = v
         lesson_case_datas.append(lesson_case_data)
     else:
         weeks = lesson_week_list(raw_lesson_case['lesson_week'])
@@ -194,21 +209,22 @@ def format_raw_lesson_case(raw_lesson_case, lesson_id, term_begin_time, lesson_t
             for lesson_time_beg in lesson_times_beg:
                 lesson_time_set.add(lesson_time_map.get(lesson_time_beg, '14'))
             for lesson_time in lesson_time_set:
-                lesson_case_data = {'lesson_id': lesson_id}
+                lesson_case_data = {'lesson_id': lesson_id, 'inner_lesson_id': inner_lesson_id}
                 for k, v in raw_lesson_case.items():
-                    try:
-                        v = json.loads(v)
-                    except:
-                        v = v
-                    if v is None or v is '':
-                        continue
-                    if k == 'lesson_week':
-                        lesson_case_data['lesson_week'] = week
-                        continue
-                    if k == 'lesson_time':
-                        lesson_case_data['lesson_time'] = lesson_time
-                        continue
-                    lesson_case_data[k] = v
+                    if k not in lesson_case_data:
+                        try:
+                            v = json.loads(v)
+                        except:
+                            v = v
+                        if v is None or v is '':
+                            continue
+                        if k == 'lesson_week':
+                            lesson_case_data['lesson_week'] = week
+                            continue
+                        if k == 'lesson_time':
+                            lesson_case_data['lesson_time'] = lesson_time
+                            continue
+                        lesson_case_data[k] = v
                 date = week_to_date(term_begin_time, week,
                                     lesson_case_data['lesson_weekday'])
                 lesson_case_data['lesson_date'] = date
@@ -280,6 +296,7 @@ def update_database(info: dict = None):
                 if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
                     continue
                 lesson_case_datas = format_raw_lesson_case(raw_lesson_case=raw_lesson_case_data,
+                                                           lesson=new_lesson,
                                                            lesson_id=new_lesson['id'], term_begin_time=term_begin_time,
                                                            lesson_time_map=lesson_time_map)
                 print("新增上课地点：{}".format(len(lesson_case_datas)))
