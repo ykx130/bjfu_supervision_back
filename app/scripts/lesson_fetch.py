@@ -92,6 +92,7 @@ def query_raw_lessons(cursor, term=None):
 
 def format_raw_lesson(data):
     teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
+    data['lesson_raw_teacher_name'] = data['lesson_teacher_name']
     data['lesson_teacher_name'] = teachers
     teacher_ids = data['lesson_teacher_id'].replace(' ', '').split(',')
     data['lesson_teacher_id'] = teacher_ids
@@ -170,6 +171,7 @@ def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_
     lesson_year,
     lesson_semester
     ))
+    print(lesson_id, teacher_name, lesson_year, lesson_semester)
     lesson_case_datas = cursor.fetchall()
     return lesson_case_datas
 
@@ -260,7 +262,6 @@ def update_database(info: dict = None):
     raw_lessons = query_raw_lessons(cursor, term)
     
     def update_one_lesson(raw_lesson):
-        print(raw_lesson['lesson_teacher_name'])
         if raw_lesson['lesson_teacher_name'] == '':
             return
         term_name = '-'.join([raw_lesson['lesson_year'],
@@ -271,27 +272,23 @@ def update_database(info: dict = None):
 
         term_begin_time = term['begin_time']
         lesson_datas = format_raw_lesson(raw_lesson)
-        print("D",lesson_datas)
 
         for lesson_data in lesson_datas:
             old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
             if old_lesson:
-                print("合并班级")
                 if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(old_lesson['lesson_class']) > 100:
                     update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
                         'lesson_class' : old_lesson['lesson_class'] + lesson_data['lesson_class']
                     })
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
-                print("新增课程")
             new_lesson = dao.Lesson.get_lesson(
                 query_dict={'lesson_id': lesson_data['lesson_id']})
             del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
-                                                           teacher_name=lesson_data['lesson_teacher_name'],
+                                                           teacher_name=lesson_data['lesson_raw_teacher_name'],
                                                            lesson_year = raw_lesson['lesson_year'],
                                                            lesson_semester = str(raw_lesson['lesson_semester']))
-
             for raw_lesson_case_data in raw_lesson_case_datas:
                 if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
                     continue
@@ -299,11 +296,9 @@ def update_database(info: dict = None):
                                                            lesson=new_lesson,
                                                            lesson_id=new_lesson['id'], term_begin_time=term_begin_time,
                                                            lesson_time_map=lesson_time_map)
-                print("新增上课地点：{}".format(len(lesson_case_datas)))
                 for lesson_case_data in lesson_case_datas:
                     insert_lesson_case(data=lesson_case_data)
     for raw_lesson in raw_lessons:
-        print('No', raw_lesson['lesson_name'])
         update_one_lesson(raw_lesson)
  
     return True

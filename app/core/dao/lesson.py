@@ -453,7 +453,7 @@ class LessonCase(db.Model):
     lesson_week = db.Column(db.String(48), default='')
     lesson_time = db.Column(db.String(48), default='')
     lesson_date = db.Column(db.Date, default=datetime.now)
-    inner_lesson_id = db.Column(db.String(255), default='') # 这个是为了课表正常显示 做的区分 一个课有所有的lesson_case 课表显示用这个 
+    inner_lesson_id = db.Column(db.String(255), default='') # 这个是为了课表正常显示 做的区分 一个课有所有的lesson_case 课表显示用这个
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
