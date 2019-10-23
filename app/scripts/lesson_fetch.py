@@ -276,7 +276,7 @@ def update_database(info: dict = None):
         for lesson_data in lesson_datas:
             old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
             if old_lesson:
-                if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(old_lesson['lesson_class']) > 100:
+                if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(old_lesson['lesson_class']) < 100:
                     update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
                         'lesson_class' : old_lesson['lesson_class'] + lesson_data['lesson_class']
                     })
