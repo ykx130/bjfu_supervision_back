@@ -81,6 +81,8 @@ class NoticeLessonController(object):
             data['unit'] = lesson['lesson_unit']
             data['lesson_name'] = lesson['lesson_name']
             data['lesson_teacher_name'] = lesson['lesson_teacher_name']
+            data['lesson_teacher_id'] = lesson['lesson_teacher_id']
+            data['lesson_teacher_unit'] = lesson['lesson_teacher_unit']
             dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
             dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [data['lesson_id']]},
                                      data={'lesson_level': '关注课程'})
@@ -116,6 +118,8 @@ class NoticeLessonController(object):
                 data['unit'] = lesson['lesson_unit']
                 data['lesson_name'] = lesson['lesson_name']
                 data['lesson_teacher_name'] = lesson['lesson_teacher_name']
+                data['lesson_teacher_id'] = lesson['lesson_teacher_id']
+                data['lesson_teacher_unit'] = lesson['lesson_teacher_unit']
                 data = cls.reformatter_insert(data)
                 dao.NoticeLesson.insert_notice_lesson(ctx=False, data=data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
@@ -298,6 +302,8 @@ class NoticeLessonController(object):
                 notice_lesson_data['unit'] = lesson['lesson_unit']
                 notice_lesson_data['lesson_name'] = lesson['lesson_name']
                 notice_lesson_data['lesson_teacher_name'] = lesson['lesson_teacher_name']
+                notice_lesson_data['lesson_teacher_id'] = lesson['lesson_teacher_id']
+                notice_lesson_data['lesson_teacher_unit'] = lesson['lesson_teacher_unit']
                 (_, num) = dao.NoticeLesson.query_notice_lessons(
                     query_dict={'lesson_id': [lesson_id]}, unscoped=False)
                 if num != 0:
@@ -369,3 +375,11 @@ class NoticeLessonController(object):
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return filename
+
+    
+    @classmethod
+    def query_notice_lessons_teachers(cls, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
+        (teacher_names, num) = dao.NoticeLesson.query_teacher_names(query_dict=query_dict)
+        return teacher_names, num

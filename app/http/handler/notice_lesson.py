@@ -185,3 +185,25 @@ def notice_lesson_vote(id):
         'code': 200,
         'msg': ''
     }), 200
+
+
+@notice_lesson_blueprint.route('/notice_lessons/teachers', methods=['GET'])
+@login_required
+@Filter.filter_permission()
+def notice_lesson_teahcers(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    try:
+        (teachers, total) = controller.NoticeLessonController.query_notice_lessons_teachers(query_dict=query_dict)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'teachers': teachers,
+        'total': total, 
+        'msg': ''
+    }), 200
