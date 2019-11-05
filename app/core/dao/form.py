@@ -108,7 +108,7 @@ class FormMeta(object):
             try:
                 datas = mongo.db.form_meta.find()
             except Exception as e:
-                raise (500, 500, str(e))
+                raise CustomError(500, 500, str(e))
             return datas, datas.count()
         if '_id' in url_condition.filter_dict:
             url_condition.filter_dict['_id']['$in'] = [mongodb_url_condition.ObjectId(item) for item in

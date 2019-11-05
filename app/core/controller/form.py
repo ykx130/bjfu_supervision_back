@@ -67,6 +67,8 @@ class FormController(object):
         lesson_id = meta.get('lesson', {}).get('lesson_id', None)
         if lesson_id is None:
             raise CustomError(500, 200, '课程不能为空')
+        if not FormService.check_lesson_meta(meta):
+            raise CustomError(500, 200, '该督导在该时间段, 听过别的课!时间冲突!')
         dao.Form.insert_form(data)
         form_model = dao.Form.formatter_total(data)
         send_kafka_message(topic='form_service',
