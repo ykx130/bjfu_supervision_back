@@ -85,5 +85,24 @@ class FormService:
         redis_cli.set("form_service:{}:map".format(meta_name), json.dumps(list(item_map.values())))
         print("计算完成")
 
+    @classmethod
+    def check_lesson_meta(cls, meta):
+        """[检查meta的时间是否冲突, 一个督导一个时间只能有一门课]
+        Arguments:
+            meta {[type]} -- [description]
+        """
+        lesson_date = meta.get('lesson', {}).get('lesson_date')
+        guider = meta.get('guider')
+        lesson_times = meta.get('lesson', {}).get('lesson_times', [])
 
+        forms, _ = dao.Form.query_forms(query_dict={
+            'meta.lesson.lesson_date': lesson_date,
+            'meta.guider': guider,
+        })
+        if forms:
+            for form in forms:
+                has_times = form.get('meta',{}).get('lesson', {}).get('lesson_times', []) 
+                if set(has_times)  & set(lesson_times):
+                    return False
+        return True
 
