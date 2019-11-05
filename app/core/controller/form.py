@@ -1,7 +1,7 @@
 import app.core.dao as dao
 from app.utils.Error import CustomError
 from app.utils.kafka import send_kafka_message
-from app.core.services import NoticeService
+from app.core.services import NoticeService, FormService
 
 from app import redis_cli
 import json

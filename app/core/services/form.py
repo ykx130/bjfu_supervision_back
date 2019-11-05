@@ -85,3 +85,5 @@ class FormService:
         redis_cli.set("form_service:{}:map".format(meta_name), json.dumps(list(item_map.values())))
         print("计算完成")
 
+
+

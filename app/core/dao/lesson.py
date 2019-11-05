@@ -587,9 +587,9 @@ class NoticeLesson(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.String(32), default=-1)
     lesson_name = db.Column(db.String(32), default='')
-    lesson_teacher_name = db.Column(db.String(8), default='')
-    lesson_teacher_id = db.Column(db.String(8), default='')
-    lesson_teacher_unit = db.Column(db.String(8), default='')
+    lesson_teacher_name = db.Column(db.String(64), default='')
+    lesson_teacher_id = db.Column(db.String(64), default='')
+    lesson_teacher_unit = db.Column(db.String(64), default='')
     group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
@@ -725,15 +725,14 @@ class NoticeLesson(db.Model):
 
     @classmethod
     def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
-        print("query" , query_dict)
         if query_dict is None:
             query_dict = {}
         query = NoticeLesson.query.with_entities(NoticeLesson.lesson_teacher_id, NoticeLesson.lesson_teacher_name, NoticeLesson.lesson_teacher_unit).distinct()
         if not unscoped:
-            query = query.filter(Lesson.using == True)
+            query = query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, Lesson)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
             (lessons, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
