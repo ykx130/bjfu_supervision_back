@@ -1,3 +1,11 @@
+'''
+@Author: your name
+@Date: 2019-11-06 19:31:57
+@LastEditTime: 2019-11-06 19:32:06
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /bjfu_supervision_back_ykx/app/streaming/lesson_server.py
+'''
 from app.streaming import sub_kafka
 from app.core.services import InterfaceService
 from app.core import dao
@@ -20,7 +28,8 @@ def lesson_form_service_server(method, args):
         return
     if method == 'add_form' or method == 'repulse_form':
         _, total, = dao.Form.query_forms(query_dict={
-            'meta.lesson.lesson_id': args.get("lesson_id")
+            'meta.lesson.lesson_id': args.get("lesson_id"),
+            "status": "已完成"
         })
         dao.Lesson.update_lesson(query_dict={
             'lesson_id': args.get("lesson_id")

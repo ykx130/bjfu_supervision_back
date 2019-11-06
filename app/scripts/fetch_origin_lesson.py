@@ -1,3 +1,11 @@
+'''
+@Author: your name
+@Date: 2019-11-05 16:43:07
+@LastEditTime: 2019-11-06 19:52:02
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /bjfu_supervision_back_ykx/app/scripts/fetch_origin_lesson.py
+'''
 import app.core.dao as dao
 import cx_Oracle
 import argparse
@@ -71,8 +79,7 @@ def update_database(info=None):
             dao.OriginLessons.insert(insert_data)
         page = page + 1
 
-
-if __name__ == '__main__':
+def run():
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', '-t', help='请输入学期', default='2019-2020')
     parser.add_argument('--semester', '-s', help='请输入学期', default='1')
@@ -85,3 +92,8 @@ if __name__ == '__main__':
             'semester': args.semester}
     print('begin {}'.format(info))
     update_database(info=info)
+
+
+if __name__ == '__main__':
+    run()
+ 

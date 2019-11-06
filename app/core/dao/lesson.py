@@ -773,7 +773,8 @@ class ModelLesson(db.Model):
             'status': status,
             'votes': model_lesson.votes,
             'is_lock': model_lesson.is_lock,
-            'guiders': model_lesson.guiders
+            'guiders': model_lesson.guiders,
+            'lesson_name': model_lesson.lesson_name
         }
         return model_lesson_dict
 

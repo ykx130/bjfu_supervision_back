@@ -363,7 +363,7 @@ class Form(object):
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
                 'bind_meta_version': data.get('bind_meta_version', None),
-                'values': data.get('values', []),
+                # 'values': data.get('values', []),
                 "model_lesson": data.get("model_lesson", {}),
                 'toptip': data.get('toptip', ''),
             }
@@ -393,7 +393,7 @@ class Form(object):
         return cls.formatter_total(data)
 
     @classmethod
-    def query_forms(cls, query_dict: dict = None, unscoped: bool = False):
+    def query_forms(cls, query_dict: dict = None, unscoped: bool = False, simple=False):
         from app.utils.mongodb import mongo
         if query_dict is None:
             query_dict = dict()
@@ -416,7 +416,11 @@ class Form(object):
         datas = mongodb_url_condition.sort_limit(datas, url_condition.sort_limit_dict)
         paginate = mongodb_url_condition.Paginate(datas, url_condition.page_dict)
         datas = paginate.data_page
-        return [cls.formatter_simple(data=data) for data in datas], paginate.total
+        if simple:
+            return [cls.formatter_simple(data=data) for data in datas], paginate.total
+        else:
+            return [cls.formatter_total(data=data) for data in datas], paginate.total
+
 
     @classmethod
     def insert_form(cls, data: dict = None):
