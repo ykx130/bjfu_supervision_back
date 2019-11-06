@@ -111,7 +111,7 @@ def get_my_forms():
     query_dict = args_to_dict(request.args)
     query_dict['meta.guider'] = [current_user.username]
     try:
-        (forms, total) = controller.FormController.query_forms(query_dict=query_dict)
+        (forms, total) = controller.FormController.query_forms(query_dict=query_dict, simple=True)
     except CustomError as e:
         return jsonify({
             'code': e.code,

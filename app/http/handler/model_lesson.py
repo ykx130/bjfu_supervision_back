@@ -135,7 +135,8 @@ def update_model_lesson(id):
 @login_required
 def model_lesson_vote(lesson_id):
     try:
-        controller.ModelLessonController.model_lesson_vote(lesson_id=lesson_id, vote=request.json.get('vote', True))
+        # controller.ModelLessonController.model_lesson_vote(lesson_id=lesson_id, vote=request.json.get('vote', True))
+        pass
     except CustomError as e:
         return jsonify({
             'code': e.code,

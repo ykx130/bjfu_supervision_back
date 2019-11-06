@@ -2,7 +2,7 @@
 @Description: In User Settings Edit
 @Author: your name
 @Date: 2019-10-03 21:09:28
-@LastEditTime: 2019-10-05 00:23:21
+@LastEditTime: 2019-11-06 19:52:19
 @LastEditors: Please set LastEditors
 '''
 import app.core.dao as dao
@@ -303,8 +303,7 @@ def update_database(info: dict = None):
  
     return True
 
-
-if __name__ == '__main__':
+def run():
     parser = argparse.ArgumentParser()
     parser.add_argument('--term', '-t', help='请输入学期', default='2019-2020-1')
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
@@ -317,3 +316,7 @@ if __name__ == '__main__':
             'charset': args.charset}
     print('begin {}'.format(info))
     update_database(info=info)
+
+
+if __name__ == '__main__':
+    run()

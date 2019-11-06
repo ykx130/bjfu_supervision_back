@@ -1,7 +1,7 @@
 import app.core.dao as dao
 from app.utils.Error import CustomError
 from app.utils.kafka import send_kafka_message
-from app.core.services import NoticeService, FormService
+from app.core.services import NoticeService, FormService, ModelLessonService, LessonService
 
 from app import redis_cli
 import json
@@ -70,7 +70,11 @@ class FormController(object):
         if not FormService.check_lesson_meta(meta):
             raise CustomError(500, 200, '该督导在该时间段, 听过别的课!时间冲突!')
         dao.Form.insert_form(data)
+        
+
         form_model = dao.Form.formatter_total(data)
+        LessonService.refresh_notices(data.get("meta", {}).get("lesson", {}).get("lesson_id"))        #刷新听课次数
+        ModelLessonService.refresh_vote_nums(data.get("meta", {}).get("lesson", {}).get("lesson_id"))        #刷新好评课程次数
         send_kafka_message(topic='form_service',
                            method='add_form',
                            term=meta.get('term', None),
@@ -86,10 +90,10 @@ class FormController(object):
         return form
 
     @classmethod
-    def query_forms(cls, query_dict: dict = None, unscoped: bool = False):
+    def query_forms(cls, query_dict: dict = None, unscoped: bool = False, simple=False):
         if query_dict is None:
             query_dict = dict()
-        (forms, total) = dao.Form.query_forms(query_dict=query_dict, unscoped=unscoped)
+        (forms, total) = dao.Form.query_forms(query_dict=query_dict, unscoped=unscoped, simple=simple)
         return [cls.formatter(form) for form in forms], total
 
     @classmethod
