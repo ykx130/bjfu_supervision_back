@@ -1,6 +1,7 @@
 import json
 from app.streaming import sub_kafka
 from app.core.services import FormService, InterfaceService
+from multiprocessing import Process, Queue
 
 
 @sub_kafka('form_service')
@@ -20,4 +21,9 @@ def calculate_form_server(method, args):
 
 
 if __name__ == '__main__':
-    calculate_form_server()
+    processes = [
+        Process(target=calculate_form_server),
+    ]
+    [p.start() for p in processes]
+    [p.join() for p in processes]
+

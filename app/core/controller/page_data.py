@@ -28,7 +28,7 @@ class PageDataController():
         else:
             wait_submitted_form = json.loads(wait_submitted_form)
 
-        data_dict["sys:submitted_form"] = wait_submitted_form
+        data_dict["sys:wait_submitted_form"] = wait_submitted_form
         data_dict["sys:submitted_form"] = submitted_form
         now_term = TermService.get_now_term()
         data_dict["sys:guider_num"] = dao.Supervisor.count(query_dict={'term': [now_term['name']]})

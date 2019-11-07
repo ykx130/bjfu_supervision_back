@@ -18,8 +18,9 @@ class InterfaceService:
             "status": ["已完成"]
         })
         _, wait_submitted_form_num = dao.Form.query_forms(query_dict={
-            "status": ["待提交"]
+            "status": ["待提交", "草稿"]
         })
+        print("has_submitted_num", has_submitted_num, "wait", wait_submitted_form_num)
         for unit in UNIT_LIST:
             _, submit_unit_num = dao.Form.query_forms(query_dict={
                 "status": ["已完成"],
@@ -28,3 +29,8 @@ class InterfaceService:
             redis_cli.set('sys:form_num:{unit}'.format(unit=unit), str(submit_unit_num))
         redis_cli.set("sys:submitted_form", json.dumps(has_submitted_num))
         redis_cli.set("sys:wait_submitted_form", json.dumps(wait_submitted_form_num))
+        
+
+
+if __name__ == "__main__":
+    InterfaceService.update_page_data()
