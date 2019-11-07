@@ -342,7 +342,7 @@ class Form(object):
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
                 'bind_meta_version': data.get('bind_meta_version', None),
-                'values': data.get('values', []),
+               # 'values': data.get('values', []),
                 "model_lesson": data.get("model_lesson", {}),
                 'toptip': data.get('toptip', ''),
             }
@@ -363,7 +363,7 @@ class Form(object):
                 'bind_meta_id': data.get('bind_meta_id', None),
                 'bind_meta_name': data.get('bind_meta_name', None),
                 'bind_meta_version': data.get('bind_meta_version', None),
-                # 'values': data.get('values', []),
+                'values': data.get('values', []),
                 "model_lesson": data.get("model_lesson", {}),
                 'toptip': data.get('toptip', ''),
             }
