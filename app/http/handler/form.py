@@ -129,3 +129,20 @@ def get_my_forms():
 @login_required
 def get_form_map(name):
     return jsonify(controller.FormController.get_form_map(name))
+
+
+@form_blueprint.route('/form/excel/export', methods=['POST'])
+@login_required
+def form_excel_export():
+    try:
+        filename = controller.FormController.form_excel_export(data=request.json)
+    except CustomError as e:
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'filename': filename
+    }), 200
