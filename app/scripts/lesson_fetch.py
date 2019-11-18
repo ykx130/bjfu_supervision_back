@@ -14,7 +14,7 @@ import json
 from datetime import datetime, timedelta
 import re
 import argparse
-from app import app
+from app import app, db as sup_db
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 
@@ -260,6 +260,10 @@ def update_database(info: dict = None):
     cursor = get_cursor(info=info)
     term = info.get('term', None)
     raw_lessons = query_raw_lessons(cursor, term)
+
+    dao.LessonCase.query.delete()
+    sup_db.session.commit()
+
     
     def update_one_lesson(raw_lesson):
         if raw_lesson['lesson_teacher_name'] == '':

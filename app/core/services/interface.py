@@ -4,6 +4,7 @@ from collections import Counter
 from app import redis_cli
 from app.core import dao
 from app.core.const import UNIT_LIST
+from app.utils.mongodb import mongo
 
 class InterfaceService:
 
@@ -30,6 +31,36 @@ class InterfaceService:
         redis_cli.set("sys:submitted_form", json.dumps(has_submitted_num))
         redis_cli.set("sys:wait_submitted_form", json.dumps(wait_submitted_form_num))
         
+    
+        # 评价情况数据刷新
+        satisfy_num = mongo.db.form.count({
+            "values": {
+                "$elemMatch":{ "title": "总体评价", "value":{
+                    "$in": ["1","2"]
+                } } 
+            }
+        })
+
+        just_num = mongo.db.form.count({
+            "values": {
+                "$elemMatch":{ "title": "总体评价", "value":{
+                    "$in": ["3"]
+                } } 
+            }
+        })
+
+        unsatisfy_num = mongo.db.form.count({
+            "values": {
+                "$elemMatch":{ "title": "总体评价", "value":{
+                    "$in": ["4","5"]
+                } } 
+            }
+        })
+
+        print("总体评价 满意 {} 一般 {} 不满意 {}".format(satisfy_num, just_num, unsatisfy_num))
+        redis_cli.set("sys:form_statisfy_num", json.dumps(satisfy_num))
+        redis_cli.set("sys:form_just_num", json.dumps(just_num))
+        redis_cli.set("sys:form_unsatisfy_num", json.dumps(unsatisfy_num))
 
 
 if __name__ == "__main__":
