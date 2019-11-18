@@ -2,6 +2,8 @@ import app.core.dao as dao
 from app.utils.Error import CustomError
 from app.utils.kafka import send_kafka_message
 from app.core.services import NoticeService, FormService, ModelLessonService, LessonService
+import pandas
+import datetime
 
 from app import redis_cli
 import json
@@ -70,7 +72,7 @@ class FormController(object):
         if not FormService.check_lesson_meta(meta):
             raise CustomError(500, 200, '该督导在该时间段, 听过别的课!时间冲突!')
         dao.Form.insert_form(data)
-        
+
 
         form_model = dao.Form.formatter_total(data)
         LessonService.refresh_notices(data.get("meta", {}).get("lesson", {}).get("lesson_id"))        #刷新听课次数
@@ -157,3 +159,93 @@ class FormController(object):
             'item_map': item_map,
             'word_cloud': word_cloud
         }
+
+    @classmethod
+    def form_excel_export(cls,data:dict=None):
+        """[表格导出]
+        
+        Keyword Arguments:
+            data {dict} -- [term,bind_meta_name,]] (default: {None})
+        
+        Returns:
+            [type] -- [filename]
+        """
+        
+        if data is None:
+            data = dict()
+        forms,num=dao.Form.query_forms(query_dict=data) # 过滤选择符合条件的form
+        meta_form_dict = {'当前学期':'term','督导姓名':'guider_name','填表时间':'created_at','指定小组':'guider_group'}
+        lesson_form_dict={'任课教师':'lesson_teacher_name','教师所在学院':'lesson_teacher_unit',
+                      '上课班级':'lesson_class','上课地点':'lesson_room','听课时间':'lesson_date',
+                      '听课节次':'lesson_times','课程名称':'lesson_name','章节目录':'content'}
+        excel_dict=dict() # form内容
+        option_dict=dict() # 选项内容
+
+
+        for form in forms:
+            
+            for key,value in meta_form_dict.items(): # 从form匹配meta_form_dict中的value 并将meta_form_dict中的key作为字段名
+                excel_value=form['meta'][meta_form_dict[key]] 
+                if key not in excel_dict:
+                    excel_dict[key]=[excel_value]
+                else:
+                    excel_dict[key].append(excel_value)
+            excel_dict['评价状态']=form['status']
+            
+            for key,value in lesson_form_dict.items(): # 从form匹配lesson_form_dict中的value 并将lesson_form_dict中的key作为字段名
+                excel_value=form['meta']['lesson'][lesson_form_dict[key]]
+                if key not in excel_dict:
+                    excel_dict[key]=[excel_value]
+                else:
+                    excel_dict[key].append(excel_value)
+            
+            for key in form: # 遍历form找到values
+                #import ipdb; ipdb.set_trace()
+                if key=='values':
+                    options=form['values']
+                    option_len=len(options)
+                    
+                    for i in range(option_len): # form中的单选项,提取item_name作为字段名,根据value得到选择项的label
+                        if options[i]['item_type']=='radio_option':
+                            key=options[i]['item_name']
+                            choose=options[i]['payload']['options']
+                            val=''
+                            for key_choose in range(len(choose)):
+                                if choose[key_choose]['value']==options[i]['value']:
+                                    val=choose[key_choose]['label']                               
+                            if key not in  option_dict:
+                                option_dict[key]=[val]
+                            else:
+                                option_dict[key].append(val)
+                        
+                        if options[i]['item_type']=='raw_text': # form中的文本项,提取item_name作为字段名,根据value得到填写的文本
+                            key=options[i]['item_name']
+                            if key not in  option_dict:
+                                option_dict[key]=[options[i]['value']]
+                            else:
+                                option_dict[key].append(options[i]['value'])
+                        
+                        if options[i]['item_type']=='checkbox_option': # form中的多选项,遍历options,将options中的label作为字段名,如果value中存在字段名则该字段的值为1,否则为0
+                            for l in range(len(options[i]['payload']['options'])):
+                                key=options[i]['payload']['options'][l]['label']
+                                if key in options[i]['value']:
+                                    value=1
+                                else:
+                                    value=0
+                                if key not in  option_dict:
+                                    option_dict[key]=[value]
+                                else:
+                                    option_dict[key].append(value)
+            excel_dict.update(option_dict)       
+  
+        try:
+            frame = pandas.DataFrame(excel_dict)
+            from app import basedir
+            filename = '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123', index=False, header=True)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return filename                    
+
+
