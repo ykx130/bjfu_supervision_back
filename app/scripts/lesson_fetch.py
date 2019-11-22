@@ -69,7 +69,7 @@ def get_cursor(info: dict):
     lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
                                 cursorclass=pymysql.cursors.DictCursor)
     cursor = lesson_db.cursor()
-    return cursor
+    return cursor   
 
 
 def query_raw_lessons(cursor, term=None):

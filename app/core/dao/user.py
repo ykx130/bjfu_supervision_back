@@ -290,7 +290,8 @@ class Supervisor(db.Model):
             'is_grouper': supervisor.grouper,
             'is_main_grouper': supervisor.main_grouper,
             'work_state': supervisor.work_state,
-            'term': supervisor.term
+            'term': supervisor.term,
+            'name': supervisor.name
         }
         return supervisor_dict
 
