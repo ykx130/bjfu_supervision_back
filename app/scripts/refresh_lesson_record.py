@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-21 10:07:59
-@LastEditTime: 2019-11-21 12:26:23
+@LastEditTime: 2019-11-22 11:34:22
 @LastEditors: Please set LastEditors
 @Description: In User Settings Editfrom
 @FilePath: /bjfu_supervision_back/app/scripts/refresh_lesson_record.py
@@ -9,7 +9,7 @@
 
 from app.core import dao
 from app import app
-
+from app.core.services import LessonService
 ctx = app.app_context()
 ctx.push()
 
@@ -26,34 +26,7 @@ def get_all_guider():
 def inser_lesson_record():
     guiders = get_all_guider() 
     for guider in guiders:
-        _, total = dao.Form.query_forms(query_dict={
-            "meta.guider": guider.get("username"),
-            "meta.term": term
-        })
-
-        _, has_submit = dao.Form.query_forms(query_dict={
-            "meta.guider": guider.get("username"),
-            "meta.term":term,
-            "status": "已完成"
-        })
-
-        _, wait_submit = dao.Form.query_forms(query_dict={
-            "meta.guider": guider.get("username"),
-            "meta.term":term,
-            "status": "待提交"
-        })
-        
-        print("数量 {} {} {}".format(total, has_submit, wait_submit))
-        dao.LessonRecord.insert_lesson_record(data={
-            "username": guider.get("username"),
-            "name": guider.get("name"),
-            "group_name": guider.get("group_name"),
-            "to_be_submitted": wait_submit,
-            "has_submitted": has_submit,
-            "total_times": total,
-            "using": 1,
-            "term": term
-        })
+        LessonService.refresh_lesson_record(guider)
 
 if __name__ == "__main__":
     inser_lesson_record()

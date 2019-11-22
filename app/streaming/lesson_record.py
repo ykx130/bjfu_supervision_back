@@ -1,5 +1,13 @@
+'''
+@Author: your name
+@Date: 2019-08-29 21:09:59
+@LastEditTime: 2019-11-22 11:36:37
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /bjfu_supervision_back/app/streaming/lesson_record.py
+'''
 from app.streaming import sub_kafka
-from app.core import dao
+from app.core import dao,services
 from multiprocessing import Process, Queue
 
 
@@ -14,38 +22,12 @@ def lesson_record_by_form_server(method, args):
         return
 
     if method == 'add_form' or method == 'repulse_form':
-        # 更新听课记录
-        print(args)
-        _, total = dao.Form.query_forms(query_dict={
-            "meta.guider": args.get("username"),
-            "meta.term": args.get("term")
+        guider = dao.Supervisor.get_supervisor(query_dict={
+            "username": args.get("username"),
+            "term": args.get("term")
         })
-
-        _, has_submit = dao.Form.query_forms(query_dict={
-            "meta.guider": args.get("username"),
-            "meta.term": args.get("term"),
-            "status": "已完成"
-        })
-
-        _, wait_submit = dao.Form.query_forms(query_dict={
-            "meta.guider": args.get("username"),
-            "meta.term": args.get("term"),
-            "status": "待提交"
-        })
-        
-        print("数量 {} {} {}".format(total, has_submit, wait_submit))
-        ok=dao.LessonRecord.update_lesson_record(
-            query_dict={
-                "username": args.get("username"),
-                "term": args.get("term")
-            },
-            data={
-                "to_be_submitted": wait_submit,
-                "has_submitted": has_submit,
-                "total_times": total
-            }
-        ) 
-        print("RES:{}".format(ok))
+        if guider:
+            services.LessonService.refresh_lesson_record(guider)
 
 @sub_kafka('user_service')
 def user_service_server(method, args):

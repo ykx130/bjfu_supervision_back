@@ -124,6 +124,13 @@ class LessonRecord(db.Model):
     to_be_submitted = db.Column(db.Integer, nullable=False, default=0)
     has_submitted = db.Column(db.Integer, nullable=False, default=0)
     total_times = db.Column(db.Integer, nullable=False, default=0)
+
+    finish_total_times = db.Column(db.Integer, nullable=False, default=0)
+    finish_1_times = db.Column(db.Integer, nullable=False, default=0)
+    finish_2_times = db.Column(db.Integer, nullable=False, default=0)
+    finish_3_times = db.Column(db.Integer, nullable=False, default=0)
+    finish_4_times = db.Column(db.Integer, nullable=False, default=0)
+
     using = db.Column(db.Boolean, nullable=True, default=True)
 
     @classmethod
@@ -131,16 +138,7 @@ class LessonRecord(db.Model):
         if lesson_record is None:
             return None
         try:
-            lesson_record_dict = {
-                'id': lesson_record.id,
-                'username': lesson_record.username,
-                'name': lesson_record.name,
-                'term': lesson_record.term,
-                'group_name': lesson_record.group_name,
-                'to_be_submitted': lesson_record.to_be_submitted,
-                'has_submitted': lesson_record.has_submitted,
-                'total_times': lesson_record.total_times
-            }
+            lesson_record_dict = dict(lesson_record)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return lesson_record_dict
