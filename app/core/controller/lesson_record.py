@@ -166,7 +166,9 @@ class LessonRecordController(object):
         lesson_records,num=dao.LessonRecord.query_lesson_records(query_dict=data)
         column_dict={'用户名称':'username','所在分组':'group_name',
                      '当前学期': 'term','未提交':'to_be_submitted',
-                     '已提交':'has_submitted','提交总次数':'total_times'}
+                     '已提交':'has_submitted','完成总课时':'finish_total_times',
+                     '只听一节课':'finish_1_times','连续完成2课时':'finish_2_times',
+                     '连续完成3课时':'finish_3_times','连续完成4课时':'finish_4_times','提交总次数':'total_times'}
         frame_dict = dict()
         for lesson_record in lesson_records:
             for key, value in column_dict.items():
