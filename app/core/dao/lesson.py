@@ -1,6 +1,7 @@
 from app.utils.mysql import db
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
+from app.utils import misc
 from datetime import datetime
 from app.utils.misc import convert_string_to_date
 from sqlalchemy.sql import or_
@@ -138,7 +139,7 @@ class LessonRecord(db.Model):
         if lesson_record is None:
             return None
         try:
-            lesson_record_dict = dict(lesson_record)
+            lesson_record_dict = misc.model_to_dict(lesson_record)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return lesson_record_dict

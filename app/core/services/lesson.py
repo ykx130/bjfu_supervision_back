@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-06 17:19:25
-@LastEditTime: 2019-11-22 11:36:51
+@LastEditTime: 2019-11-22 11:43:28
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /bjfu_supervision_back_ykx/app/core/services/model_lesson.py
@@ -40,7 +40,7 @@ class LessonService:
         """
         print("刷新 guider : {}".format(guider))
         from . import term
-        term = term.TermService.get_now_term()['name']
+        term = term.TermService.get_now_term_no_cache()['name']
         _, total = dao.Form.query_forms(query_dict={
             "meta.guider": guider.get("username"),
             "meta.term": term

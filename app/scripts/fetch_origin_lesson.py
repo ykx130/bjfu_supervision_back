@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-05 16:43:07
-@LastEditTime: 2019-11-06 19:52:02
+@LastEditTime: 2019-11-22 11:39:11
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /bjfu_supervision_back_ykx/app/scripts/fetch_origin_lesson.py
@@ -14,9 +14,9 @@ import os
 from datetime import datetime
 
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
-
 ctx = app.app_context()
 ctx.push()
+
 
 
 def get_cursor(info: dict):

@@ -1,3 +1,11 @@
+'''
+@Author: your name
+@Date: 2019-11-22 11:46:29
+@LastEditTime: 2019-11-22 11:47:09
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edit
+@FilePath: /bjfu_supervision_back/app/utils/misc.py
+'''
 #!/usr/bin/env python
 # -_- coding: utf-8 -_-
 
@@ -54,3 +62,14 @@ def convert_ctt_to_utc(time_str, format="%Y-%m-%d %H:%M:%S"):
     o_time = datetime.strptime(time_str, format)
     o_time = o_time - timedelta(hours=8)
     return convert_datetime_to_string(o_time, format)
+
+
+def model_to_dict(result):
+    # 转换完成后，删除  '_sa_instance_state' 特殊属性
+    try:
+        tmp = dict(zip(result.__dict__.keys(), result.__dict__.values()))
+        tmp.pop('_sa_instance_state')
+        return tmp
+    except BaseException as e:
+        print(e.args)
+        raise TypeError('Type error of parameter')

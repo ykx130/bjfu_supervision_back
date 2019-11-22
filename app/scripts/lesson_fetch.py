@@ -2,7 +2,7 @@
 @Description: In User Settings Edit
 @Author: your name
 @Date: 2019-10-03 21:09:28
-@LastEditTime: 2019-11-06 19:52:19
+@LastEditTime: 2019-11-22 11:40:35
 @LastEditors: Please set LastEditors
 '''
 import app.core.dao as dao
@@ -18,6 +18,8 @@ from app import app, db as sup_db
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 
+ctx = app.app_context()
+ctx.push()
 
 def get_md5(raw):
     """
@@ -29,8 +31,6 @@ def get_md5(raw):
     m2.update(raw)
     return m2.hexdigest()
 
-ctx = app.app_context()
-ctx.push()
 
 def lesson_id_gen(raw_lesson_id, term,  lesson_teacher_id, lesson_week, lesson_weekday, lesson_room):
     return get_md5(str(raw_lesson_id + term + lesson_teacher_id+ lesson_week + lesson_weekday + lesson_room ).encode('utf-8'))

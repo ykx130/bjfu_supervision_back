@@ -2,7 +2,7 @@
 @Description: In User Settings Edit
 @Author: your name
 @Date: 2019-09-30 20:45:11
-@LastEditTime: 2019-10-05 10:12:57
+@LastEditTime: 2019-11-22 16:02:29
 @LastEditors: Please set LastEditors
 '''
 import app.core.dao as dao
@@ -269,8 +269,9 @@ class ModelLessonController(object):
                     fail_lessons.append({**lesson_filter, 'reason': '好评课已经存在'})
                     continue
                 model_lesson_data['term'] = term
+            
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
-                                            data={'lesson_model': '推荐课'})
+                                            data={'lesson_model': '推荐为好评课'})
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
             if ctx:
                 db.session.commit()

@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-21 10:07:59
-@LastEditTime: 2019-11-22 11:34:22
+@LastEditTime: 2019-11-22 11:41:34
 @LastEditors: Please set LastEditors
 @Description: In User Settings Editfrom
 @FilePath: /bjfu_supervision_back/app/scripts/refresh_lesson_record.py
