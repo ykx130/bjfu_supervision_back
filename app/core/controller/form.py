@@ -173,6 +173,7 @@ class FormController(object):
         
         if data is None:
             data = dict()
+        print(data)
         forms,num=dao.Form.query_forms(query_dict=data) # 过滤选择符合条件的form
         meta_form_dict = {'当前学期':'term','督导姓名':'guider_name','填表时间':'created_at','指定小组':'guider_group'}
         lesson_form_dict={'任课教师':'lesson_teacher_name','教师所在学院':'lesson_teacher_unit',
@@ -193,7 +194,7 @@ class FormController(object):
             excel_dict['评价状态']=form['status']
             
             for key,value in lesson_form_dict.items(): # 从form匹配lesson_form_dict中的value 并将lesson_form_dict中的key作为字段名
-                excel_value=form['meta']['lesson'][lesson_form_dict[key]]
+                excel_value=form['meta']['lesson'].get(lesson_form_dict[key], '')
                 if key not in excel_dict:
                     excel_dict[key]=[excel_value]
                 else:

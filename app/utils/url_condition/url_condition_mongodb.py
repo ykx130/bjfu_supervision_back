@@ -1,3 +1,11 @@
+'''
+@Author: your name
+@Date: 2019-11-23 18:09:17
+@LastEditTime: 2019-11-23 18:09:33
+@LastEditors: Please set LastEditors
+@Description: In User Settings Edi
+@FilePath: /bjfu_supervision_back/app/utils/url_condition/url_condition_mongodb.py
+'''
 import json
 from flask_pymongo import ObjectId
 
@@ -70,7 +78,7 @@ class UrlCondition(object):
 
 class Paginate(object):
     def __init__(self, _data, page_dict):
-        self.per_page = page_dict.get('_per_page', 20)
+        self.per_page = page_dict.get('_per_page', 1000000)
         self.page = page_dict.get('_page', 1)
         self.total = _data.count()
         self.page_num = self.total // self.per_page + 1 if self.total % self.per_page != 0 else self.total // self.per_page

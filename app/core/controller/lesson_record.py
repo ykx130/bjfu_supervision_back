@@ -164,7 +164,7 @@ class LessonRecordController(object):
         if data is None:
             data = dict()
         lesson_records,num=dao.LessonRecord.query_lesson_records(query_dict=data)
-        column_dict={'用户名称':'username','所在分组':'group_name',
+        column_dict={'用户工号':'username','用户姓名':'name','所在分组':'group_name',
                      '当前学期': 'term','未提交':'to_be_submitted',
                      '已提交':'has_submitted','完成总课时':'finish_total_times',
                      '只听一节课':'finish_1_times','连续完成2课时':'finish_2_times',
