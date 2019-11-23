@@ -1,12 +1,12 @@
 '''
 @Author: your name
 @Date: 2019-11-21 23:27:08
-@LastEditTime: 2019-11-21 23:57:10
+@LastEditTime: 2019-11-23 08:56:13
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edi
 @FilePath: /bjfu_supervision_back/schedule_task.py
 '''
-from app.scripts import lesson_fetch, fetch_origin_lesson, mongodb_back
+from app.scripts import lesson_fetch, fetch_origin_lesson, mongodb_back, refresh_lesson_record
 import schedule
 import time
 
@@ -16,12 +16,19 @@ def job_refresh_lesson():
      'year': '2019-2020', 'semester': '1'} 
     fetch_origin_lesson.update_database(info=origin_info)
 
-    lesson_info = {'term': '2019-2020-1', 'host': 'localhost', 'user': 'rot', 'passwd': 'Root!!2018', 'db': 'supervision',
+    lesson_info = {'term': '2019-2020-1', 'host': 'localhost', 'user': 'root', 'passwd': 'Root!!2018', 'db': 'supervision',
             'charset': 'utf8'}
     lesson_fetch.update_database(info=lesson_info)
 
-schedule.every().day.at("22:00").do(job_refresh_lesson)
+schedule.every().day.at("23:35").do(job_refresh_lesson)
 schedule.every(5).hours.do(mongodb_back.run_back)
+schedule.every().day.at("09:00").do(refresh_lesson_record.inser_lesson_record)
+schedule.every().day.at("12:00").do(refresh_lesson_record.inser_lesson_record)
+schedule.every().day.at("14:00").do(refresh_lesson_record.inser_lesson_record)
+schedule.every().day.at("17:00").do(refresh_lesson_record.inser_lesson_record)
+schedule.every().day.at("19:00").do(refresh_lesson_record.inser_lesson_record)
+
+
 
 
 if __name__ == "__main__":

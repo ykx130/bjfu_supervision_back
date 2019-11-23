@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-06 19:46:03
-@LastEditTime: 2019-11-21 12:44:48
+@LastEditTime: 2019-11-22 11:40:10
 @LastEditors: Please set LastEditors
 @Description: In User Settings Ediz
 @FilePath: /bjfu_supervision_back_ykx/app/scripts/refresh_model_lesson_vote.py
@@ -11,8 +11,6 @@ from app.core.services import LessonService,ModelLessonService
 from app.core import dao
 from app import app
 
-ctx = app.app_context()
-ctx.push()
 
 def run():
     model_lessons, num = dao.ModelLesson.query_model_lessons()

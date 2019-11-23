@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-06 17:19:25
-@LastEditTime: 2019-11-22 11:43:28
+@LastEditTime: 2019-11-23 08:52:46
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edit
 @FilePath: /bjfu_supervision_back_ykx/app/core/services/model_lesson.py
@@ -55,7 +55,7 @@ class LessonService:
         _, wait_submit = dao.Form.query_forms(query_dict={
             "meta.guider": guider.get("username"),
             "meta.term":term,
-            "status": "待提交"
+            "status": ["待提交", "草稿"]
         })
 
         finish_times = {
