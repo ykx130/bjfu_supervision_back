@@ -36,7 +36,7 @@ class UrlCondition(object):
         self.filter_dict = dict()
         order_list = []
         sort_list = []
-        filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne']
+        filter_list = ['_lt', '_lte', '_gt', '_gte', '_ne','_like']
         for key, value in url_args.items():
             if type(value) is not list:
                 value = [value]
@@ -56,8 +56,11 @@ class UrlCondition(object):
                     for item in filter_list:
                         if item in key and key.endswith(item):
                             isEqual = False
-                            key = key[:len(key) - len(item)]
-                            self.filter_dict[key] = {'${}'.format(item[1:]): v}
+                            if item == '_like':
+                                self.filter_dict[key[:len(key) - len('_like')]] = {'$regex': v}
+                            else:
+                                key = key[:len(key) - len(item)]
+                                self.filter_dict[key] = {'${}'.format(item[1:]): v}
                             break
                     if isEqual:
                         if key not in self.filter_dict:
@@ -95,7 +98,7 @@ def sort_limit(datas, sort_limit_dict):
     _sort_dict = sort_limit_dict.get('_sort_dict', [])
     if _limit is not None:
         dataspage = dataspage.limit(_limit)
-    if len(_sort_dict)>0:
+    if len(_sort_dict) > 0:
         print(_sort_dict)
         dataspage = dataspage.sort(_sort_dict)
     return dataspage
