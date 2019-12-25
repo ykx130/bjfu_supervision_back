@@ -50,19 +50,19 @@ class AuthController():
 
 
 class UserController():
-
+    role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '学院领导',
+                          'is_guider': '督导','is_reader':'校级管理员'}
     @classmethod
     def role_list(cls, user: dict, term: str):
-        role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '学院领导',
-                          'is_guider': '督导'}
+       
         role_names = ['教师']
-        for role_name_e, role_name_c in role_list_dict.items():
+        for role_name_e, role_name_c in cls.role_list_dict.items():
             if user.get(role_name_e, False):
                 role_names.append(role_name_c)
         if user['is_guider']:
             supervisor = dao.Supervisor.get_supervisor(query_dict={'username': user['username'], 'term': term})
             if supervisor:
-                for role_name_e, role_name_c in role_list_dict.items():
+                for role_name_e, role_name_c in cls.role_list_dict.items():
                     if supervisor.get(role_name_e, False):
                         role_names.append(role_name_c)
         return role_names
@@ -113,7 +113,7 @@ class UserController():
                 data['password'] = default_password
 
             role_names = data.get('role_names', [])
-            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader'}
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader'}
             for role_name in role_names:
                 role_name_filed = role_name_dict[role_name]
                 data[role_name_filed] = True
@@ -148,51 +148,15 @@ class UserController():
             user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
             if user is None:
                 raise CustomError(404, 404, 'user is not found')
+            
+            role_names = data.get('role_names', [])
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader'}
+            for role_name in role_name_dict.keys():
+                role_name_filed = role_name_dict[role_name]
+                data[role_name_filed] = True if role_name in role_names else False
             dao.User.update_user(ctx=False, username=username, data=data)
 
-            # supervisor role_name 变更
-            role_names = list(set(data.get('role_names', [])))
-            old_role_names = cls.role_list(user=user, term=term)
-            new_role_names = list(set(role_names) - set(old_role_names))
-            del_role_names = list(set(old_role_names) - set(role_names))
-            if '督导' in del_role_names:
-                del_role_names.remove('督导')
-                SupervisorController.delete_supervisor(ctx=False, username=username, term=term)
-            elif '督导' in new_role_names:
-                new_role_names.remove('督导')
-                SupervisorController.insert_supervisor(ctx=False, data=data)
-            if '小组长' in del_role_names:
-                del_role_names.remove('小组长')
-                supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
-                group_name = data['group_name'] if 'group_name' in data else supervisor['group_name']
-                SupervisorController.update_grouper(ctx=False, username=username, term=term,
-                                                    group_name=group_name, role_name='grouper', add=False)
-            elif '小组长' in new_role_names:
-                new_role_names.remove('小组长')
-                supervisor = dao.Supervisor.get_supervisor(query_dict={'username': username, 'term': term})
-                group_name = data.get('group_name', supervisor['group_name'])
-                (groupers, num) = dao.Supervisor.query_supervisors(
-                    query_dict={'term_gte': [term], 'grouper': [True], 'group_name': [group_name]})
-                if num > 0:
-                    grouper = groupers[0]
-                    SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
-                                                        group_name=group_name, role_name='grouper', add=False)
-                SupervisorController.update_grouper(ctx=False, username=username, term=term, group_name=group_name,
-                                                    role_name='grouper', add=True)
-            if '大组长' in del_role_names:
-                del_role_names.remove('大组长')
-                SupervisorController.update_grouper(ctx=False, username=username, term=term, role_name='main_grouper',
-                                                    add=False)
-            elif '大组长' in new_role_names:
-                new_role_names.remove('大组长')
-                (groupers, num) = dao.Supervisor.query_supervisors(
-                    query_dict={'term_gte': [term], 'main_grouper': [True]})
-                if num > 0:
-                    grouper = groupers[0]
-                    SupervisorController.update_grouper(ctx=False, username=grouper['username'], term=term,
-                                                        role_name='main_grouper', add=False)
-                SupervisorController.update_grouper(ctx=False, username=username, term=term, role_name='main_grouper',
-                                                    add=True)
+          
             if ctx:
                 db.session.commit()
         except Exception as e:
