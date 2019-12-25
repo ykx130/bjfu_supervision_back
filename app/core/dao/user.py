@@ -28,6 +28,8 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     is_leader = db.Column(db.Boolean, default=False)
     is_guider = db.Column(db.Boolean, default=False)
+    is_reader = db.Column(db.Boolean, default=False)
+
 
     @classmethod
     def formatter(cls, user):
@@ -47,14 +49,15 @@ class User(db.Model, UserMixin):
             'skill': user.skill,
             'is_guider': user.is_guider,
             'is_leader': user.is_leader,
-            'is_admin': user.is_admin
+            'is_admin': user.is_admin,
+            'is_reader': user.is_reader
         }
         return user_dict
 
     @classmethod
     def reformatter_update(cls, data: dict):
         allow_change_list = ['name', 'sex', 'password', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
-                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider']
+                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider','is_reader']
         update_data = dict()
         for key, value in data.items():
             if key in allow_change_list:
