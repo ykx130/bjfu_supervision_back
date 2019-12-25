@@ -10,7 +10,8 @@ UserRoleMap = {
     "main_grouper": "大组长",
     "leader": "学院领导",
     "guider": "督导",
-    "teacher": "教师"
+    "teacher": "教师",
+    'reader':"校级管理员"
 }
 
 
@@ -75,7 +76,7 @@ class Filter(object):
                 user = AuthController.get_current_user()
                 query_dict = dict()
                 query_dict.update(kwargs)
-
+                
                 if user is not None:
                     username = user.get('username')
                     user_id = user.get('id')
@@ -94,7 +95,7 @@ class Filter(object):
                     if term is None:
                         term = TermService.get_now_term()['name']
                         query_dict.update({'term': term})
-                    if current_role == '管理员':
+                    if current_role == '管理员' or current_role == '校级管理员':
                         query_dict = query_dict
                     elif current_role == '学院领导':
                         query_dict.update({'unit': [user['unit']]})
@@ -152,7 +153,7 @@ class Filter(object):
                     if term is None:
                         term = TermService.get_now_term()['name']
                         query_dict.update({'meta.term': term})
-                    if current_role == '管理员':
+                    if current_role == '管理员' or  current_role == '校级管理员':                       
                         query_dict = query_dict
                     elif current_role == '学院领导':
                         query_dict.update({'meta.lesson.lesson_teacher_unit': user.get('unit')})
