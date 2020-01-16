@@ -189,7 +189,8 @@ class FormController(object):
         meta_form_dict = {'当前学期':'term','督导姓名':'guider_name','填表时间':'created_at','指定小组':'guider_group'}
         lesson_form_dict={'任课教师':'lesson_teacher_name','教师所在学院':'lesson_teacher_unit',
                       '上课班级':'lesson_class','上课地点':'lesson_room','听课时间':'lesson_date',
-                      '听课节次':'lesson_times','课程名称':'lesson_name','章节目录':'content', }
+                      '听课节次':'lesson_times','课程名称':'lesson_name','章节目录':'content',
+                      '关注原因':'lesson_attention_reason' }
         excel_dict=dict() # form内容
         option_dict=dict() # 选项内容
 
@@ -213,9 +214,6 @@ class FormController(object):
                 else:
                     excel_dict[key].append(excel_value)
             excel_dict['评价状态']=form['status']
-
-            excel_dict['关注原因']= lesson_info["lesson_attention_reason"]
-
             
             for key,value in lesson_form_dict.items(): # 从form匹配lesson_form_dict中的value 并将lesson_form_dict中的key作为字段名
                 excel_value=form['meta']['lesson'].get(lesson_form_dict[key], '')
