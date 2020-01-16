@@ -202,8 +202,9 @@ class FormController(object):
                 notice_lesson = dao.NoticeLesson.get_notice_lesson({
                     "lesson_id": lesson_info.get("lesson_id")
                 })
-                if notice_lesson:
-            lesson_info["lesson_attention_reason"] = notice_lesson["lesson_attention_reason"]
+            
+            if notice_lesson:
+                lesson_info["lesson_attention_reason"] = notice_lesson["lesson_attention_reason"]
             
             for key,value in meta_form_dict.items(): # 从form匹配meta_form_dict中的value 并将meta_form_dict中的key作为字段名
                 excel_value=form['meta'][meta_form_dict[key]] 
