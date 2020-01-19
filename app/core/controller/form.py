@@ -212,7 +212,9 @@ class FormController(object):
                     excel_dict[key]=[excel_value]
                 else:
                     excel_dict[key].append(excel_value)
-            excel_dict['评价状态']=form['status']
+            if not excel_dict.get('评价状态'):
+                excel_dict["评价状态"] = list()
+            excel_dict["评价状态"].append(form["status"])
             
             for key,value in lesson_form_dict.items(): # 从form匹配lesson_form_dict中的value 并将lesson_form_dict中的key作为字段名
                 excel_value=form['meta']['lesson'].get(lesson_form_dict[key], '')
