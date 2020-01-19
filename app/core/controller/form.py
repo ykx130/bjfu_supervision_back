@@ -206,16 +206,11 @@ class FormController(object):
                 if notice_lesson:
                     lesson_info["lesson_attention_reason"] = notice_lesson["lesson_attention_reason"]
             
-            # 处理是否好评课
-            model_lesson = dao.ModelLesson.get_model_lesson({
-                    "lesson_id": lesson_info.get("lesson_id")
-                }) 
+ 
             
             if not excel_dict.get('是否为好评课入围'):
                 excel_dict['是否为好评课入围'] = list()
             
-            excel_dict['是否为好评课入围'].append( (model_lesson is not None) )
-
             for key,value in meta_form_dict.items(): # 从form匹配meta_form_dict中的value 并将meta_form_dict中的key作为字段名
                 excel_value=form['meta'][meta_form_dict[key]] 
                 if key not in excel_dict:
@@ -232,7 +227,12 @@ class FormController(object):
                     excel_dict[key]=[excel_value]
                 else:
                     excel_dict[key].append(excel_value)
-            
+                       # 处理是否好评课
+            model_lesson = dao.ModelLesson.get_model_lesson({
+                    "lesson_id": lesson_info.get("lesson_id")
+                }) 
+            excel_dict['是否为好评课入围'].append( (model_lesson is not None) )
+
             for key in form: # 遍历form找到values
                 #import ipdb; ipdb.set_trace()
                 if key=='values':
