@@ -212,7 +212,7 @@ class FormController(object):
                     "lesson_id": lesson_info.get("lesson_id")
                 }) 
             
-            if excel_dict.get('是否为好评课入围'):
+            if not excel_dict.get('是否为好评课入围'):
                 excel_dict['是否为好评课入围'] = list()
             
             excel_dict['是否为好评课入围'].append( (model_lesson is not None) )
