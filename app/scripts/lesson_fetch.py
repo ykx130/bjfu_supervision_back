@@ -32,10 +32,17 @@ def get_md5(raw):
     return m2.hexdigest()
 
 
-def lesson_id_gen(raw_lesson_id, term,  lesson_teacher_id, lesson_week, lesson_weekday, lesson_room):
-    return get_md5(str(raw_lesson_id + term + lesson_teacher_id+ lesson_week + lesson_weekday + lesson_room ).encode('utf-8'))
+def lesson_id_gen(raw_lesson_id, term, lesson_teacher_id):
+    """
+    得到md5格式的值
+    """
+    return get_md5(str(raw_lesson_id + term + lesson_teacher_id ).encode('utf-8'))
 
 def lesson_week_list(lesson_week):
+    """
+    得到课程上课的周次
+
+    """
     lesson_weeks = list()
     lesson_week_blocks = lesson_week.replace(' ', '').split(',')
     for lesson_week_block in lesson_week_blocks:
@@ -53,12 +60,18 @@ def lesson_week_list(lesson_week):
 
 
 def week_to_date(term_begin_time, week, weekday):
+    """
+    根据学期开始时间，周次，星期几计算日期
+    """
     time = convert_string_to_datetime(term_begin_time)
     date = time + timedelta((int(week) - 1) * 7 + int(weekday))
     return date.date()
 
 
 def get_cursor(info: dict):
+    """
+    连接数据库
+    """
     if info is None:
         info = {}
     host = info.get("host", "localhost")
@@ -69,10 +82,14 @@ def get_cursor(info: dict):
     lesson_db = pymysql.connect(host=host, user=user, passwd=passwd, db=database, charset=charset,
                                 cursorclass=pymysql.cursors.DictCursor)
     cursor = lesson_db.cursor()
-    return cursor   
+    return cursor
 
 
 def query_raw_lessons(cursor, term=None):
+    """
+
+    从数据库取出所需学期的课程并判断学期格式是否正确
+    """
     sql = "select distinct lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
          lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
           lesson_grade, lesson_week, lesson_weekday, lesson_room from origin_lessons"
@@ -82,6 +99,7 @@ def query_raw_lessons(cursor, term=None):
             raise CustomError(500, 200, 'term format is wrong')
         lesson_year = '-'.join(parts[0:2])
         lesson_semester = parts[2]
+        #过滤当前学期与与课程开课学期相符的课程
         filter_sql = "where lesson_year= '{lesson_year}'and lesson_semester = '{lesson_semester}'".format(
             lesson_year=lesson_year, lesson_semester=lesson_semester)
         sql = " ".join([sql, filter_sql])
@@ -91,6 +109,10 @@ def query_raw_lessons(cursor, term=None):
 
 
 def format_raw_lesson(data):
+    """
+
+    将教务处课程数据格式进行处理改为督导系统格式
+    """
     teachers = data['lesson_teacher_name'].replace(' ', '').split(',')
     data['lesson_raw_teacher_name'] = data['lesson_teacher_name']
     data['lesson_teacher_name'] = teachers
@@ -100,17 +122,14 @@ def format_raw_lesson(data):
     data['lesson_teacher_unit'] = teacher_units
     lesson_id = data['lesson_id']
     data['raw_lesson_id'] = lesson_id
-    
+
     term_name = '-'.join([data['lesson_year'],
                           str(data['lesson_semester'])]).replace(' ', '')
-
+    #lesson_id为教师、课程id和学期信息的集合
     data['lesson_id'] = [lesson_id_gen(
         raw_lesson_id=lesson_id,
         term=term_name,
-        lesson_teacher_id=teacher_id,
-        lesson_week=data['lesson_week'],
-        lesson_weekday=data['lesson_weekday'],
-        lesson_room = data['lesson_room']
+        lesson_teacher_id=teacher_id
     ) for teacher_id in teacher_ids]
 
     lesson_datas = list()
@@ -133,6 +152,10 @@ def format_raw_lesson(data):
 
 
 def update_lesson(query_dict: dict, data: dict):
+    """
+
+    更新课程
+    """
     not_allow_column = ['lesson_model',
                         'notices', 'lesson_level', 'lesson_state']
     new_data = dict()
@@ -143,6 +166,10 @@ def update_lesson(query_dict: dict, data: dict):
 
 
 def insert_term(term_name):
+    """
+
+    插入学期
+    """
     parts = term_name.split('-')
     if int(parts[2]) == 1:
         begin_year = parts[0]
@@ -162,11 +189,15 @@ def insert_term(term_name):
 
 
 def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_semester):
+    """
+
+    从数据库取出教务处中开课学期 教师姓名及id并格式化
+    """
     cursor.execute("select lesson_id,lesson_attribute, lesson_state, lesson_teacher_id, lesson_name, lesson_teacher_name,\
          lesson_semester, lesson_level, lesson_teacher_unit, lesson_unit, lesson_year, lesson_type, lesson_class,\
           lesson_grade, lesson_week, lesson_weekday, lesson_room, lesson_time from origin_lessons where lesson_id \
     ='{}' and lesson_teacher_name='{}' and lesson_year = '{}' and lesson_semester='{}'".format(
-        lesson_id, 
+        lesson_id,
     teacher_name,
     lesson_year,
     lesson_semester
@@ -177,15 +208,16 @@ def query_raw_lesson_cases(cursor, lesson_id, teacher_name, lesson_year, lesson_
 
 
 def format_raw_lesson_case(raw_lesson_case, lesson, lesson_id, term_begin_time, lesson_time_map):
+    """
+    处理课程具体信息（上课节次内置课程id等）
+
+    """
     lesson_case_datas = list()
     teacher_ids = raw_lesson_case['lesson_teacher_id'].replace(' ', '').split(',')
     inner_lessson_ids = [lesson_id_gen(
         raw_lesson_id= str(lesson['raw_lesson_id']),
         term= lesson['term'],
-        lesson_teacher_id=teacher_id,
-        lesson_week=raw_lesson_case['lesson_week'],
-        lesson_weekday=raw_lesson_case['lesson_weekday'],
-        lesson_room = raw_lesson_case['lesson_room']
+        lesson_teacher_id=teacher_id
     ) for teacher_id in teacher_ids]
     inner_lesson_id = inner_lessson_ids[0]
     if lesson['lesson_id'] in inner_lessson_ids:
@@ -241,6 +273,10 @@ def insert_lesson(data: dict):
 
 
 def insert_lesson_case(data: dict):
+    """
+
+    向数据库添加课程具体信息
+    """
     dao.LessonCase.insert_lesson_case(data=data)
 
 
@@ -249,23 +285,30 @@ def del_lesson_cases(query_dict: dict):
 
 
 def if_has_lesson(query_dict: dict):
+    """
+
+    判断课程是否存在
+    """
+
     lesson = dao.Lesson.get_lesson(query_dict=query_dict)
     return lesson
 
 def update_database(info: dict = None):
+    """
+    更新数据库
+    """
     lesson_time_map = {'01': '0102', '02': '0102', '03': '0304', '04': '0304', '05': '05',
                        '06': '0607', '07': '0607', '08': '0809', '09': '0809', '10': '10',
                        '11': '1112', '12': '1112', '13': '13', '14': '14'}
 
     cursor = get_cursor(info=info)
     term = info.get('term', None)
-    raw_lessons = query_raw_lessons(cursor, term)
+    raw_lessons = query_raw_lessons(cursor, term)#从数据库中过滤符合当前学期的课程
 
     dao.LessonCase.query.delete()
     sup_db.session.commit()
 
-    
-    def update_one_lesson(raw_lesson):
+    def update_one_lesson(raw_lesson):#更新一个课程
         if raw_lesson['lesson_teacher_name'] == '':
             return
         term_name = '-'.join([raw_lesson['lesson_year'],
@@ -275,12 +318,13 @@ def update_database(info: dict = None):
             term = insert_term(term_name=term_name)
 
         term_begin_time = term['begin_time']
-        lesson_datas = format_raw_lesson(raw_lesson)
+        lesson_datas = format_raw_lesson(raw_lesson)#将教务处课程转化为督导课程格式
 
         for lesson_data in lesson_datas:
             old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
             if old_lesson:
-                if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(old_lesson['lesson_class']) < 100:
+                if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(
+                        old_lesson['lesson_class']) < 100:
                     update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
                         'lesson_class' : old_lesson['lesson_class'] + lesson_data['lesson_class']
                     })
@@ -291,8 +335,8 @@ def update_database(info: dict = None):
             del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
                                                            teacher_name=lesson_data['lesson_raw_teacher_name'],
-                                                           lesson_year = raw_lesson['lesson_year'],
-                                                           lesson_semester = str(raw_lesson['lesson_semester']))
+                                                           lesson_year=raw_lesson['lesson_year'],
+                                                           lesson_semester=str(raw_lesson['lesson_semester']))
             for raw_lesson_case_data in raw_lesson_case_datas:
                 if raw_lesson_case_data['lesson_week'] == '' or raw_lesson_case_data['lesson_weekday'] == '':
                     continue
@@ -304,21 +348,30 @@ def update_database(info: dict = None):
                     insert_lesson_case(data=lesson_case_data)
     for raw_lesson in raw_lessons:
         update_one_lesson(raw_lesson)
- 
+
     return True
 
 def run():
+    """
+    设置默认参数
+
+    """
+    # 创建解析器
     parser = argparse.ArgumentParser()
+    #添加参数
     parser.add_argument('--term', '-t', help='请输入学期', default='2019-2020-1')
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
     parser.add_argument('--user', '-u', help='请输入用户名', default='root')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')
     parser.add_argument('--db', '-d', help='请输入数据库名', default='supervision')
     parser.add_argument('--charset', '-c', help='请输入编码格式', default='utf8')
+    #解析参数
     args = parser.parse_args()
     info = {'term': args.term, 'host': args.host, 'user': args.user, 'passwd': args.passwd, 'db': args.db,
             'charset': args.charset}
+    #格式化参数
     print('begin {}'.format(info))
+    #更新数据库
     update_database(info=info)
 
 
