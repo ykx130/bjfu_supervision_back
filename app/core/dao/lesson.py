@@ -922,6 +922,48 @@ class ModelLesson(db.Model):
                 raise CustomError(500, 500, str(e))
         return True
 
+class OtherModelLesson(db.Model):
+    __tablename__ = 'other_model_lessons'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_name = db.Column(db.String(32), default='')
+    lesson_attribute=db.Column(db.String(32), default='')
+    lesson_year=db.Column(db.String(32), default='')
+    lesson_semester =db.Column(db.String(32), default='')
+    lesson_teacher_name = db.Column(db.String(8), default='')
+    lesson_teacher_unit = db.Column(db.String)
+    group_name = db.Column(db.String(32), default='')
+
+    @classmethod
+    def insert_other_model_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        print(data)
+        other_model_lesson = OtherModelLesson()
+        for key, value in data.items():
+            if hasattr(other_model_lesson, key):
+                setattr(other_model_lesson, key, value)
+        db.session.add(other_model_lesson)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def query_other_model_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        query = OtherModelLesson.query
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, OtherModelLesson)
+            # (model_lessons, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [other_model_lesson for other_model_lesson in query]
+
+
 class OriginLessons(db.Model):
     __tablename__ = 'origin_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)

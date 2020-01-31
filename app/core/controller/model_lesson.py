@@ -57,6 +57,12 @@ class ModelLessonController(object):
         return [cls.formatter(model_lesson) for model_lesson in model_lessons], num
 
     @classmethod
+    def query_other_model_lessons(cls, query_dict: dict, unscoped: bool = False):
+        other_model_lessons, num = dao.OtherModelLesson.query_other_model_lessons(query_dict=query_dict, unscoped=unscoped)
+        return [other_model_lesson for other_model_lesson in other_model_lessons]
+
+
+    @classmethod
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
@@ -290,6 +296,10 @@ class ModelLessonController(object):
                             frame_dict[key] = [excel_value]
                         else:
                             frame_dict[key].append(excel_value)
+                if file_lesson['reason']== '没有课程':
+                    other_model_lesson=file_lesson
+                    del other_model_lesson['reason']
+                    dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data=other_model_lesson)
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
