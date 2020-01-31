@@ -23,7 +23,8 @@ class ModelLessonController(object):
         }, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
-        lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
+        lesson_keys = ['lesson_'
+                       'attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
                        'lesson_teacher_id', 'notices', 'term', 'lesson_class', 'lesson_unit', 'lesson_teacher_name']
         for lesson_key in lesson_keys:
             model_lesson[lesson_key] = lesson.get(lesson_key, '')
@@ -56,10 +57,6 @@ class ModelLessonController(object):
         model_lessons, num = dao.ModelLesson.query_model_lessons(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(model_lesson) for model_lesson in model_lessons], num
 
-    @classmethod
-    def query_other_model_lessons(cls, query_dict: dict, unscoped: bool = False):
-        other_model_lessons, num = dao.OtherModelLesson.query_other_model_lessons(query_dict=query_dict, unscoped=unscoped)
-        return [other_model_lesson for other_model_lesson in other_model_lessons]
 
 
     @classmethod
@@ -297,9 +294,16 @@ class ModelLessonController(object):
                         else:
                             frame_dict[key].append(excel_value)
                 if file_lesson['reason']== '没有课程':
-                    other_model_lesson=file_lesson
-                    del other_model_lesson['reason']
-                    dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data=other_model_lesson)
+                    dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
+                        'lesson_name':file_lesson['lesson_name'],
+                        'lesson_attribute':file_lesson['lesson_attribute'],
+                        'term': '-'.join([file_lesson['lesson_year'],
+                                              str(file_lesson['lesson_semester'])]).replace(' ', ''),
+                        'lesson_teacher_name':file_lesson['lesson_teacher_name'],
+                        'unit':file_lesson['lesson_teacher_unit'],
+                        'group_name':file_lesson['group_name'],
+                        'using':'true'
+                    })
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'

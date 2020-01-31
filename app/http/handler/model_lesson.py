@@ -6,26 +6,6 @@ from app.http.handler.filter import Filter
 from app.utils import CustomError, args_to_dict
 from app.http.handler.filter import Filter
 
-@model_lesson_blueprint.route('/model_lessons/other_model_lessons')
-@login_required
-def find_other_model_lessons(*args):
-    query_dict = {}
-    query_dict.update(args_to_dict(request.args))
-    # query_dict.update(kwargs)
-    print(query_dict)
-    try:
-        (other_model_lessons) = controller.ModelLessonController.query_other_model_lessons(query_dict=query_dict)
-    except CustomError as e:
-        return jsonify({
-            'code': e.code,
-            'msg': e.err_info,
-        }), e.status_code
-    return jsonify({
-        'code': 200,
-        # 'total': total,
-        'other_model_lessons': other_model_lessons,
-        'msg': ''
-    }), 200
 
 @model_lesson_blueprint.route('/model_lessons')
 @login_required
