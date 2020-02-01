@@ -284,7 +284,7 @@ class ModelLessonController(object):
             raise e
         file_path = None
         if fail_lessons:
-            frame_dict = {},
+            frame_dict = {}
             other_model_data={}
             for file_lesson in fail_lessons:
                 for key, value in column_dict.items():
