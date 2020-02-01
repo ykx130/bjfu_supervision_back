@@ -293,15 +293,15 @@ class ModelLessonController(object):
                             frame_dict[key] = [excel_value]
                         else:
                             frame_dict[key].append(excel_value)
-                if file_lesson['reason']== '没有课程':
+                if frame_dict['reason']== '没有课程':
                     dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
-                        'lesson_name':file_lesson['lesson_name'],
-                        'lesson_attribute':file_lesson['lesson_attribute'],
-                        'term': '-'.join([file_lesson['lesson_year'],
-                                              str(file_lesson['lesson_semester'])]).replace(' ', ''),
-                        'lesson_teacher_name':file_lesson['lesson_teacher_name'],
-                        'unit':file_lesson['lesson_teacher_unit'],
-                        'group_name':file_lesson['group_name'],
+                        'lesson_name':frame_dict['lesson_name'],
+                        'lesson_attribute':frame_dict['lesson_attribute'],
+                        'term': '-'.join([frame_dict['lesson_year'],
+                                              str(frame_dict['lesson_semester'])]).replace(' ', ''),
+                        'lesson_teacher_name':frame_dict['lesson_teacher_name'],
+                        'unit':frame_dict['lesson_teacher_unit'],
+                        'group_name':frame_dict['group_name'],
                         'using':'true'
                     })
             frame = pandas.DataFrame(frame_dict)
