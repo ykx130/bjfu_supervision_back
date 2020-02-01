@@ -284,6 +284,8 @@ class ModelLessonController(object):
             raise e
         file_path = None
         if fail_lessons:
+            import ipdb
+            ipdb.set_trace()
             frame_dict = {}
             other_model_data={}
             for file_lesson in fail_lessons:
