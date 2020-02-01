@@ -931,6 +931,7 @@ class OtherModelLesson(db.Model):
     lesson_teacher_name = db.Column(db.String(8), default='')
     unit = db.Column(db.String(32), default='')
     group_name = db.Column(db.String(32), default='')
+    using=db.Column(db.Boolean, default=True)
 
     @classmethod
     def insert_other_model_lesson(cls, ctx: bool = True, data: dict = None):
