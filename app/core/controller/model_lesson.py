@@ -297,8 +297,6 @@ class ModelLessonController(object):
                 if file_lesson['reason'] == '没有课程':
                     name=file_lesson['lesson_name'][0]
                     for i in range(0, row_num):
-                        import ipdb
-                        ipdb.set_trace()
                         if df.iloc[i]['课程名称'] == name:
                             for key, value in column_dict.items():
                                 other_model_data[value] = str(df.iloc[i].get(key, ''))
