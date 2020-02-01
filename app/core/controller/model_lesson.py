@@ -1154,6 +1154,7 @@ class ModelLessonController(object):
             raise e
         file_path = None
         if fail_lessons:
+<<<<<<< HEAD
 	 
  ipdb.set_trace()
             frame_dict = {}
@@ -1365,6 +1366,10 @@ class ModelLessonController(object):
             raise CustomError(500, 500, str(e))
         return filename
 	    ipdb.set_trace()
+=======
+            import ipdb
+            ipdb.set_trace()
+>>>>>>> 90209e6331da8a2ca6007eb83c627b9be8f9cdaa
             frame_dict = {}
             other_model_data={}
             for file_lesson in fail_lessons:
