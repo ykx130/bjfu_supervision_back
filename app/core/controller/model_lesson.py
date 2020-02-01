@@ -300,17 +300,17 @@ class ModelLessonController(object):
                         if df.iloc[i]['课程名称'] == name:
                             for key, value in column_dict.items():
                                 other_model_data[value] = str(df.iloc[i].get(key, ''))
-                    print(other_model_data)
-                    dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
-                        'lesson_name':other_model_data['lesson_name'],
-                        'lesson_attribute':other_model_data['lesson_attribute'],
-                        'term': '-'.join([other_model_data['lesson_year'],
-                                              str(other_model_data['lesson_semester'])]).replace(' ', ''),
-                        'lesson_teacher_name':other_model_data['lesson_teacher_name'],
-                        'unit':other_model_data['lesson_teacher_unit'],
-                        'group_name':other_model_data['group_name'],
-                        'using':'true'
-                    })
+                            print(other_model_data)
+                            dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
+                                'lesson_name':other_model_data['lesson_name'],
+                                'lesson_attribute':other_model_data['lesson_attribute'],
+                                'term': '-'.join([other_model_data['lesson_year'],
+                                                      str(other_model_data['lesson_semester'])]).replace(' ', ''),
+                                'lesson_teacher_name':other_model_data['lesson_teacher_name'],
+                                'unit':other_model_data['lesson_teacher_unit'],
+                                'group_name':other_model_data['group_name'],
+                                'using':'true'
+                            })
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
