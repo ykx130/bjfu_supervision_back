@@ -929,7 +929,7 @@ class OtherModelLesson(db.Model):
     lesson_attribute=db.Column(db.String(32), default='')
     term=db.Column(db.String(32), default='')
     lesson_teacher_name = db.Column(db.String(8), default='')
-    unit = db.Column(db.String)
+    unit = db.Column(db.String(32), default='')
     group_name = db.Column(db.String(32), default='')
 
     @classmethod
