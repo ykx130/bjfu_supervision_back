@@ -284,7 +284,8 @@ class ModelLessonController(object):
             raise e
         file_path = None
         if fail_lessons:
-            frame_dict = {}
+            frame_dict = {},
+            other_model_data={}
             for file_lesson in fail_lessons:
                 for key, value in column_dict.items():
                     if value in file_lesson:
@@ -293,15 +294,21 @@ class ModelLessonController(object):
                             frame_dict[key] = [excel_value]
                         else:
                             frame_dict[key].append(excel_value)
-                if frame_dict['reason']== '没有课程':
+                if file_lesson['reason'] == '没有课程':
+                    name=file_lesson['lesson_name']
+                    for i in range(0, row_num):
+                        if df.iloc[i]['课程名称'] == name:
+                            for key, value in column_dict.items():
+                                other_model_data[value] = str(df.iloc[i].get(key, ''))
+                    print(other_model_data)
                     dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
-                        'lesson_name':frame_dict['lesson_name'],
-                        'lesson_attribute':frame_dict['lesson_attribute'],
-                        'term': '-'.join([frame_dict['lesson_year'],
-                                              str(frame_dict['lesson_semester'])]).replace(' ', ''),
-                        'lesson_teacher_name':frame_dict['lesson_teacher_name'],
-                        'unit':frame_dict['lesson_teacher_unit'],
-                        'group_name':frame_dict['group_name'],
+                        'lesson_name':other_model_data['lesson_name'],
+                        'lesson_attribute':other_model_data['lesson_attribute'],
+                        'term': '-'.join([other_model_data['lesson_year'],
+                                              str(other_model_data['lesson_semester'])]).replace(' ', ''),
+                        'lesson_teacher_name':other_model_data['lesson_teacher_name'],
+                        'unit':other_model_data['lesson_teacher_unit'],
+                        'group_name':other_model_data['group_name'],
                         'using':'true'
                     })
             frame = pandas.DataFrame(frame_dict)
