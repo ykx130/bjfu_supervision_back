@@ -309,7 +309,7 @@ class ModelLessonController(object):
                                 'lesson_teacher_name':other_model_data['lesson_teacher_name'],
                                 'unit':other_model_data['lesson_teacher_unit'],
                                 'group_name':other_model_data['group_name'],
-                                'using':'true'
+                                'using':'True'
                             })
             frame = pandas.DataFrame(frame_dict)
             from app import basedir

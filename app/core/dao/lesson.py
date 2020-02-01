@@ -989,7 +989,7 @@ class OtherModelLesson(db.Model):
             'term': other_model_lesson.term,
             'lesson_teacher_name':other_model_lesson.lesson_teacher_name,
             'unit':other_model_lesson.unit,
-            'using':'other_model_lesson.using'
+            'using':other_model_lesson.using
         }
         return other_model_lesson_dict
 
