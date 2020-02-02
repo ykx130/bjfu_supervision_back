@@ -8,6 +8,7 @@ class OtherModelLessonController(object):
     def formatter(cls, other_model_lesson):
         if other_model_lesson is None:
             return None
+        print(other_model_lesson)
         other_model_lesson_dict = {
             # 'id': other_model_lesson.id,
             'group_name': other_model_lesson.group_name,
