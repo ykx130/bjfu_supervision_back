@@ -9,7 +9,7 @@ class OtherModelLessonController(object):
         if other_model_lesson is None:
             return None
         other_model_lesson_dict = {
-            'id': other_model_lesson.id,
+            # 'id': other_model_lesson.id,
             'group_name': other_model_lesson.group_name,
             'lesson_name': other_model_lesson.lesson_name,
             'lesson_attribute': other_model_lesson.lesson_attribute,
