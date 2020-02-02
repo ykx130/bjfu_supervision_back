@@ -23,7 +23,8 @@ class ModelLessonController(object):
         }, unscoped=True)
         if lesson is None:
             raise CustomError(404, 404, 'lesson not found')
-        lesson_keys = ['lesson_attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
+        lesson_keys = ['lesson_'
+                       'attribute', 'lesson_state', 'lesson_level', 'lesson_model', 'lesson_name',
                        'lesson_teacher_id', 'notices', 'term', 'lesson_class', 'lesson_unit', 'lesson_teacher_name']
         for lesson_key in lesson_keys:
             model_lesson[lesson_key] = lesson.get(lesson_key, '')
@@ -55,6 +56,8 @@ class ModelLessonController(object):
     def query_model_lessons(cls, query_dict: dict, unscoped: bool = False):
         model_lessons, num = dao.ModelLesson.query_model_lessons(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(model_lesson) for model_lesson in model_lessons], num
+
+
 
     @classmethod
     def insert_model_lesson(cls, ctx: bool = True, data: dict = None):
@@ -250,7 +253,7 @@ class ModelLessonController(object):
                     model_lesson_data[col_name_e] = str(df.iloc[i].get(col_name_c,''))
                     if col_name_e in filter_list:
                         lesson_filter[col_name_e] = [str(model_lesson_data[col_name_e])]
-                
+
                 lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
                 if total == 0:
                     fail_lessons.append({**lesson_filter, 'reason': '没有课程'})
@@ -269,7 +272,7 @@ class ModelLessonController(object):
                     fail_lessons.append({**lesson_filter, 'reason': '好评课已经存在'})
                     continue
                 model_lesson_data['term'] = term
-            
+
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
                                             data={'lesson_model': '推荐为好评课'})
                 dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
@@ -282,6 +285,7 @@ class ModelLessonController(object):
         file_path = None
         if fail_lessons:
             frame_dict = {}
+            other_model_data={}
             for file_lesson in fail_lessons:
                 for key, value in column_dict.items():
                     if value in file_lesson:
@@ -290,6 +294,23 @@ class ModelLessonController(object):
                             frame_dict[key] = [excel_value]
                         else:
                             frame_dict[key].append(excel_value)
+                if file_lesson['reason'] == '没有课程':
+                    name=file_lesson['lesson_name'][0]
+                    for i in range(0, row_num):
+                        if df.iloc[i]['课程名称'] == name:
+                            for key, value in column_dict.items():
+                                other_model_data[value] = str(df.iloc[i].get(key, ''))
+                            print(other_model_data)
+                            dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
+                                'lesson_name':other_model_data['lesson_name'],
+                                'lesson_attribute':other_model_data['lesson_attribute'],
+                                'term': '-'.join([other_model_data['lesson_year'],
+                                                      str(other_model_data['lesson_semester'])]).replace(' ', ''),
+                                'lesson_teacher_name':other_model_data['lesson_teacher_name'],
+                                'unit':other_model_data['lesson_teacher_unit'],
+                                'group_name':other_model_data['group_name'],
+                                'using':'True'
+                            })
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
@@ -311,7 +332,7 @@ class ModelLessonController(object):
         frame_dict = dict()
         for model_lesson in model_lessons:
             lesson = dao.Lesson.get_lesson(query_dict={
-                'lesson_id': model_lesson['lesson_id'], 
+                'lesson_id': model_lesson['lesson_id'],
                 'term': model_lesson['term']
             }, unscoped=True)
             if lesson is None:

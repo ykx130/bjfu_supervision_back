@@ -922,6 +922,80 @@ class ModelLesson(db.Model):
                 raise CustomError(500, 500, str(e))
         return True
 
+class OtherModelLesson(db.Model):
+    __tablename__ = 'other_model_lessons'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    lesson_name = db.Column(db.String(32), default='')
+    lesson_attribute=db.Column(db.String(32), default='')
+    term=db.Column(db.String(32), default='')
+    lesson_teacher_name = db.Column(db.String(8), default='')
+    unit = db.Column(db.String(32), default='')
+    group_name = db.Column(db.String(32), default='')
+    using=db.Column(db.Boolean, default=True)
+
+    @classmethod
+    def insert_other_model_lesson(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        print(data)
+        data = cls.reformatter_other_model(data)
+        print(data)
+        other_model_lesson = OtherModelLesson()
+        for key, value in data.items():
+            if hasattr(other_model_lesson, key):
+                setattr(other_model_lesson, key, value)
+        db.session.add(other_model_lesson)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def reformatter_other_model(cls, data: dict):
+        allow_column = ['lesson_name', 'lesson_attribute', 'term', 'lesson_teacher_name', 'unit', 'group_name','using']
+        new_data = dict()
+        for key, value in data.items():
+            if key in allow_column:
+                new_data[key] = value
+        return new_data
+
+    @classmethod
+    def query_other_model_lessons(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        query = OtherModelLesson.query
+        if not unscoped:
+            query = query.filter(OtherModelLesson.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, OtherModelLesson)
+            (other_model_lessons, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [cls.formatter(other_model_lesson) for other_model_lesson in other_model_lessons], total
+
+    @classmethod
+    def formatter(cls, other_model_lesson):
+        if other_model_lesson is None:
+            return None
+        # status_dict = {1: '推荐为好评课', 2: '待商榷'}
+        # status = status_dict[other_model_lesson.status]
+        other_model_lesson_dict = {
+            'id': other_model_lesson.id,
+            'group_name': other_model_lesson.group_name,
+            'lesson_name': other_model_lesson.lesson_name,
+            'lesson_attribute':other_model_lesson.lesson_attribute,
+            'term': other_model_lesson.term,
+            'lesson_teacher_name':other_model_lesson.lesson_teacher_name,
+            'unit':other_model_lesson.unit,
+            'using':other_model_lesson.using
+        }
+        return other_model_lesson_dict
+
+
+
 class OriginLessons(db.Model):
     __tablename__ = 'origin_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)

@@ -11,3 +11,4 @@ from app.core.controller.user import *
 from app.core.controller.notices import *
 from app.core.controller.page_data import *
 from app.core.controller.captcha import *
+from app.core.controller.other_model_lesson import *
