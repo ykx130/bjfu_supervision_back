@@ -12,7 +12,6 @@ from app.http.handler.filter import Filter
 def find_other_model_lessons(*args,**kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))
-    query_dict.update(kwargs)
     print(query_dict)
     try:
         (other_model_lessons,total) = controller.OtherModelLessonController.query_other_model_lessons(query_dict=query_dict)
