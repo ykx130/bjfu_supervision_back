@@ -966,6 +966,8 @@ class OtherModelLesson(db.Model):
         if query_dict is None:
             query_dict = {}
         query = OtherModelLesson.query
+        import ipdb
+        ipdb.set_trace()
         if not unscoped:
             query = query.filter(OtherModelLesson.using == True)
         url_condition = UrlCondition(query_dict)
