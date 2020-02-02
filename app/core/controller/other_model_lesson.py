@@ -10,14 +10,14 @@ class OtherModelLessonController(object):
             return None
         print(other_model_lesson)
         other_model_lesson_dict = {
-            # 'id': other_model_lesson.id,
-            'group_name': other_model_lesson.group_name,
-            'lesson_name': other_model_lesson.lesson_name,
-            'lesson_attribute': other_model_lesson.lesson_attribute,
-            'term': other_model_lesson.term,
-            'lesson_teacher_name': other_model_lesson.lesson_teacher_name,
-            'unit': other_model_lesson.unit,
-            'using': other_model_lesson.using
+            'id': other_model_lesson['id'],
+            'group_name': other_model_lesson['group_name'],
+            'lesson_name': other_model_lesson['lesson_name'],
+            'lesson_attribute': other_model_lesson['lesson_attribute'],
+            'term': other_model_lesson['term'],
+            'lesson_teacher_name': other_model_lesson['lesson_teacher_name'],
+            'unit': other_model_lesson['unit'],
+            'using': other_model_lesson['using']
         }
         return other_model_lesson_dict
 
