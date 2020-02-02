@@ -23,4 +23,5 @@ class OtherModelLessonController(object):
     @classmethod
     def query_other_model_lessons(cls, query_dict: dict, unscoped: bool = False):
         other_model_lessons, num = dao.OtherModelLesson.query_other_model_lessons(query_dict=query_dict, unscoped=unscoped)
+        print(other_model_lessons)
         return [cls.formatter(other_model_lesson) for other_model_lesson in other_model_lessons],num
