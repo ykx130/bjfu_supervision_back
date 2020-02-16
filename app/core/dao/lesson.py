@@ -475,34 +475,32 @@ class LessonCase(db.Model):
         return data
 
     @classmethod
-    def get_table(cls, query_dict: dict):
-        return lesson_case_function.items[query_dict['term']]
+    def get_table(cls, term: str):
+        return lesson_case_function[term]
 
     @classmethod
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        CaseClassName=cls.get_table()
-        query = CaseClassName.query
+        query=cls.query
         if not unscoped:
-            query = query.filter(CaseClassName.using == True)
+            query = query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, CaseClassName)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
 
     @classmethod
     def get_lesson_case(cls, query_dict: dict, unscoped: bool = False):
-        CaseClassName = cls.get_table()
-        lesson_case = CaseClassName.query
+        lesson_case = cls.query
         if not unscoped:
-            lesson_case = lesson_case.filter(CaseClassName.using == True)
+            lesson_case = lesson_case.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             lesson_case = process_query(lesson_case, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                        CaseClassName).first()
+                                        cls).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(lesson_case)
@@ -512,8 +510,7 @@ class LessonCase(db.Model):
         if data is None:
             data = {}
         data = cls.reformatter_insert(data)
-        CaseClassName = cls.get_table()
-        lesson_case = CaseClassName()
+        lesson_case = cls()
         for key, value in data.items():
             if hasattr(lesson_case, key):
                 setattr(lesson_case, key, value)
@@ -529,13 +526,12 @@ class LessonCase(db.Model):
     def query_lesson_cases(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        CaseClassName = cls.get_table()
-        query = CaseClassName.query
+        query = cls.query
         if not unscoped:
-            query = query.filter(CaseClassName.using == True)
+            query = query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, CaseClassName)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
             (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -545,11 +541,10 @@ class LessonCase(db.Model):
     def delete_lesson_case(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        CaseClassName = cls.get_table()
-        query = CaseClassName.query.filter(CaseClassName.using == True)
+        query = cls.query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, CaseClassName)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
             (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -570,11 +565,10 @@ class LessonCase(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        CaseClassName=cls.get_table()
-        query = CaseClassName.query.filter(CaseClassName.using == True)
+        query = cls.query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, CaseClassName)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
             (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -1056,7 +1050,7 @@ def create_all_lesson_case():
     for term in terms:
         term_dict[term.name.replace('-','_')]='lesson_case'+term.name.replace('-','_')
     for key,value in term_dict.items():
-        lesson_case=type(value, LessonCase,{'__tablename__':value})
+        lesson_case=type(value, (LessonCase,),{'__tablename__':value})
         lesson_case()
         lesson_case_function[key]=lesson_case
 
