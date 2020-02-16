@@ -64,7 +64,7 @@ class LessonController(object):
 
     @classmethod
     def formatter_with_cases(cls, lesson: dict = None):
-        (lesson_cases, _) = dao.LessonCase.query_lesson_cases(query_dict={
+        (lesson_cases, _) = dao.LessonCase.get_table(term=lesson.get('term')).query_lesson_cases(query_dict={
             'inner_lesson_id': [lesson.get('lesson_id')],
             'lesson_id': [lesson.get('id')]
         }, unscoped=False)
@@ -153,7 +153,7 @@ class LessonCaseController(object):
     def query_lesson_cases(cls, query_dict: dict = None, unscoped: bool = False):
         print(query_dict)
         query_dict['_per_page'] = 10000
-        (lesson_cases, num) = dao.LessonCase.query_lesson_cases(query_dict=query_dict, unscoped=unscoped)
+        (lesson_cases, num) = dao.LessonCase.get_table(term=query_dict['term']).query_lesson_cases(query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(lesson_case) for lesson_case in lesson_cases], num
 
 
