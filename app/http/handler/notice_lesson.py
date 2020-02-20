@@ -86,7 +86,7 @@ def find_notice_lesson(id, *args, **kwargs):
 @login_required
 def delete_notice_lesson(id):
     try:
-        controller.NoticeLessonController.delete_notice_lesson(id=id)
+        controller.NoticeLessonController.delete_notice_lesson(lesson_teacher_id=id)
     except CustomError as e:
         return jsonify({
             'code': e.code,

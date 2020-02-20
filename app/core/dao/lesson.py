@@ -588,15 +588,12 @@ class LessonCase(db.Model):
 class NoticeLesson(db.Model):
     __tablename__ = 'notice_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    lesson_id = db.Column(db.String(32), default=-1)
-    lesson_name = db.Column(db.String(32), default='')
     lesson_teacher_name = db.Column(db.String(64), default='')
     lesson_teacher_id = db.Column(db.String(64), default='')
     lesson_teacher_unit = db.Column(db.String(64), default='')
     group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
-    unit = db.Column(db.String)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -605,7 +602,7 @@ class NoticeLesson(db.Model):
             return None
         notice_lesson_dict = {
             'id': notice_lesson.id,
-            'lesson_id': notice_lesson.lesson_id,
+            'lesson_teacher_id': notice_lesson.lesson_id,
             'lesson_attention_reason': notice_lesson.lesson_attention_reason,
             'group_name': notice_lesson.group_name
         }
@@ -635,16 +632,16 @@ class NoticeLesson(db.Model):
 
     @classmethod
     def get_notice_lesson(cls, query_dict: dict, unscoped: bool = False):
-        notice_lesson = NoticeLesson.query
+        notice_lesson_teacher = NoticeLesson.query
         if not unscoped:
-            notice_lesson = notice_lesson.filter(NoticeLesson.using == True)
+            notice_lesson_teacher = notice_lesson_teacher.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            notice_lesson = process_query(notice_lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                          NoticeLesson).first()
+            notice_lesson_teacher = process_query(notice_lesson_teacher, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                            NoticeLesson).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return cls.formatter(notice_lesson)
+        return cls.formatter(notice_lesson_teacher)
 
     @classmethod
     def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):

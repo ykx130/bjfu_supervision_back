@@ -52,6 +52,7 @@ class NoticeLessonController(object):
     def get_notice_lesson(cls, query_dict: dict, unscoped: bool = False):
         notice_lesson = dao.NoticeLesson.get_notice_lesson(
             query_dict=query_dict, unscoped=unscoped)
+
         if notice_lesson is None:
             raise CustomError(404, 404, 'notice_lesson not found')
         return cls.formatter(notice_lesson)
@@ -153,10 +154,6 @@ class NoticeLessonController(object):
             data = dict()
         notice_lesson = dao.NoticeLesson.get_notice_lesson(
             query_dict={'id': id}, unscoped=False)
-        lesson = dao.Lesson.get_lesson(
-            query_dict={'lesson_id': notice_lesson['lesson_id']}, unscoped=False)
-        if lesson is None:
-            raise CustomError(404, 404, 'lesson not found')
         try:
             dao.NoticeLesson.update_notice_lesson(
                 ctx=False, query_dict={'id': [id]}, data=data)
@@ -172,19 +169,20 @@ class NoticeLessonController(object):
         return True
 
     @classmethod
-    def delete_notice_lesson(cls, ctx: bool = True, id: int = 0):
-        notice_lesson = dao.NoticeLesson.get_notice_lesson(
-            query_dict={'id': id}, unscoped=False)
-        if notice_lesson is None:
-            raise CustomError(404, 404, 'notice_lesson not found')
+    def delete_notice_lesson(cls, ctx: bool = True, lesson_teacher_id: int = 0):
+        notice_lesson_teacher = dao.NoticeLesson.get_notice_lesson(
+            query_dict={'lesson_teacher_id': lesson_teacher_id}, unscoped=False)
+        if notice_lesson_teacher is None:
+            raise CustomError(404, 404, 'notice_lesson_teacher not found')
         try:
-            lesson = dao.Lesson.get_lesson(
-                query_dict={'lesson_id': notice_lesson['lesson_id']}, unscoped=False)
-            if lesson is None:
+            lessons,total = dao.Lesson.query_lessons(
+                query_dict={'lesson_teacher_id': notice_lesson_teacher['lesson_teacher_id']}, unscoped=False)
+            if lessons is None:
                 raise CustomError(404, 404, 'lesson not found')
             dao.NoticeLesson.delete_notice_lesson(
-                ctx=False, query_dict={'id': [id]})
-            dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [notice_lesson['lesson_id']]},
+                ctx=False, query_dict={'lesson_teacher_id': [lesson_teacher_id]})
+            for lesson in lessons:
+                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_teacher_id': [lesson['lesson_teacher_id']]},
                                      data={'lesson_level': '自主听课'})
             if ctx:
                 db.session.commit()
@@ -215,7 +213,7 @@ class NoticeLessonController(object):
                 dao.NoticeLesson.delete_notice_lesson(
                     ctx=False, query_dict={'id': [notice_lesson_id]})
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [notice_lesson['lesson_id']]},
-                                         data={'lesson_level': '自助听课'})
+                                         data={'lesson_level': '自主听课'})
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -275,53 +273,37 @@ class NoticeLessonController(object):
         else:
             raise CustomError(500, 200, 'file must be given')
         column_dict = {'开课学年': 'lesson_year',
-                       '开课学期': 'lesson_semester', 
-                       '指定小组': 'group_name', '关注原因': 'lesson_attention_reason'}
-        filter_list = {'任课教师姓名': 'lesson_teacher_name', '开课学期': 'lesson_semester', '开课学年': 'lesson_year'}
+                       '开课学期': 'lesson_semester',
+                       '指定小组': 'group_name', '关注原因': 'lesson_attention_reason',
+                       '任课教师姓名': 'lesson_teacher_name','任课教师学院':'lesson_teacher_unit',
+                       '任课教师工号':'lesson_teacher_id'}
+
         row_num = df.shape[0]
         fail_lessons = list()
         for i in range(0, row_num):
-            lesson_filter = dict()
             notice_lesson_data = dict()
             for col_name_c, col_name_e in column_dict.items():
                 notice_lesson_data[col_name_e] = str(
                     df.iloc[i][col_name_c])
-            for col_name_c , col_name_e in filter_list.items():
-                lesson_filter[col_name_e] = [
-                    str(df.iloc[i][col_name_c])]
-            print(lesson_filter)
-            (lessons, total) = dao.Lesson.query_lessons(
-                query_dict=lesson_filter, unscoped=False)
+            notice_lesson_data['term'] = (notice_lesson_data['lesson_year'] + notice_lesson_data['lesson_semester']).replace('-', '_')
+            query_dict = {'lesson_teacher_id': notice_lesson_data['lesson_teacher_id'],'lesson_teacher_name':notice_lesson_data['lesson_teacher_name'],'term': notice_lesson_data['term']}
+            (lessons, total) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=False)
             if total == 0:
-                fail_lessons.append(lesson_filter)
+                fail_lessons.append(query_dict)
                 continue
             for lesson in lessons:
-                lesson_id = lesson['lesson_id']
-                term = lesson['term']
-                notice_lesson_data['lesson_id'] = lesson_id
-                notice_lesson_data['unit'] = lesson['lesson_unit']
-                notice_lesson_data['lesson_name'] = lesson['lesson_name']
-                notice_lesson_data['lesson_teacher_name'] = lesson['lesson_teacher_name']
-                notice_lesson_data['lesson_teacher_id'] = lesson['lesson_teacher_id']
-                notice_lesson_data['lesson_teacher_unit'] = lesson['lesson_teacher_unit']
-                (_, num) = dao.NoticeLesson.query_notice_lessons(
-                    query_dict={'lesson_id': [lesson_id]}, unscoped=False)
-                if num != 0:
-                    fail_lessons.append(lesson_filter)
-                    continue
-                notice_lesson_data['term'] = term
                 try:
-                    dao.NoticeLesson.insert_notice_lesson(
-                        ctx=False, data=notice_lesson_data)
-                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': lesson['lesson_id']},
                                              data={'lesson_level': '关注课程'})
                 except:
-                    fail_lessons.append(lesson_filter)
+                    fail_lessons.append(query_dict)
                     continue
+            dao.NoticeLesson.insert_notice_lesson(
+                ctx=False, data=notice_lesson_data)
             if ctx:
                 db.session.commit()
         file_path = None
-        if len(fail_lessons) == 0:
+        if len(fail_lessons) != 0:
             frame_dict = {}
             for file_lesson in fail_lessons:
                 for key, value in column_dict.items():
@@ -354,17 +336,18 @@ class NoticeLessonController(object):
                        '指定小组': 'group_name', '关注原因': 'lesson_attention_reason', '关注次数': 'notices'}
         frame_dict = dict()
         for notice_lesson in notice_lessons:
-            lesson = dao.Lesson.get_lesson(
-                query_dict={'lesson_id': notice_lesson['lesson_id']}, unscoped=True)
-            if lesson is None:
-                raise CustomError(404, 404, 'lesson not found')
+            lessons = dao.Lesson.get_lesson(
+                query_dict={'lesson_teacher_id': notice_lesson['lesson_teacher_id']}, unscoped=True)
+            if lessons is None:
+                raise CustomError(404, 404, 'lessons not found')
             for key, value in column_dict.items():
-                excel_value = lesson[value] if value in lesson else notice_lesson.get(
-                    value, "")
-                if key not in frame_dict:
-                    frame_dict[key] = [excel_value]
-                else:
-                    frame_dict[key].append(excel_value)
+                for lesson in lessons:
+                    excel_value = lesson[value] if value in lesson else notice_lesson.get(
+                        value, "")
+                    if key not in frame_dict:
+                        frame_dict[key] = [excel_value]
+                    else:
+                        frame_dict[key].append(excel_value)
         try:
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
