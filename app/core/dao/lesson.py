@@ -602,7 +602,7 @@ class NoticeLesson(db.Model):
             return None
         notice_lesson_dict = {
             'id': notice_lesson.id,
-            'lesson_teacher_id': notice_lesson.lesson_id,
+            'lesson_teacher_id': notice_lesson.lesson_teacher_id,
             'lesson_attention_reason': notice_lesson.lesson_attention_reason,
             'group_name': notice_lesson.group_name
         }
