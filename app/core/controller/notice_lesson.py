@@ -59,8 +59,7 @@ class NoticeLessonController(object):
 
     @classmethod
     def query_notice_lessons(cls, query_dict: dict, unscoped: bool = False):
-        (notice_lessons, num) = dao.NoticeLesson.query_notice_lessons(
-            query_dict=query_dict, unscoped=unscoped)
+        (notice_lessons,num)=dao.Lesson.query_lessons( query_dict=query_dict, unscoped=unscoped)
         return [cls.formatter(notice_lesson) for notice_lesson in notice_lessons], num
 
     @classmethod
