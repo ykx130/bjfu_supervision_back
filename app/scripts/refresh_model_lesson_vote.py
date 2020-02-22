@@ -1,7 +1,7 @@
 '''
 @Author: your name
 @Date: 2019-11-06 19:46:03
-@LastEditTime: 2019-11-22 11:40:10
+@LastEditTime: 2019-11-26 22:29:53
 @LastEditors: Please set LastEditors
 @Description: In User Settings Ediz
 @FilePath: /bjfu_supervision_back_ykx/app/scripts/refresh_model_lesson_vote.py
@@ -10,6 +10,9 @@
 from app.core.services import LessonService,ModelLessonService
 from app.core import dao
 from app import app
+
+ctx = app.app_context()
+ctx.push()
 
 
 def run():

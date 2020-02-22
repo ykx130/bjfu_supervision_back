@@ -1,12 +1,12 @@
 '''
 @Author: your name
 @Date: 2019-11-21 23:27:08
-@LastEditTime: 2019-11-23 08:56:13
+@LastEditTime: 2019-11-26 22:31:53
 @LastEditors: Please set LastEditors
 @Description: In User Settings Edi
 @FilePath: /bjfu_supervision_back/schedule_task.py
 '''
-from app.scripts import lesson_fetch, fetch_origin_lesson, mongodb_back, refresh_lesson_record
+from app.scripts import lesson_fetch, fetch_origin_lesson, mongodb_back, refresh_lesson_record, refresh_model_lesson_vote
 import schedule
 import time
 
@@ -27,7 +27,7 @@ schedule.every().day.at("12:00").do(refresh_lesson_record.inser_lesson_record)
 schedule.every().day.at("14:00").do(refresh_lesson_record.inser_lesson_record)
 schedule.every().day.at("17:00").do(refresh_lesson_record.inser_lesson_record)
 schedule.every().day.at("19:00").do(refresh_lesson_record.inser_lesson_record)
-
+schedule.every(2).hours.do(refresh_model_lesson_vote.run)
 
 
 

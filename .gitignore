@@ -105,3 +105,4 @@ static/
 .mypy_cache/
 
 .idea
+app/config/__init__.py

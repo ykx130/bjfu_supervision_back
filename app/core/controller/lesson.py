@@ -51,15 +51,17 @@ class LessonController(object):
             if noice_lesson:
                 lesson['group_name'] = noice_lesson['group_name']
                 lesson['lesson_attention_reason'] = noice_lesson['lesson_attention_reason']
-        if lesson['lesson_model'] :
-            model_lesson = dao.ModelLesson.get_model_lesson(query_dict={
-                "lesson_id": lesson["lesson_id"],
-                "term": lesson["term"]
-            })
-            if model_lesson:
-                lesson['group_name'] = model_lesson['group_name']
-                lesson["is_lock"] = model_lesson["is_lock"]
-                lesson["guiders"] = model_lesson["guiders"]
+        model_lesson = dao.ModelLesson.get_model_lesson(query_dict={
+            "lesson_teacher_name": lesson["lesson_teacher_name"],
+            'lesson_name': lesson["lesson_name"],
+            "term": lesson["term"]
+        })
+        print(model_lesson)
+        if model_lesson:
+            lesson['lesson_model'] = model_lesson['status']
+            lesson['group_name'] = model_lesson['group_name']
+            lesson["is_lock"] = model_lesson["is_lock"]
+            lesson["guiders"] = model_lesson["guiders"]
         return lesson
 
     @classmethod
