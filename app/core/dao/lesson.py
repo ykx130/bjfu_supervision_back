@@ -734,6 +734,7 @@ class NoticeLesson(db.Model):
         try:
             query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
             (lessons, total) = page_query(query, url_condition.page_dict)
+            print(lessons)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [{
