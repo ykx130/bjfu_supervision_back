@@ -727,7 +727,7 @@ class NoticeLesson(db.Model):
     def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        query = NoticeLesson.query.with_entities(NoticeLesson.lesson_teacher_id, NoticeLesson.lesson_teacher_name, NoticeLesson.lesson_teacher_unit).distinct()
+        query = NoticeLesson.query.with_entities(NoticeLesson.lesson_teacher_id, NoticeLesson.lesson_teacher_name, NoticeLesson.lesson_teacher_unit,NoticeLesson.lesson_attention_reason,NoticeLesson.group_name).distinct()
         if not unscoped:
             query = query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
@@ -741,6 +741,8 @@ class NoticeLesson(db.Model):
             'lesson_teacher_name': data.lesson_teacher_name,
             'lesson_teacher_id': data.lesson_teacher_id,
             'lesson_teacher_unit': data.lesson_teacher_unit,
+            'lesson_attention_reason':data.lesson_attention_reason,
+            'group_name':data.group_name
         } for data in lessons], total
 
 
