@@ -335,7 +335,7 @@ class NoticeLessonController(object):
                        '指定小组': 'group_name', '关注原因': 'lesson_attention_reason', '关注次数': 'notices'}
         frame_dict = dict()
         for notice_lesson in notice_lessons:
-            lessons = dao.Lesson.get_lesson(
+            lessons = dao.Lesson.query_lessons(
                 query_dict={'lesson_teacher_id': notice_lesson['lesson_teacher_id']}, unscoped=True)
             if lessons is None:
                 raise CustomError(404, 404, 'lessons not found')
