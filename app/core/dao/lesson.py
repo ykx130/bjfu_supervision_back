@@ -1056,4 +1056,4 @@ def create_all_lesson_case():
         lesson_case=type(value, (LessonCase,),{'__tablename__':value})
         lesson_case()
         lesson_case_function[key]=lesson_case
-
+    print(lesson_case_function)
