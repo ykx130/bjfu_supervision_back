@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from app.utils.mongodb import mongo
 from app.config import config
-# from flask_login import LoginManager
+from flask_login import LoginManager
 from app.utils.reids import get_redis_con
 from app.utils.mysql import db
 from flask_pymongo import PyMongo
@@ -12,7 +12,6 @@ from app.utils.logger import consoleHandler, fileHandler
 from kafka import KafkaConsumer, KafkaProducer
 import json
 from flask_caching import Cache
-import app.core.dao as dao
 
 basedir = os.path.abspath(os.getcwd())
 
@@ -80,7 +79,6 @@ def create_app(config_name):
 
 app = create_app('default')
 app.logger.addHandler(consoleHandler)
-dao.create_all_lesson_case()
 
 
 @login_manager.unauthorized_handler
