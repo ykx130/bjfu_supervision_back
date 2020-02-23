@@ -340,9 +340,9 @@ class NoticeLessonController(object):
             if lessons is None:
                 raise CustomError(404, 404, 'lessons not found')
             for key, value in column_dict.items():
-                for lesson in lessons:
+                for lesson in lessons[0]:
 
-                    ipdb.set_trace()
+                    
                     excel_value = lesson[value] if value in lesson else notice_lesson.get(value, "")
                     if key not in frame_dict:
                         frame_dict[key] = [excel_value]
