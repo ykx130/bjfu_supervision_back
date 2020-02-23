@@ -12,6 +12,7 @@ from app.utils.logger import consoleHandler, fileHandler
 from kafka import KafkaConsumer, KafkaProducer
 import json
 from flask_caching import Cache
+from app.core.dao import create_all_lesson_case()
 
 basedir = os.path.abspath(os.getcwd())
 
@@ -79,7 +80,7 @@ def create_app(config_name):
 
 app = create_app('default')
 app.logger.addHandler(consoleHandler)
-
+create_all_lesson_case()
 
 @login_manager.unauthorized_handler
 def user_unauthorized_handler():

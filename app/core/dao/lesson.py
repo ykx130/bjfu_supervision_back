@@ -1048,7 +1048,7 @@ def create_all_lesson_case():
     global lesson_case_function
     term_dict={}
     for term in terms:
-        term_dict[term.name.replace('-','_')]='lesson_case'+term.name.replace('-','_')
+        term_dict[term['name'].replace('-','_')]='lesson_case'+term['name'].replace('-','_')
     for key,value in term_dict.items():
         lesson_case=type(value, (LessonCase,),{'__tablename__':value})
         lesson_case()
