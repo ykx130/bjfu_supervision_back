@@ -1054,4 +1054,4 @@ def create_all_lesson_case():
         lesson_case()
         lesson_case_function[key]=lesson_case
 
-
+create_all_lesson_case()
