@@ -476,6 +476,8 @@ class LessonCase(db.Model):
 
     @classmethod
     def get_table(cls, term: str):
+        import ipdb
+        ipdb.set_trace()
         global lesson_case_function
         return lesson_case_function[term]
 
