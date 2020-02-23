@@ -50,12 +50,12 @@ class NoticeLessonController(object):
 
     @classmethod
     def get_notice_lesson(cls, query_dict: dict, unscoped: bool = False):
-        notice_lesson = dao.NoticeLesson.get_notice_lesson(
+        notice_lesson_teacher = dao.NoticeLesson.get_notice_lesson(
             query_dict=query_dict, unscoped=unscoped)
 
-        if notice_lesson is None:
-            raise CustomError(404, 404, 'notice_lesson not found')
-        return cls.formatter(notice_lesson)
+        if notice_lesson_teacher is None:
+            raise CustomError(404, 404, 'notice_lesson_teacher not found')
+        return notice_lesson_teacher
 
     @classmethod
     def query_notice_lessons(cls, query_dict: dict, unscoped: bool = False):
