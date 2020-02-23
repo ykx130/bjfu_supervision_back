@@ -6,7 +6,7 @@ from datetime import datetime
 from app.utils.misc import convert_string_to_date
 from sqlalchemy.sql import or_
 
-
+lesson_case_function={}
 class Term(db.Model):
     __tablename__ = 'terms'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
@@ -476,6 +476,7 @@ class LessonCase(db.Model):
 
     @classmethod
     def get_table(cls, term: str):
+        global lesson_case_function
         return lesson_case_function[term]
 
     @classmethod
@@ -1045,7 +1046,6 @@ class OriginLessons(db.Model):
 def create_all_lesson_case():
     terms,num=Term.query_terms
     global lesson_case_function
-    lesson_case_function={}
     term_dict={}
     for term in terms:
         term_dict[term.name.replace('-','_')]='lesson_case'+term.name.replace('-','_')
