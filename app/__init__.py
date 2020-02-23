@@ -80,13 +80,15 @@ def create_app(config_name):
 app = create_app('default')
 app.logger.addHandler(consoleHandler)
 
+from app.core.dao.lesson import create_all_lesson_case
+create_all_lesson_case() 
+
 @login_manager.unauthorized_handler
 def user_unauthorized_handler():
     return jsonify({
         'msg': '未登录请登陆',
         'code': 401
     }), 401
-
 
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')

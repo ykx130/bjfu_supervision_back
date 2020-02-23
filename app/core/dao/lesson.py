@@ -1044,6 +1044,9 @@ class OriginLessons(db.Model):
 
 
 def create_all_lesson_case():
+    from app import app
+    ctx = app.app_context()
+    ctx.push()
     (terms,num)=Term.query_terms()
     global lesson_case_function
     term_dict={}
