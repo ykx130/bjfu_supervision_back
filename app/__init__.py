@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from app.utils.mongodb import mongo
 from app.config import config
-from flask_login import LoginManager
+# from flask_login import LoginManager
 from app.utils.reids import get_redis_con
 from app.utils.mysql import db
 from flask_pymongo import PyMongo
