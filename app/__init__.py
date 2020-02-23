@@ -12,7 +12,7 @@ from app.utils.logger import consoleHandler, fileHandler
 from kafka import KafkaConsumer, KafkaProducer
 import json
 from flask_caching import Cache
-from app.core.dao import create_all_lesson_case()
+from app.core.dao import create_all_lesson_case
 
 basedir = os.path.abspath(os.getcwd())
 
