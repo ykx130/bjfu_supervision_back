@@ -1053,7 +1053,16 @@ def create_all_lesson_case():
     for term in terms:
         term_dict[term['name'].replace('-','_')]='lesson_case'+term['name'].replace('-','_')
     for key,value in term_dict.items():
-        lesson_case=type(value, (LessonCase,),{'__tablename__':value})
+        lesson_case=type(value, (db.Model,),{'__tablename__':value,
+                                            'id'  :db.Column(db.Integer, primary_key=True, autoincrement=True, index=True),
+                                             'lesson_id ': db.Column(db.Integer, default=-1),
+                                             'lesson_room ': db.Column(db.String(48), default=''),
+                                             'lesson_weekday': db.Column(db.Integer, default=0),
+                                             'lesson_week':db.Column(db.String(48), default=''),
+                                             'lesson_time' : db.Column(db.String(48), default=''),
+                                             'lesson_date': db.Column(db.Date, default=datetime.now),
+                                             'inner_lesson_id ':db.Column(db.String(255), default=''), # 这个是为了课表正常显示 做的区分 一个课有所有的lesson_case 课表显示用这个
+                                             'using': db.Column(db.Boolean, default=True)})
         lesson_case()
         lesson_case_function[key]=lesson_case
     print(lesson_case_function)
