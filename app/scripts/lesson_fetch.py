@@ -303,8 +303,7 @@ def update_database(info: dict = None):
 
     cursor = get_cursor(info=info)
     term = info.get('term', None)
-    raw_lessons = query_raw_lessons(cursor, term)#从数据库中过滤符合当前学期的课程
-
+    raw_lessons = query_raw_lessons(cursor, term)#从数据库中过滤符合当前学期的课程 
     dao.LessonCase.get_table(term=term).query.delete()
     sup_db.session.commit()
 
