@@ -277,8 +277,10 @@ def insert_lesson_case(data: dict):
 
     向数据库添加课程具体信息
     """
+   
+    data['term']=data['lesson_year'].replace('-','_')+'_'+str(data['lesson_semester']) 
     dao.LessonCase.get_table(term=data['term']).insert_lesson_case(data=data)
-
+    
 
 def del_lesson_cases(query_dict: dict):
     dao.LessonCase.get_table(term=query_dict['term']).delete_lesson_case(query_dict=query_dict)
@@ -331,7 +333,7 @@ def update_database(info: dict = None):
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
             new_lesson = dao.Lesson.get_lesson(
                 query_dict={'lesson_id': lesson_data['lesson_id']})
-            del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']]})
+            del_lesson_cases(query_dict={'lesson_id': [new_lesson['id']], 'term':term['name']})
             raw_lesson_case_datas = query_raw_lesson_cases(cursor=cursor, lesson_id=lesson_data['raw_lesson_id'],
                                                            teacher_name=lesson_data['lesson_raw_teacher_name'],
                                                            lesson_year=raw_lesson['lesson_year'],
