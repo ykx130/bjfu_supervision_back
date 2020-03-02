@@ -5,8 +5,10 @@ from app.utils import misc
 from datetime import datetime
 from app.utils.misc import convert_string_to_date
 from sqlalchemy.sql import or_
+from sqlalchemy import Table, Column
+import copy
 
-
+lesson_case_function={}
 class Term(db.Model):
     __tablename__ = 'terms'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
@@ -444,7 +446,8 @@ class Lesson(db.Model):
 
 
 class LessonCase(db.Model):
-    __tablename__ = 'lesson_cases'
+    # __tablename__ = 'lesson_cases'
+    __abstract__ = True
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.Integer, default=-1)
     lesson_room = db.Column(db.String(48), default='')
@@ -475,28 +478,33 @@ class LessonCase(db.Model):
         return data
 
     @classmethod
+    def get_table(cls, term: str):
+        global lesson_case_function
+        return lesson_case_function[term.replace('-','_')]
+
+    @classmethod
     def count(cls, query_dict: dict, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        query = LessonCase.query
+        query=cls.query
         if not unscoped:
-            query = query.filter(LessonCase.using == True)
+            query = query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            total = count_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return total
 
     @classmethod
     def get_lesson_case(cls, query_dict: dict, unscoped: bool = False):
-        lesson_case = LessonCase.query
+        lesson_case = cls.query
         if not unscoped:
-            lesson_case = lesson_case.filter(LessonCase.using == True)
+            lesson_case = lesson_case.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             lesson_case = process_query(lesson_case, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                        LessonCase).first()
+                                        cls).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return cls.formatter(lesson_case)
@@ -506,7 +514,7 @@ class LessonCase(db.Model):
         if data is None:
             data = {}
         data = cls.reformatter_insert(data)
-        lesson_case = LessonCase()
+        lesson_case = cls()
         for key, value in data.items():
             if hasattr(lesson_case, key):
                 setattr(lesson_case, key, value)
@@ -522,12 +530,12 @@ class LessonCase(db.Model):
     def query_lesson_cases(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        query = LessonCase.query
+        query = cls.query
         if not unscoped:
-            query = query.filter(LessonCase.using == True)
+            query = query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
             (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -537,10 +545,10 @@ class LessonCase(db.Model):
     def delete_lesson_case(cls, ctx: bool = True, query_dict: dict = None):
         if query_dict is None:
             query_dict = {}
-        query = LessonCase.query.filter(LessonCase.using == True)
+        query = cls.query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
             (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -561,10 +569,10 @@ class LessonCase(db.Model):
         if query_dict is None:
             query_dict = {}
         data = cls.reformatter_update(data)
-        query = LessonCase.query.filter(LessonCase.using == True)
+        query = cls.query.filter(cls.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, LessonCase)
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, cls)
             (lesson_cases, total) = page_query(query, url_condition.page_dict)
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -584,15 +592,12 @@ class LessonCase(db.Model):
 class NoticeLesson(db.Model):
     __tablename__ = 'notice_lessons'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
-    lesson_id = db.Column(db.String(32), default=-1)
-    lesson_name = db.Column(db.String(32), default='')
     lesson_teacher_name = db.Column(db.String(64), default='')
     lesson_teacher_id = db.Column(db.String(64), default='')
     lesson_teacher_unit = db.Column(db.String(64), default='')
     group_name = db.Column(db.String(32), default='')
     term = db.Column(db.String(32), default='')
     lesson_attention_reason = db.Column(db.String(128), default='')
-    unit = db.Column(db.String)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -601,7 +606,7 @@ class NoticeLesson(db.Model):
             return None
         notice_lesson_dict = {
             'id': notice_lesson.id,
-            'lesson_id': notice_lesson.lesson_id,
+            'lesson_teacher_id': notice_lesson.lesson_teacher_id,
             'lesson_attention_reason': notice_lesson.lesson_attention_reason,
             'group_name': notice_lesson.group_name
         }
@@ -631,16 +636,16 @@ class NoticeLesson(db.Model):
 
     @classmethod
     def get_notice_lesson(cls, query_dict: dict, unscoped: bool = False):
-        notice_lesson = NoticeLesson.query
+        notice_lesson_teacher = NoticeLesson.query
         if not unscoped:
-            notice_lesson = notice_lesson.filter(NoticeLesson.using == True)
+            notice_lesson_teacher = notice_lesson_teacher.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
-            notice_lesson = process_query(notice_lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
-                                          NoticeLesson).first()
+            notice_lesson_teacher = process_query(notice_lesson_teacher, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                            NoticeLesson).first()
         except Exception as e:
             raise CustomError(500, 500, str(e))
-        return cls.formatter(notice_lesson)
+        return cls.formatter(notice_lesson_teacher)
 
     @classmethod
     def insert_notice_lesson(cls, ctx: bool = True, data: dict = None):
@@ -726,19 +731,22 @@ class NoticeLesson(db.Model):
     def query_teacher_names(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        query = NoticeLesson.query.with_entities(NoticeLesson.lesson_teacher_id, NoticeLesson.lesson_teacher_name, NoticeLesson.lesson_teacher_unit).distinct()
+        query = NoticeLesson.query.with_entities(NoticeLesson.lesson_teacher_id, NoticeLesson.lesson_teacher_name, NoticeLesson.lesson_teacher_unit,NoticeLesson.lesson_attention_reason,NoticeLesson.group_name).distinct()
         if not unscoped:
             query = query.filter(NoticeLesson.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict, NoticeLesson)
             (lessons, total) = page_query(query, url_condition.page_dict)
+            print(lessons)
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return [{
             'lesson_teacher_name': data.lesson_teacher_name,
             'lesson_teacher_id': data.lesson_teacher_id,
             'lesson_teacher_unit': data.lesson_teacher_unit,
+            'lesson_attention_reason':data.lesson_attention_reason,
+            'group_name':data.group_name
         } for data in lessons], total
 
 
@@ -779,7 +787,7 @@ class ModelLesson(db.Model):
 
     @classmethod
     def reformatter_insert(cls, data: dict):
-        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term', 'unit', 'guiders']
+        allow_column = ['lesson_id', 'group_name', 'status', 'votes', 'term', 'unit', 'guiders','lesson_name','lesson_teacher_name']
         status_dict = {'推荐为好评课': 1, '待商榷': 2}
         new_data = dict()
         for key, value in data.items():
@@ -944,7 +952,7 @@ class OtherModelLesson(db.Model):
         for key, value in data.items():
             if hasattr(other_model_lesson, key):
                 setattr(other_model_lesson, key, value)
-        db.session.add(other_model_lesson)
+        db.session.add(other_model_lesson)        
         if ctx:
             try:
                 db.session.commit()
@@ -1036,3 +1044,18 @@ class OriginLessons(db.Model):
         except Exception as e:
             print(str(e))
             db.session.rollback()
+
+
+def create_all_lesson_case():
+    from app import app
+    ctx = app.app_context()
+    ctx.push()
+    (terms,num)=Term.query_terms()
+    global lesson_case_function
+    term_dict={}
+    for term in terms:
+        term_dict[term['name'].replace('-','_')]='lesson_case'+term['name'].replace('-','_')
+    for key,value in term_dict.items():
+        lesson_case=type(value, (LessonCase,),{'__tablename__':value,'__name__':value})
+        lesson_case_function[key]=lesson_case
+    print(lesson_case_function)
