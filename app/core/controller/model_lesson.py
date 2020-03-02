@@ -254,7 +254,7 @@ class ModelLessonController(object):
                     if col_name_e in filter_list:
                         lesson_filter[col_name_e] = [str(model_lesson_data[col_name_e])]
 
-                lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)
+                lessons, total = dao.Lesson.query_lessons(query_dict=lesson_filter, unscoped=False)                      
                 if total == 0:
                     fail_lessons.append({**lesson_filter, 'reason': '没有课程'})
                     continue
@@ -264,6 +264,7 @@ class ModelLessonController(object):
                 model_lesson_data['unit'] = lessons[0]['lesson_unit']
                 model_lesson_data['lesson_name'] = lessons[0]['lesson_name']
                 model_lesson_data['lesson_teacher_name'] = lessons[0]['lesson_teacher_name']
+                model_lesson_data['status']='待商榷'
                 (_, num) = dao.ModelLesson.query_model_lessons(query_dict={
                     'lesson_id': [lesson_id],
                     'term': term
@@ -272,10 +273,9 @@ class ModelLessonController(object):
                     fail_lessons.append({**lesson_filter, 'reason': '好评课已经存在'})
                     continue
                 model_lesson_data['term'] = term
-
+                dao.ModelLesson.insert_model_lesson(ctx=False,data=model_lesson_data)
                 dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
-                                            data={'lesson_model': '推荐为好评课'})
-                dao.ModelLesson.insert_model_lesson(ctx=False, data=model_lesson_data)
+                                            data={'lesson_model': '待商榷'})           
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -309,12 +309,14 @@ class ModelLessonController(object):
                                 'lesson_teacher_name':other_model_data['lesson_teacher_name'],
                                 'unit':other_model_data['lesson_teacher_unit'],
                                 'group_name':other_model_data['group_name'],
-                                'using':'True'
+                                'using':True
                             })
             frame = pandas.DataFrame(frame_dict)
+            db.session.commit()
             from app import basedir
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             fullname = basedir + filename
+            import ipdb 
             frame.to_excel(fullname, sheet_name='123', index=False, header=True)
         return fail_lessons
 

@@ -68,7 +68,7 @@ def find_notice_lesson(id, *args, **kwargs):
     query_dict.update(kwargs)
     try:
         query_dict = kwargs
-        query_dict.update({'id':id})
+        query_dict.update({'lesson_teacher_id':id})
         notice_lesson = controller.NoticeLessonController.get_notice_lesson(query_dict=query_dict)
     except CustomError as e:
         return jsonify({
@@ -86,7 +86,7 @@ def find_notice_lesson(id, *args, **kwargs):
 @login_required
 def delete_notice_lesson(id):
     try:
-        controller.NoticeLessonController.delete_notice_lesson(id=id)
+        controller.NoticeLessonController.delete_notice_lesson(lesson_teacher_id=id)
     except CustomError as e:
         return jsonify({
             'code': e.code,
