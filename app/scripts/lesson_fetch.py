@@ -179,8 +179,8 @@ def insert_term(term_name):
     else:
         begin_year = parts[1]
         end_year = parts[1]
-        begin_time = begin_year + '-02-14'
-        end_time = end_year + '-09-01'
+        begin_time = end_year + '-02-14'
+        end_time = str(int(end_year)+1) + '-09-01'
     term_data = {'name': term_name,
                  'begin_time': begin_time, 'end_time': end_time}
     dao.Term.insert_term(ctx=True, data=term_data)
@@ -323,11 +323,13 @@ def update_database(info: dict = None):
         for lesson_data in lesson_datas:
             old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
             if old_lesson:
+                lesson_class = old_lesson['lesson_class'] 
                 if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(
                         old_lesson['lesson_class']) < 100:
-                    update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
-                        'lesson_class' : old_lesson['lesson_class'] + lesson_data['lesson_class']
-                    })
+                        lesson_class = lesson_class + lesson_data['lesson_class'],
+                update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
+                    'lesson_class' : lesson_class,
+                })
             else:
                 dao.Lesson.insert_lesson(ctx=True, data=lesson_data)
             new_lesson = dao.Lesson.get_lesson(
