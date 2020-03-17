@@ -75,8 +75,9 @@ class Filter(object):
 
                 user = AuthController.get_current_user()
                 query_dict = dict()
-                query_dict.update(kwargs)
-                
+                import ipdb
+                ipdb.set_trace()
+                query_dict.update(kwargs) 
                 if user is not None:
                     username = user.get('username')
                     user_id = user.get('id')
@@ -116,7 +117,8 @@ class Filter(object):
                                 {'group_name': [group], 'username': [username], 'user_id': [user_id]})
                     else:
                         query_dict.update({'username': [username], 'user_id': [user_id]})
-                result = func(*args, **query_dict)
+                
+                result=func(*args, **query_dict)
                 return result
 
             return wrapper

@@ -12,8 +12,8 @@ from app.http.handler.filter import Filter
 @Filter.filter_permission()
 def find_model_lessons(*args, **kwargs):
     query_dict = {}
-    query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
+    query_dict.update(args_to_dict(request.args))
     print(query_dict)
     try:
         (model_lessons, total) = controller.ModelLessonController.query_model_lessons(query_dict=query_dict)
