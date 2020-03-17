@@ -232,7 +232,6 @@ class FormController(object):
             excel_dict['是否为好评课入围'].append( ( "是" if model_lesson is not None else "否") )
 
             for key in form: # 遍历form找到values
-                #import ipdb; ipdb.set_trace()
                 if key=='values':
                     options=form['values']
                     option_len=len(options)

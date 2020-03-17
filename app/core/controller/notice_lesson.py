@@ -14,8 +14,6 @@ import pandas
 import datetime
 import app.core.services as service
 import json
-import ipdb
-
 class NoticeLessonController(object):
     @classmethod
     def formatter(cls, notice_lesson):
