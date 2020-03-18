@@ -3,8 +3,7 @@ from flask import request, jsonify
 import app.core.controller as controller
 from flask_login import login_required
 from app.http.handler.filter import Filter
-from app.utils import CustomError, args_to_dict
-from app.http.handler.filter import Filter
+from app.utils import CustomError, args_to_dict, db
 
 
 @model_lesson_blueprint.route('/model_lessons')
@@ -18,6 +17,7 @@ def find_model_lessons(*args, **kwargs):
     try:
         (model_lessons, total) = controller.ModelLessonController.query_model_lessons(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -36,6 +36,7 @@ def insert_model_lesson():
     try:
         controller.ModelLessonController.insert_model_lesson(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -52,6 +53,7 @@ def insert_model_lessons():
     try:
         controller.ModelLessonController.insert_model_lessons(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -72,6 +74,7 @@ def find_model_lesson(id, *args, **kwargs):
         query_dict.update({'id':id})
         model_lesson = controller.ModelLessonController.get_model_lesson(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -89,6 +92,7 @@ def delete_model_lesson(id):
     try:
         controller.ModelLessonController.delete_model_lesson(id)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -105,6 +109,7 @@ def delete_model_lessons():
     try:
         controller.ModelLessonController.delete_model_lessons(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -121,6 +126,7 @@ def update_model_lesson(id):
     try:
         controller.ModelLessonController.update_model_lesson(id=id, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -138,6 +144,7 @@ def model_lesson_vote(lesson_id):
         # controller.ModelLessonController.model_lesson_vote(lesson_id=lesson_id, vote=request.json.get('vote', True))
         pass
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -154,6 +161,7 @@ def import_lesson_excel():
     try:
         path = controller.ModelLessonController.import_lesson_excel(data=request)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -178,6 +186,7 @@ def export_lesson_excel():
     try:
         filename = controller.ModelLessonController.export_lesson_excel(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,

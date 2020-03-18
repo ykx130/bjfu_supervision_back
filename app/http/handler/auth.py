@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask import request, jsonify, Blueprint
 import app.core.controller as controller
 import app.core.services as service
-from app.utils import CustomError
+from app.utils import CustomError, db
 
 @user_blueprint.route("/login", methods=["POST"])
 def login():
@@ -13,6 +13,7 @@ def login():
     try:
         controller.AuthController.login(username=username, password=password)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -29,6 +30,7 @@ def logout():
     try:
         controller.AuthController.logout()
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -45,6 +47,7 @@ def get_current():
     try:
         user = controller.AuthController.get_current_user()
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,

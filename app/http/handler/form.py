@@ -3,7 +3,7 @@ from flask_pymongo import ObjectId
 from flask import jsonify, request
 from flask_login import current_user, login_required
 from app.http.handler import form_blueprint
-from app.utils import CustomError, args_to_dict
+from app.utils import CustomError, args_to_dict, db
 from werkzeug.datastructures import ImmutableMultiDict
 from datetime import datetime
 from app.http.handler.filter import Filter

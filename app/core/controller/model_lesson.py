@@ -273,8 +273,8 @@ class ModelLessonController(object):
                     fail_lessons.append({**lesson_filter, 'reason': '好评课已经存在'})
                     continue
                 model_lesson_data['term'] = term
-                dao.ModelLesson.insert_model_lesson(ctx=False,data=model_lesson_data)
-                dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': [lesson_id]},
+                dao.ModelLesson.insert_model_lesson(ctx=True,data=model_lesson_data)
+                dao.Lesson.update_lesson(ctx=True, query_dict={'lesson_id': [lesson_id]},
                                             data={'lesson_model': '待商榷'})           
             if ctx:
                 db.session.commit()
@@ -301,7 +301,7 @@ class ModelLessonController(object):
                             for key, value in column_dict.items():
                                 other_model_data[value] = str(df.iloc[i].get(key, ''))
                             print(other_model_data)
-                            dao.OtherModelLesson.insert_other_model_lesson(ctx=False, data={
+                            dao.OtherModelLesson.insert_other_model_lesson(ctx=True, data={
                                 'lesson_name':other_model_data['lesson_name'],
                                 'lesson_attribute':other_model_data['lesson_attribute'],
                                 'term': '-'.join([other_model_data['lesson_year'],

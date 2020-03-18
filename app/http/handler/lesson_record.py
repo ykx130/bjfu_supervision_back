@@ -1,7 +1,7 @@
 from app.http.handler import lesson_record_blueprint
 from flask import request, jsonify
 import app.core.controller as controller
-from app.utils import CustomError, args_to_dict
+from app.utils import CustomError, args_to_dict, db
 from flask import g
 from flask_login import login_required
 from app.http.handler.filter import Filter
@@ -18,6 +18,7 @@ def find_term_lesson_records(**kwargs):
     try:
         (lesson_records, num) = controller.LessonRecordController.query_lesson_records_term(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -37,6 +38,7 @@ def find_lesson_records_history(*args, **kwargs):
     try:
         (lesson_records, num) = controller.LessonRecordController.query_lesson_records_history(query_dict=kwargs)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -58,6 +60,7 @@ def find_lesson_record_history(username, **kwargs):
         query_dict.update({'username':username})
         (lesson_records, num) = controller.LessonRecordController.query_lesson_record_history(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -79,6 +82,7 @@ def find_lesson_record(username, term, **kwargs):
     try:
         lesson_record = controller.LessonRecordController.get_lesson_record(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -96,6 +100,7 @@ def insert_lesson_record(**kwargs):
     try:
         controller.LessonRecordController.insert_lesson_record(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -112,6 +117,7 @@ def delete_lesson_record(username, term, **kwargs):
     try:
         controller.LessonRecordController.delete_lesson_record(username=username, term=term)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -128,6 +134,7 @@ def update_lesson_record(username, term, **kwargs):
     try:
         controller.LessonRecordController.update_lesson_record(username=username, term=term, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -144,6 +151,7 @@ def export_lesson_excel():
     try:
         filename = controller.LessonRecordController.export_lesson_record(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,

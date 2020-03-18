@@ -4,7 +4,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 import app.core.controller as controller
 from flask_login import login_required, current_user
 from datetime import datetime
-from app.utils import CustomError, args_to_dict
+from app.utils import CustomError, args_to_dict, db
 from app.http.handler.filter import Filter
 
 

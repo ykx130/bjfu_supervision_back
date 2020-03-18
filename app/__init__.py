@@ -81,7 +81,7 @@ app = create_app('default')
 app.logger.addHandler(consoleHandler)
 
 from app.core.dao.lesson import create_all_lesson_case
-create_all_lesson_case() 
+#create_all_lesson_case() 
 
 @login_manager.unauthorized_handler
 def user_unauthorized_handler():

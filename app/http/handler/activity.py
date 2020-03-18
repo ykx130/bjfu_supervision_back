@@ -3,7 +3,7 @@ from flask import request, jsonify
 from flask_login import login_required
 import app.core.controller  as controller
 from flask_login import current_user
-from app.utils import CustomError, args_to_dict
+from app.utils import CustomError, args_to_dict, db
 from app.http.handler.filter import Filter
 
 
@@ -16,6 +16,7 @@ def find_activities(**kwargs):
     try:
         (activities, total) = controller.ActivityController.query_activities(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -34,6 +35,7 @@ def insert_activity(**kwargs):
     try:
         controller.ActivityController.insert_activity(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -54,6 +56,7 @@ def find_activity(id, *args, **kwargs):
         activity = controller.ActivityController.get_activity(query_dict={'id': id})
         (activity_users, num) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -72,6 +75,7 @@ def delete_activity(id, **kwargs):
     try:
         controller.ActivityController.delete_activity(id=id)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -88,6 +92,7 @@ def update_activity(id, **kwargs):
     try:
         controller.ActivityController.update_activity(id=id, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -108,6 +113,7 @@ def find_activity_users(id, **kwargs):
         activity = controller.ActivityController.get_activity(query_dict={'id': id})
         (activity_users, total) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -126,6 +132,7 @@ def insert_activity_user(id, **kwargs):
     try:
         controller.ActivityUserController.insert_activity_user(activity_id=id, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -146,6 +153,7 @@ def find_activity_user(id, username, **kwargs):
         activity = controller.ActivityController.get_activity(query_dict=query_dict)
         activity_user = controller.ActivityUserController.get_activity_user(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -164,6 +172,7 @@ def delete_activity_user(id, username, **kwargs):
     try:
         controller.ActivityUserController.delete_activity_user(activity_id=id, username=username)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -180,6 +189,7 @@ def update_activity_user(id, username, **kwargs):
     try:
         controller.ActivityUserController.update_activity_user(activity_id=id, username=username, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -201,6 +211,7 @@ def get_current_user_activities(**kwargs):
         (activities, total) = controller.ActivityUserController.query_current_user_activities(username=username,
                                                                                               query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,

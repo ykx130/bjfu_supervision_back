@@ -1,7 +1,7 @@
 from app.http.handler import event_blueprint
 from flask import request, jsonify
 import app.core.controller as controller
-from app.utils import CustomError, args_to_dict
+from app.utils import CustomError, args_to_dict, db
 from flask_login import login_required
 from app.http.handler.filter import Filter
 
@@ -12,6 +12,7 @@ def new_event():
     try:
         controller.EventController.insert_event(data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -31,6 +32,7 @@ def get_events(*args, **kwargs):
     try:
         (events, total) = controller.EventController.query_events(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -51,6 +53,7 @@ def get_user_events(username, *args, **kwargs):
     try:
         (events, total) = controller.EventController.query_user_events(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -71,6 +74,7 @@ def get_user(id, *args, **kwargs):
     try:
         event = controller.EventController.get_event(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -88,6 +92,7 @@ def del_event(id):
     try:
         controller.EventController.delete_event(id=id)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -104,6 +109,7 @@ def change_event(id):
     try:
         controller.EventController.update_event(id=id, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,

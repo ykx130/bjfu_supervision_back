@@ -448,6 +448,7 @@ class Lesson(db.Model):
 class LessonCase(db.Model):
     # __tablename__ = 'lesson_cases'
     __abstract__ = True
+    __has_mapped_table__ = False
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     lesson_id = db.Column(db.Integer, default=-1)
     lesson_room = db.Column(db.String(48), default='')
@@ -479,6 +480,9 @@ class LessonCase(db.Model):
 
     @classmethod
     def get_table(cls, term: str):
+        if not cls.__has_mapped_table__:
+            create_all_lesson_case()
+            cls.__has_mapped_table__ = True
         global lesson_case_function
         return lesson_case_function[term.replace('-','_')]
 
@@ -1047,9 +1051,6 @@ class OriginLessons(db.Model):
 
 
 def create_all_lesson_case():
-    from app import app
-    ctx = app.app_context()
-    ctx.push()
     (terms,num)=Term.query_terms()
     global lesson_case_function
     term_dict={}

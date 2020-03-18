@@ -279,7 +279,6 @@ class NoticeLessonController(object):
 
         row_num = df.shape[0]
         fail_lessons = list()
-        import ipdb
         for i in range(0, row_num):
             notice_lesson_data = dict()
             for col_name_c, col_name_e in column_dict.items():
@@ -293,15 +292,13 @@ class NoticeLessonController(object):
                 continue
             for lesson in lessons:
                 try:
-                    dao.Lesson.update_lesson(ctx=False, query_dict={'lesson_id': lesson['lesson_id']},
+                    dao.Lesson.update_lesson(ctx=True, query_dict={'lesson_id': lesson['lesson_id']},
                                              data={'lesson_level': '关注课程'})
+                    dao.NoticeLesson.insert_notice_lesson(
+                        ctx=True, data=notice_lesson_data)                                             
                 except:
                     fail_lessons.append(query_dict)
                     continue
-            dao.NoticeLesson.insert_notice_lesson(
-                ctx=False, data=notice_lesson_data)
-            if ctx:
-                db.session.commit()
         file_path = None
         if len(fail_lessons) != 0:
             frame_dict = {}

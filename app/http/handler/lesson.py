@@ -3,7 +3,7 @@ from flask import jsonify, request
 from app.utils.misc import convert_datetime_to_string
 import app.core.controller as controller
 from app.utils.url_condition.url_condition_mongodb import dict_serializable
-from app.utils import CustomError, args_to_dict
+from app.utils import CustomError, args_to_dict, db
 from flask_login import login_required
 from app.http.handler.filter import Filter
 from app import cache
@@ -15,6 +15,7 @@ def new_lesson():
     try:
         controller.LessonController.update_database(info=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -34,6 +35,7 @@ def get_lessons(*args, **kwargs):
     try:
         (lessons, num) = controller.LessonController.query_lessons(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -55,6 +57,7 @@ def get_lessons_with_case(*args, **kwargs):
     try:
         (lessons, num) = controller.LessonController.query_lessons_with_cases(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -76,6 +79,7 @@ def query_lesson_cases(*args, **kwargs):
     try:
         (lessons, num) = controller.LessonCaseController.query_lesson_cases(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -96,6 +100,7 @@ def get_lesson(lesson_id, *args, **kwargs):
         query_dict.update({'lesson_id': lesson_id})
         lesson = controller.LessonController.get_lesson(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -113,6 +118,7 @@ def update_lesson(lesson_id):
     try:
         controller.LessonController.update_lesson(lesson_id=lesson_id, data=request.json)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -133,6 +139,7 @@ def get_teacher_names(*args, **kwargs):
         (teacher_names, total) = controller.LessonController.query_teacher_names(query_dict=query_dict,
                                                                                  unscoped=False)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -156,6 +163,7 @@ def get_terms():
     try:
         (terms, total) = controller.TermController.query_terms(query_dict=query_dict)
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
@@ -174,6 +182,7 @@ def get_term_now():
     try:
         term = controller.TermController.get_now_term()
     except CustomError as e:
+        db.session.rollback()
         return jsonify({
             'code': e.code,
             'msg': e.err_info,
