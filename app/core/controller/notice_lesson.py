@@ -14,7 +14,7 @@ import pandas
 import datetime
 import app.core.services as service
 import json
-import ipdb
+
 
 class NoticeLessonController(object):
     @classmethod
@@ -279,26 +279,31 @@ class NoticeLessonController(object):
 
         row_num = df.shape[0]
         fail_lessons = list()
-        for i in range(0, row_num):
-            notice_lesson_data = dict()
-            for col_name_c, col_name_e in column_dict.items():
-                notice_lesson_data[col_name_e] = str(
-                    df.iloc[i][col_name_c])
-            notice_lesson_data['term'] = (notice_lesson_data['lesson_year'] + '-'+notice_lesson_data['lesson_semester']).replace('_', '-')
-            query_dict = {'lesson_teacher_id': notice_lesson_data['lesson_teacher_id'],'term': notice_lesson_data['term']}           
-            (lessons, total) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=False)
-            if total == 0:
-                fail_lessons.append(query_dict)
-                continue
-            for lesson in lessons:
-                try:
-                    dao.Lesson.update_lesson(ctx=True, query_dict={'lesson_id': lesson['lesson_id']},
-                                             data={'lesson_level': '关注课程'})
-                    dao.NoticeLesson.insert_notice_lesson(
-                        ctx=True, data=notice_lesson_data)                                             
-                except:
+        try:
+            for i in range(0, row_num):
+                notice_lesson_data = dict()
+                for col_name_c, col_name_e in column_dict.items():
+                    notice_lesson_data[col_name_e] = str(
+                        df.iloc[i][col_name_c])
+                notice_lesson_data['term'] = (notice_lesson_data['lesson_year'] + '-'+notice_lesson_data['lesson_semester']).replace('_', '-')
+                query_dict = {'lesson_teacher_id': notice_lesson_data['lesson_teacher_id'],'term': notice_lesson_data['term']}
+                (lessons, total) = dao.Lesson.query_lessons(query_dict=query_dict, unscoped=False)
+                if total == 0:
                     fail_lessons.append(query_dict)
                     continue
+                for lesson in lessons:
+                    try:
+                        dao.Lesson.update_lesson(ctx=True, query_dict={'lesson_id': lesson['lesson_id']},
+                                                 data={'lesson_level': '关注课程'})
+                        dao.NoticeLesson.insert_notice_lesson(
+                            ctx=True, data=notice_lesson_data)
+                    except:
+                        fail_lessons.append(query_dict)
+                        continue
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            raise e
         file_path = None
         if len(fail_lessons) != 0:
             frame_dict = {}
