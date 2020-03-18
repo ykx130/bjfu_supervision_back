@@ -18,6 +18,7 @@ class LessonService:
         forms_total, num_total = dao.Form.query_forms(
             query_dict={
                 "meta.lesson.lesson_id": lesson_id,
+                "model_lesson.is_model_lesson":True,
                 "status": "已完成"
             },
         )

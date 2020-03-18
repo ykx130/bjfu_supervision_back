@@ -334,8 +334,7 @@ class ModelLessonController(object):
         frame_dict = dict()
         for model_lesson in model_lessons:
             lesson = dao.Lesson.get_lesson(query_dict={
-                'lesson_id': model_lesson['lesson_id'],
-                'term': model_lesson['term']
+                'lesson_id': model_lesson['lesson_id']
             }, unscoped=True)
             if lesson is None:
                 raise CustomError(404, 404, 'lesson not found')

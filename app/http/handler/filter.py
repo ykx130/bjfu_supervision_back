@@ -47,10 +47,7 @@ class Filter(object):
                             'msg': 'forbidden'
                         }), 403
 
-                    term = query_dict.get('term')
-                    if term is None:
-                        term = TermService.get_now_term()['name']
-                        query_dict.update({'term': term})
+                    
                     if current_role == '学院领导':
                         query_dict.update({'unit': [user['unit']]})
                 result = func(*args, **query_dict)
@@ -91,10 +88,6 @@ class Filter(object):
                             'msg': 'forbidden'
                         }), 403
 
-                    term = query_dict.get('term')
-                    if term is None:
-                        term = TermService.get_now_term()['name']
-                        query_dict.update({'term': term})
                     if current_role == '管理员' or current_role == '校级管理员':
                         query_dict = query_dict
                     elif current_role == '学院领导':
@@ -149,10 +142,6 @@ class Filter(object):
                             'msg': 'forbidden'
                         }), 403
 
-                    term = query_dict.get('term')
-                    if term is None:
-                        term = TermService.get_now_term()['name']
-                        query_dict.update({'meta.term': term})
                     if current_role == '管理员' or  current_role == '校级管理员':                       
                         query_dict = query_dict
                     elif current_role == '学院领导':
