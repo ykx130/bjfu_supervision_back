@@ -316,7 +316,7 @@ class ModelLessonController(object):
             from app import basedir
             filename = '/static/' + "fail" + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             fullname = basedir + filename
-            import ipdb 
+
             frame.to_excel(fullname, sheet_name='123', index=False, header=True)
         return fail_lessons
 
@@ -334,8 +334,7 @@ class ModelLessonController(object):
         frame_dict = dict()
         for model_lesson in model_lessons:
             lesson = dao.Lesson.get_lesson(query_dict={
-                'lesson_id': model_lesson['lesson_id'],
-                'term': model_lesson['term']
+                'lesson_id': model_lesson['lesson_id']
             }, unscoped=True)
             if lesson is None:
                 raise CustomError(404, 404, 'lesson not found')

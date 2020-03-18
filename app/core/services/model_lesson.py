@@ -24,6 +24,7 @@ class ModelLessonService:
             query_dict= {
                 "meta.lesson.lesson_id": lesson_id,
                 "model_lesson.is_model_lesson": True,
+                "model_lesson.recommend":1,
                 "status": "已完成"
             }
         )
