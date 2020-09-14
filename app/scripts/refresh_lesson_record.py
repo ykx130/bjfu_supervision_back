@@ -13,7 +13,7 @@ from app.core.services import LessonService
 ctx = app.app_context()
 ctx.push()
 
-term = "2020-2021-1"
+term = "2019-2020-1"
 
 def get_all_guider():
 

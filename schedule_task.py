@@ -13,10 +13,10 @@ import time
 def job_refresh_lesson():
     print("RUN TASK")
     origin_info = {'host':'202.204.121.76', 'user': 'bjlydx_pj', 'passwd': 'bjlydx_pj', 'db': 'orcl',
-     'year': '2020-2021', 'semester': '1'}
+     'year': '2019-2020', 'semester': '1'} 
     fetch_origin_lesson.update_database(info=origin_info)
 
-    lesson_info = {'term': '2020-2021-1', 'host': 'localhost', 'user': 'root', 'passwd': 'Root!!2018', 'db': 'supervision',
+    lesson_info = {'term': '2019-2020-1', 'host': 'localhost', 'user': 'root', 'passwd': 'Root!!2018', 'db': 'supervision',
             'charset': 'utf8'}
     lesson_fetch.update_database(info=lesson_info)
 
