@@ -212,6 +212,8 @@ def format_raw_lesson_case(raw_lesson_case, lesson, lesson_id, term_begin_time, 
     处理课程具体信息（上课节次内置课程id等）
 
     """
+    import ipdb
+    ipdb.set_trace()
     lesson_case_datas = list()
     teacher_ids = raw_lesson_case['lesson_teacher_id'].replace(' ', '').split(',')
     inner_lessson_ids = [lesson_id_gen(
