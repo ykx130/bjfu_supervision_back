@@ -39,9 +39,8 @@ class User(db.Model, UserMixin):
         if user is None:
             return None
         if user.start_working is None:
-            user.start_working='0000-01-01'
-        else:
-            user.start_working=str(user.start_working.strftime('%Y-%m-%d'))
+            default_time='0000-01-01'
+            user.start_working= datetime.strptime(default_time,'%Y-%m-%d')
         user_dict = {
             'id': user.id,
             'username': user.username,
@@ -58,7 +57,7 @@ class User(db.Model, UserMixin):
             'is_leader': user.is_leader,
             'is_admin': user.is_admin,
             'is_reader': user.is_reader,
-            'start_working':user.start_working
+            'start_working':str(user.start_working.strftime('%Y-%m-%d'))
         }
         return user_dict
 
