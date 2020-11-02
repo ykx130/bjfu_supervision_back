@@ -9,20 +9,19 @@ class Activity(db.Model):
     __tablename__ = 'activities'
     id = db.Column(db.Integer, primary_key=True,
                    autoincrement=True, index=True)
-    name = db.Column(db.String(64), default='')
-    teacher = db.Column(db.String(64), default='')
+    title = db.Column(db.String(64), default='')
+    presenter = db.Column(db.String(64), default='')
+    module = db.Column(db.String(64), default='')
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
-    end_time = db.Column(db.TIMESTAMP, default=datetime.now)
     place = db.Column(db.String(128), default='')
-    state = db.Column(db.String(16), default='')
-    information = db.Column(db.String(128), default='')
+    apply_state = db.Column(db.String(16), default='')
+    organizer = db.Column(db.String(64), default='')
     all_num = db.Column(db.Integer, default=0)
     attend_num = db.Column(db.Integer, default=0)
     remainder_num = db.Column(db.Integer, default=0)
     term = db.Column(db.String(32), default='')
-    apply_start_time = db.Column(db.TIMESTAMP, default=datetime.now)
-    apply_end_time = db.Column(db.TIMESTAMP, default=datetime.now)
-    apply_state = db.Column(db.String(32), default='')
+    period = db.Column(db.Integer, default=0)
+    is_obligatory=db.Column(db.Boolean, default=False)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -40,20 +39,19 @@ class Activity(db.Model):
         try:
             activity_dict = {
                 'id': activity.id,
-                'name': activity.name,
-                'teacher': activity.teacher,
+                'title': activity.title,
+                'presenter': activity.presenter,
+                'module':activity.module,
                 'start_time': convert_datetime_to_string(activity.start_time),
-                'end_time': convert_datetime_to_string(activity.end_time),
                 'place': activity.place,
-                'state': activity.state,
-                'information': activity.information,
-                'all_num': activity.all_num,
+                'apply_state': activity.apply_state,
+                'organizer': activity.organizer,
+                'all_num':activity.all_num,
                 'attend_num': activity.attend_num,
                 'remainder_num': activity.remainder_num,
                 'term': activity.term,
-                'apply_start_time': convert_datetime_to_string(activity.apply_start_time),
-                'apply_end_time': convert_datetime_to_string(activity.apply_end_time),
-                'apply_state': activity.apply_state
+                'period':activity.period,
+                'is_obligatory': activity.is_obligatory
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -178,6 +176,7 @@ class ActivityUser(db.Model):
     activity_id = db.Column(db.Integer, default=-1)
     state = db.Column(db.String(16), default='')
     fin_state = db.Column(db.String(16), default='')
+    activity_type = db.Column(db.String(64), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -197,9 +196,10 @@ class ActivityUser(db.Model):
                 'id': activity_user_user.id,
                 'username': activity_user_user.username,
                 'activity_id': activity_user_user.activity_id,
-                'activity_user_id': activity_user_user.id,
+                # 'activity_user_id': activity_user_user.id,
                 'state': activity_user_user.state,
-                'fin_state': activity_user_user.fin_state
+                'fin_state': activity_user_user.fin_state,
+                'activity_type':activity_user_user.activity_type
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
