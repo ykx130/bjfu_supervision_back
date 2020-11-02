@@ -35,7 +35,6 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def formatter(cls, user):
-        print(user)
         if user is None:
             return None
         if user.start_working is None:
