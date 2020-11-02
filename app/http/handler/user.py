@@ -87,6 +87,31 @@ def change_user_password(username):
     }), 200
 
 
+@user_blueprint.route('/users/excel/import', methods=['POST'])
+@login_required
+def import_users_excel():
+    try:
+        path = controller.UserController.import_users_excel(data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+
+
 @user_blueprint.route('/users/<string:username>', methods=['PUT'])
 @login_required
 def change_user(username):

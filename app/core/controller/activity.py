@@ -14,36 +14,18 @@ class ActivityController(object):
     @classmethod
     def reformatter(cls, data: dict):
         new_data = dict()
-        must_columns = ['apply_start_time', 'apply_end_time', 'start_time', 'end_time']
-        for must_column in must_columns:
-            if must_column not in data:
-                raise CustomError(200, 500, must_column + ' not found')
+        must_column = ['start_time']
+        if must_column not in data:
+            raise CustomError(200, 500, must_column + ' not found')
         for key, value in data.items():
-            if key not in ['state', 'apply_state', 'attend_num', 'remainder_num']:
+            if key not in ['apply_state', 'attend_num', 'remainder_num']:
                 new_data[key] = value
-        apply_start_time = data.get('apply_start_time', None)
-        apply_end_time = data.get('apply_end_time', None)
         start_time = data.get('start_time', None)
-        end_time = data.get('end_time', None)
-        if apply_start_time > apply_end_time:
-            raise CustomError(200, 500, 'apply_start_time can not be after apply_end_time')
-        if start_time > end_time:
-            raise CustomError(200, 500, 'start_time can not be after end_time')
-        if apply_end_time > start_time:
-            raise CustomError(200, 500, 'apply_end_time can not be after start_time')
         now = datetime.now()
-        if str(now) > apply_end_time:
-            new_data['apply_state'] = '报名已结束'
-        elif str(now) < apply_start_time:
-            new_data['apply_state'] = '报名未开始'
+        if str(now) > start_time:
+            new_data['apply_state'] = '活动已结束'
         else:
             new_data['apply_state'] = '报名进行中'
-        if str(now) > end_time:
-            new_data['state'] = '活动已结束'
-        elif str(now) < start_time:
-            new_data['state'] = '活动未开始'
-        else:
-            new_data['state'] = '活动进行中'
         new_data['attend_num'] = 0
         new_data['remainder_num'] = data['all_num']
         return new_data
@@ -58,9 +40,9 @@ class ActivityController(object):
             data = {}
         term = data.get('term', service.TermService.get_now_term()['name'])
         data['term'] = term
-        (_, num) = dao.Activity.query_activities(query_dict={'name': [data.get('name', '')]}, unscoped=False)
+        (_, num) = dao.Activity.query_activities(query_dict={'title': [data.get('title', '')]}, unscoped=False)
         if num != 0:
-            raise CustomError(500, 200, 'name has been used')
+            raise CustomError(500, 200, 'title has been used')
         data = cls.reformatter(data)
         try:
             dao.Activity.insert_activity(ctx=False, data=data)
@@ -175,12 +157,13 @@ class ActivityUserController(object):
         user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
-        if activity['apply_state'] in ['报名未开始', '报名已结束']:
+        if activity['apply_state'] =='活动已结束':
             raise CustomError(500, 200, activity['apply_state'])
         if activity['remainder_num'] <= 0:
             raise CustomError(500, 200, 'remain number is zero')
         data['activity_id'] = activity_id
         data['username'] = username
+        data['activity_type']='培训'
         data = cls.reformatter(data)
         remainder_num = activity['remainder_num'] - 1
         attend_num = activity['attend_num'] + 1
