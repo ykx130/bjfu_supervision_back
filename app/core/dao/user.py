@@ -8,6 +8,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from functools import wraps
 from app.utils.url_condition.url_condition_mysql import UrlCondition, process_query, count_query, page_query
 from app.utils.Error import CustomError
+from app.utils.misc import convert_string_to_datetime, convert_datetime_to_string
 
 
 class User(db.Model, UserMixin):
@@ -29,6 +30,7 @@ class User(db.Model, UserMixin):
     is_leader = db.Column(db.Boolean, default=False)
     is_guider = db.Column(db.Boolean, default=False)
     is_reader = db.Column(db.Boolean, default=False)
+    start_working=db.Column(db.Date, default='0000-01-01')
 
 
     @classmethod
@@ -50,14 +52,15 @@ class User(db.Model, UserMixin):
             'is_guider': user.is_guider,
             'is_leader': user.is_leader,
             'is_admin': user.is_admin,
-            'is_reader': user.is_reader
+            'is_reader': user.is_reader,
+            'start_working':str(user.start_working.strftime('%Y-%m-%d'))
         }
         return user_dict
 
     @classmethod
     def reformatter_update(cls, data: dict):
         allow_change_list = ['name', 'sex', 'password', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
-                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider','is_reader']
+                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider','is_reader','start_working']
         update_data = dict()
         for key, value in data.items():
             if key in allow_change_list:

@@ -7,7 +7,8 @@ import app.core.services as service
 from functools import wraps
 from flask import request
 from flask import jsonify
-
+import pandas
+import datetime
 
 class SchoolTerm():
     def __init__(self, term_name: str = None):
@@ -134,6 +135,42 @@ class UserController():
                                method='add_supervisor',
                                usernames=[username])
         return True
+
+    @classmethod
+    def import_users_excel(cls,ctx: bool = True,data: dict = None,default_password='bjfu123456'):
+        if 'filename' in data.files:
+            from app import basedir
+            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            file = data.files['filename']
+            file.save(filename)
+            df = pandas.read_excel(filename)
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        column_dict = {'教师姓名': 'name', '教师工号': 'username', '性别': 'sex',
+                       '教师所属学院': 'unit', '入职时间': 'start_working'}
+        row_num=df.shape[0]
+        fail_users=list()
+        try:
+            for i in range(0, row_num):
+                user_date=dict()
+                for col_name_c, col_name_e in column_dict.items():
+                    user_date[col_name_e]=str(df.iloc[i].get(col_name_c,''))
+                (_, num) = dao.User.query_users(query_dict={
+                    'lesson_id': user_date['username']
+                }, unscoped=False)
+                if num!=0:
+                    fail_users.append({**user_date,'reason':'用户已存在'})
+                    continue
+                data['password'] = default_password
+                dao.User.insert_user(ctx=True,data=user_date)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            raise e
+        return fail_users
+
 
     @classmethod
     def update_user(cls, ctx: bool = True, username: str = '', data: dict = None):
