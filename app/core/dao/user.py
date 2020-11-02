@@ -39,7 +39,7 @@ class User(db.Model, UserMixin):
         if user is None:
             return None
         if user.start_working is None:
-            default_time='0000-01-01'
+            default_time='1000-01-01'
             user.start_working= datetime.strptime(default_time,'%Y-%m-%d')
         user_dict = {
             'id': user.id,
