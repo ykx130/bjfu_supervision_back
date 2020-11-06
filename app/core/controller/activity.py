@@ -14,7 +14,7 @@ class ActivityController(object):
     @classmethod
     def reformatter(cls, data: dict):
         new_data = dict()
-        must_column = ['start_time']
+        must_column = 'start_time'
         if must_column not in data:
             raise CustomError(200, 500, must_column + ' not found')
         for key, value in data.items():
