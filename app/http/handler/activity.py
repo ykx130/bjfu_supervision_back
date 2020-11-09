@@ -151,6 +151,8 @@ def find_activity_user(id, username, **kwargs):
     query_dict.update(kwargs)
     try:
         query_dict.update({'activity_id': id,'username':username})
+        import ipdb
+        ipdb.set_trace()
         activity = controller.ActivityController.get_activity(query_dict=query_dict)
         activity_user = controller.ActivityUserController.get_activity_user(query_dict=query_dict)
     except CustomError as e:
