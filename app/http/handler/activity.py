@@ -111,6 +111,7 @@ def find_activity_users(id, **kwargs):
         query_dict.update(args_to_dict(request.args))
         query_dict.update(kwargs)
         activity = controller.ActivityController.get_activity(query_dict={'id': id})
+        query_dict.update({'activity_id':id})
         (activity_users, total) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
     except CustomError as e:
         db.session.rollback()
@@ -150,9 +151,6 @@ def find_activity_user(id, username, **kwargs):
     query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
     try:
-        query_dict.update({'activity_id': id,'username':username})
-        import ipdb
-        ipdb.set_trace()
         activity = controller.ActivityController.get_activity(query_dict=query_dict)
         activity_user = controller.ActivityUserController.get_activity_user(query_dict=query_dict)
     except CustomError as e:
