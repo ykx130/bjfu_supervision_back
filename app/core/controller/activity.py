@@ -129,7 +129,8 @@ class ActivityUserController(object):
     def reformatter(cls, data):
         if 'fin_state' not in data:
             raise CustomError(500, 200, 'fin_state must be given')
-        data['state'] = '已报名'
+        if 'state' not in data:
+            data['state'] = '已报名'
         return data
 
     @classmethod
@@ -287,7 +288,7 @@ class ActivityUserController(object):
                     'activity': activity,
                     'activity_user': {
                         'state': '未报名',
-                        'fin_state': '未报名'
+                        'fin_state': '未参加'
                     }
                 }
                 current_user_activities.append(current_user_activity)
