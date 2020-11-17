@@ -137,7 +137,7 @@ class UserController():
         return True
 
     @classmethod
-    def import_users_excel(cls,ctx: bool = True,data: dict = None,default_password='bjfu123456'):
+    def import_users_excel(cls,ctx: bool = True,data=None,default_password='bjfu123456'):
         if 'filename' in data.files:
             from app import basedir
             filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
