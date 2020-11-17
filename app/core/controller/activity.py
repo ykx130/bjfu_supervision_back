@@ -4,7 +4,7 @@ from app.utils.kafka import send_kafka_message
 from datetime import datetime
 from flask_login import current_user
 import app.core.services as service
-
+import pandas
 
 class ActivityController(object):
     @classmethod
@@ -26,8 +26,12 @@ class ActivityController(object):
             new_data['apply_state'] = '活动已结束'
         else:
             new_data['apply_state'] = '报名进行中'
-        new_data['attend_num'] = 0
-        new_data['remainder_num'] = data['all_num']
+        if 'attend_num' not in data:
+            new_data['attend_num'] = 0
+            new_data['remainder_num'] = data['all_num']
+        else:
+            new_data['attend_num'] = data['attend_num']
+            new_data['remainder_num'] = data['all_num']-data['attend_num']
         return new_data
 
     @classmethod
@@ -56,6 +60,42 @@ class ActivityController(object):
             else:
                 raise CustomError(500, 500, str(e))
         return True
+
+    def import_activity_excel(cls, ctx: bool = True, data=None):
+        if 'filename' in data.files:
+            from app import basedir
+            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            file = data.files['filename']
+            file.save(filename)
+            df = pandas.read_excel(filename)
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        column_dict = {'题目': 'title', '主讲人': 'presenter', '学期': 'term',
+                       '所属模块': 'module', '开始时间': 'start_time', '地点': 'place',
+                       '主办单位': 'organizer','学时':'period','允许报名人数':'all_num','是否为新教师必修':'is_obligatory'}
+        row_num = df.shape[0]
+        fail_activities = list()
+        try:
+            for i in range(0, row_num):
+                activity_dict = dict()
+                for col_name_c, col_name_e in column_dict.items():
+                    activity_dict[col_name_e] = str(df.iloc[i].get(col_name_c, ''))
+                activity_dict['apply_state'] = '可报名'
+                (_, num) = dao.Activity.query_activities(query_dict={
+                    'title': activity_dict['title'] ,
+                    'term': activity_dict['term']
+                }, unscoped=False)
+                if num != 0:
+                    fail_activities.append({**activity_dict, 'reason': '活动已经存在'})
+                    continue
+                dao.Activity.insert_activity(ctx=True, data=activity_dict)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            raise e
+        return fail_activities
 
     @classmethod
     def update_activity(cls, ctx: bool = True, id: int = 0, data: dict = None):
@@ -186,6 +226,100 @@ class ActivityUserController(object):
             else:
                 raise CustomError(500, 500, str(e))
         return True
+    @classmethod
+    def insert_activity_user_apply(cls, ctx: bool = True, username: str = None, data: dict = None):
+        if data is None:
+            data = {}
+        term = data.get('term', service.TermService.get_now_term()['name'])
+        data['term'] = term
+        (_, num) = dao.Activity.query_activities(query_dict={'title': [data.get('title', '')]}, unscoped=False)
+        if num != 0:
+            raise CustomError(500, 200, 'title has been used')
+        data['apply_state'] ='待审核活动'
+        try:
+            dao.Activity.insert_activity(ctx=False, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        activity = dao.Activity.get_activity(query_dict={'title':  [data.get('title', '')],'term': [data.get('term', '')]}, unscoped=False)
+        activity_user_dict={}
+        activity_user_dict['activity_id']=activity['activity_id']
+        if username is None:
+            username=current_user.username
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'user not found')
+        activity_user_dict['username'] = username
+        activity_user_dict['activity_type'] = '培训'
+        activity_user_dict['state']='已报名'
+        activity_user_dict['fin_state']=data['fin_state']
+        (_, num) = dao.ActivityUser.query_activity_users(
+            query_dict={'activity_id': [activity['activity_id']], 'username': [username]}, unscoped=False)
+        if num > 0:
+            raise CustomError(500, 200, 'activity_user has existed')
+        try:
+            dao.ActivityUser.insert_activity_user(ctx=False, data=activity_user_dict)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    def import_activity_user_excel(cls, ctx: bool = True,activity_id: int = 0, data=None):
+        if 'filename' in data.files:
+            from app import basedir
+            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            file = data.files['filename']
+            file.save(filename)
+            df = pandas.read_excel(filename)
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
+        if activity is None:
+            raise CustomError(404, 404, 'activity not found')
+        username = data.get('username', current_user.username)
+        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'user not found')
+        column_dict = {'教师工号': 'username', '参与状态': 'fin_state'}
+        row_num = df.shape[0]
+        fail_activities = list()
+        try:
+            for i in range(0, row_num):
+                activity_user_dict = dict()
+                activity_user_dict['activity_id']=activity_id
+                for col_name_c, col_name_e in column_dict.items():
+                    activity_user_dict[col_name_e] = str(df.iloc[i].get(col_name_c, ''))
+                activity_user_dict['state']='已报名'
+                activity_user_dict['activity_type'] ='培训'
+                (_, num) = dao.ActivityUser.query_activity_users(query_dict={
+                    'username': activity_user_dict['username'],
+                    'activity_id': activity_user_dict['activity_id']
+                }, unscoped=False)
+                if num != 0:
+                    dao.ActivityUser.update_activity_user(ctx=False,
+                                                  query_dict={'activity_id': [activity_id], 'username': [username]},
+                                                  data=activity_user_dict)
+                    continue
+                dao.Activity.insert_activity(ctx=True, data=activity_user_dict)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            raise e
+        return fail_activities
 
     @classmethod
     def update_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None, data: dict = None):

@@ -45,6 +45,30 @@ def insert_activity(**kwargs):
         'msg': '',
     }), 200
 
+@activity_blueprint.route('/acyivities/excel/import', methods=['POST'])
+@login_required
+def import_activitys_excel():
+    try:
+        path = controller.ActivityController.import_activity_excel(data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+
 
 @activity_blueprint.route('/activities/<int:id>')
 @login_required
@@ -143,6 +167,46 @@ def insert_activity_user(id, **kwargs):
         'msg': ''
     }), 200
 
+@activity_blueprint.route('/activities/activity_users_apply/<string:username>', methods=['POST'])
+@login_required
+def insert_activity_user_apply(username,**kwargs):
+    try:
+        controller.ActivityUserController.insert_activity_user_apply(username=username, data=request.json)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': ''
+    }), 200
+
+@activity_blueprint.route('/acyivities/<int:id>/activity_users_excel/import', methods=['POST'])
+@login_required
+def import_activitys_excel(id):
+    try:
+        path = controller.ActivityUserController.import_activity_user_excel(activity_id=id,data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+
 
 @activity_blueprint.route('/activities/<int:id>/activity_users/<string:username>')
 @login_required
@@ -222,4 +286,25 @@ def get_current_user_activities(**kwargs):
         'msg': '',
         'total': total,
         'activities': activities
+    }), 200
+
+@activity_blueprint.route('/activities/activity_users')
+@login_required
+def get_activity_users(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    try:
+        (activity_users, total) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'total': total,
+        'activity_users': activity_users,
+        'msg': ''
     }), 200
