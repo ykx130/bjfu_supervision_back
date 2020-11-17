@@ -354,7 +354,7 @@ class ActivityUserController(object):
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + \
-                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+                       datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             fullname = basedir + filename
             frame.to_excel(fullname, sheet_name='123',
                            index=False, header=True)
