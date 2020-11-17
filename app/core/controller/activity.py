@@ -65,7 +65,7 @@ class ActivityController(object):
     def import_activity_excel(cls, ctx: bool = True, data=None):
         if 'filename' in data.files:
             from app import basedir
-            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            filename = basedir + '/static/' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             file = data.files['filename']
             file.save(filename)
             df = pandas.read_excel(filename)
@@ -110,7 +110,7 @@ class ActivityController(object):
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + \
-                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+                       datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             fullname = basedir + filename
             frame.to_excel(fullname, sheet_name='123',
                            index=False, header=True)
@@ -299,7 +299,7 @@ class ActivityUserController(object):
     def import_activity_user_excel(cls, ctx: bool = True,activity_id: int = 0, data=None):
         if 'filename' in data.files:
             from app import basedir
-            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            filename = basedir + '/static/' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             file = data.files['filename']
             file.save(filename)
             df = pandas.read_excel(filename)
@@ -354,7 +354,7 @@ class ActivityUserController(object):
             frame = pandas.DataFrame(frame_dict)
             from app import basedir
             filename = '/static/' + "fail" + \
-                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+                       datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
             fullname = basedir + filename
             frame.to_excel(fullname, sheet_name='123',
                            index=False, header=True)
