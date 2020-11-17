@@ -81,7 +81,6 @@ class ActivityController(object):
                 activity_dict = dict()
                 for col_name_c, col_name_e in column_dict.items():
                     activity_dict[col_name_e] = str(df.iloc[i].get(col_name_c, ''))
-                activity_dict['apply_state'] = '可报名'
                 (_, num) = dao.Activity.query_activities(query_dict={
                     'title': activity_dict['title'] ,
                     'term': activity_dict['term']
@@ -89,6 +88,11 @@ class ActivityController(object):
                 if num != 0:
                     fail_activities.append({**activity_dict, 'reason': '活动已经存在'})
                     continue
+                activity_dict=cls.reformatter(activity_dict)
+                if activity_dict['is_obligatory']=='是':
+                    activity_dict['is_obligatory']=True
+                else:
+                    activity_dict['is_obligatory']=False
                 dao.Activity.insert_activity(ctx=True, data=activity_dict)
             if ctx:
                 db.session.commit()
