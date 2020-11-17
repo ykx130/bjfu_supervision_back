@@ -61,6 +61,7 @@ class ActivityController(object):
                 raise CustomError(500, 500, str(e))
         return True
 
+    @classmethod
     def import_activity_excel(cls, ctx: bool = True, data=None):
         if 'filename' in data.files:
             from app import basedir
@@ -294,6 +295,7 @@ class ActivityUserController(object):
                 raise CustomError(500, 500, str(e))
         return True
 
+    @classmethod
     def import_activity_user_excel(cls, ctx: bool = True,activity_id: int = 0, data=None):
         if 'filename' in data.files:
             from app import basedir
