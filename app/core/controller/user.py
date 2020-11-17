@@ -156,7 +156,7 @@ class UserController():
                 for col_name_c, col_name_e in column_dict.items():
                     user_date[col_name_e]=str(df.iloc[i].get(col_name_c,''))
                 (_, num) = dao.User.query_users(query_dict={
-                    'lesson_id': user_date['username']
+                    'username': user_date['username']
                 }, unscoped=False)
                 if num!=0:
                     fail_users.append({**user_date,'reason':'用户已存在'})
