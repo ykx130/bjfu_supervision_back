@@ -185,7 +185,7 @@ def insert_activity_user_apply(username,**kwargs):
 
 @activity_blueprint.route('/acyivities/<int:id>/activity_users_excel/import', methods=['POST'])
 @login_required
-def import_activitys_excel(id):
+def import_activitys_user_excel(id,**kwargs):
     try:
         path = controller.ActivityUserController.import_activity_user_excel(activity_id=id,data=request)
     except CustomError as e:
