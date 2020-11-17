@@ -169,7 +169,25 @@ class UserController():
             if ctx:
                 db.session.rollback()
             raise e
-        return fail_users
+        file_path = None
+        if len(fail_users) != 0:
+            frame_dict = {}
+            for fail_user in fail_users:
+                for key, value in column_dict.items():
+                    if value in fail_user:
+                        excel_value = fail_user.get(value)
+                        if key not in frame_dict:
+                            frame_dict[key] = [excel_value]
+                        else:
+                            frame_dict[key].append(excel_value)
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + "fail" + \
+                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123',
+                           index=False, header=True)
+        return file_path
 
 
     @classmethod

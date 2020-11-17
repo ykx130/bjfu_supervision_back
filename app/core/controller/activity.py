@@ -95,7 +95,25 @@ class ActivityController(object):
             if ctx:
                 db.session.rollback()
             raise e
-        return fail_activities
+        file_path = None
+        if len(fail_activities) != 0:
+            frame_dict = {}
+            for fail_activity in fail_activities:
+                for key, value in column_dict.items():
+                    if value in fail_activity:
+                        excel_value = fail_activity.get(value)
+                        if key not in frame_dict:
+                            frame_dict[key] = [excel_value]
+                        else:
+                            frame_dict[key].append(excel_value)
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + "fail" + \
+                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123',
+                           index=False, header=True)
+        return file_path
 
     @classmethod
     def update_activity(cls, ctx: bool = True, id: int = 0, data: dict = None):
@@ -285,16 +303,12 @@ class ActivityUserController(object):
             df = pandas.read_excel(filename)
         else:
             raise CustomError(500, 200, 'file must be given')
+        fail_activity_users = list()
         activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
-        username = data.get('username', current_user.username)
-        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
-        if user is None:
-            raise CustomError(404, 404, 'user not found')
         column_dict = {'教师工号': 'username', '参与状态': 'fin_state'}
         row_num = df.shape[0]
-        fail_activities = list()
         try:
             for i in range(0, row_num):
                 activity_user_dict = dict()
@@ -303,6 +317,11 @@ class ActivityUserController(object):
                     activity_user_dict[col_name_e] = str(df.iloc[i].get(col_name_c, ''))
                 activity_user_dict['state']='已报名'
                 activity_user_dict['activity_type'] ='培训'
+                username = activity_user_dict['username']
+                user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+                if user is None:
+                    fail_activity_users.append({**activity_user_dict, 'reason': '用户不存在'})
+                    continue
                 (_, num) = dao.ActivityUser.query_activity_users(query_dict={
                     'username': activity_user_dict['username'],
                     'activity_id': activity_user_dict['activity_id']
@@ -319,7 +338,25 @@ class ActivityUserController(object):
             if ctx:
                 db.session.rollback()
             raise e
-        return fail_activities
+        file_path = None
+        if len(fail_activity_users) != 0:
+            frame_dict = {}
+            for fail_activity_user in fail_activity_users:
+                for key, value in column_dict.items():
+                    if value in fail_activity_user:
+                        excel_value = fail_activity_user.get(value)
+                        if key not in frame_dict:
+                            frame_dict[key] = [excel_value]
+                        else:
+                            frame_dict[key].append(excel_value)
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + "fail" + \
+                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123',
+                           index=False, header=True)
+        return file_path
 
     @classmethod
     def update_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None, data: dict = None):
