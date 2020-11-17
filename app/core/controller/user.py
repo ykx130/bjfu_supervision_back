@@ -161,7 +161,7 @@ class UserController():
                 if num!=0:
                     fail_users.append({**user_date,'reason':'用户已存在'})
                     continue
-                data['password'] = default_password
+                user_date['password'] = default_password
                 dao.User.insert_user(ctx=True,data=user_date)
             if ctx:
                 db.session.commit()
