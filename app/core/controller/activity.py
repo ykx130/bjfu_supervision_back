@@ -178,12 +178,16 @@ class ActivityController(object):
 class ActivityUserController(object):
     @classmethod
     def formatter(cls, activity_user):
-        user = dao.User.get_user(query_dict={'username':activity_user['username']}, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': activity_user['username']}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
+        if activity_user['activity_type']=='培训':
+            activity=dao.Activity.get_activity(query_dict={'id':activity_user['activity_id']}, unscoped=False)
         activity_user_dict = {
             'user': user,
+            'activity':activity,
             'state': activity_user['state'],
+            'activity_id':activity_user['activity_id'],
             'fin_state': activity_user['fin_state']
         }
         return activity_user_dict
