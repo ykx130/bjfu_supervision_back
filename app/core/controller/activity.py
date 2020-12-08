@@ -18,10 +18,10 @@ class ActivityController(object):
         if must_column not in data:
             raise CustomError(200, 500, must_column + ' not found')
         for key, value in data.items():
-            if key not in ['apply_state', 'attend_num', 'remainder_num']:
+            if key not in ['attend_num', 'remainder_num']:
                 new_data[key] = value
         start_time = data.get('start_time', None)
-        if new_data['apply_state']!='待审核活动':
+        if 'apply_state' not in new_data or new_data['apply_state']!='待审核活动':
             now = datetime.now()
             if str(now) > start_time:
                 new_data['apply_state'] = '活动已结束'
