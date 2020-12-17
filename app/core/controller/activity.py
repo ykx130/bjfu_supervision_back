@@ -394,7 +394,7 @@ class ActivityUserController(object):
                 }, unscoped=False)
                 if num != 0:
                     dao.ActivityUser.update_activity_user(ctx=False,
-                                                  query_dict={'activity_id': [activity['activity_id']], 'username': [ activity_user_dict['username']]},
+                                                  query_dict={'activity_id': [activity['activity_id']], 'username': [ activity_user_dict['username']],'activity_type': [activity_user_dict['activity_type']]},
                                                   data=activity_user_dict)
                     continue
                 dao.Activity.insert_activity(ctx=True, data=activity_user_dict)
