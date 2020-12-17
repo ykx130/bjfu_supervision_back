@@ -809,7 +809,7 @@ class Research(db.Model):
     def get_research(cls, query_dict: dict, unscoped: bool = False):
         research = Research.query
         if not unscoped:
-            research = research.filter(Exchange.using == True)
+            research = research.filter(Research.using == True)
         url_condition = UrlCondition(query_dict)
         try:
             research = process_query(research, url_condition.filter_dict, url_condition.sort_limit_dict,
@@ -822,7 +822,7 @@ class Research(db.Model):
     def query_researchs(cls, query_dict: dict = None, unscoped: bool = False):
         if query_dict is None:
             query_dict = {}
-        query = Exchange.query
+        query = Research.query
         if not unscoped:
             query = query.filter(Research.using == True)
         url_condition = UrlCondition(query_dict)
@@ -916,7 +916,7 @@ class Project(db.Model):
                 'superior_units':project.superior_units,
                 'start_time': convert_datetime_to_string(project.start_time),
                 'end_time': convert_datetime_to_string(project.end_time),
-                'leader': project.place,
+                'leader': project.leader,
                 'term': project.term
             }
         except Exception as e:
