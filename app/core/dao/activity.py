@@ -177,6 +177,10 @@ class ActivityUser(db.Model):
     state = db.Column(db.String(16), default='')
     fin_state = db.Column(db.String(16), default='')
     activity_type = db.Column(db.String(64), default='')
+    intervals=db.Column(db.Integer, default=0)
+    activity_time= db.Column(db.TIMESTAMP, default=datetime.now)
+    user_unit=db.Column(db.String(64), default='')
+    score= db.Column(db.Integer, default=0)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -196,10 +200,13 @@ class ActivityUser(db.Model):
                 'id': activity_user_user.id,
                 'username': activity_user_user.username,
                 'activity_id': activity_user_user.activity_id,
-                # 'activity_user_id': activity_user_user.id,
                 'state': activity_user_user.state,
                 'fin_state': activity_user_user.fin_state,
-                'activity_type':activity_user_user.activity_type
+                'activity_type':activity_user_user.activity_type,
+                'intervals':activity_user_user.intervals,
+                'activity_time':convert_datetime_to_string(activity_user_user.activity_time),
+                'user_unit':activity_user_user.user_unit,
+                'score':activity_user_user.score
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -452,7 +459,7 @@ class Competition(db.Model):
     award_name = db.Column(db.String(64), default='')
     organizer = db.Column(db.String(64), default='')
     level = db.Column(db.String(64), default='')
-    award_time = db.Column(db.TIMESTAMP, default=datetime.now)
+    start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
 
@@ -474,7 +481,7 @@ class Competition(db.Model):
                 'award_name': competition.award_name,
                 'organizer': competition.organizer,
                 'level': competition.level,
-                'award_time': convert_datetime_to_string(competition.award_time),
+                'start_time': convert_datetime_to_string(competition.start_time),
                 'term': competition.term
             }
         except Exception as e:
@@ -598,7 +605,7 @@ class Exchange(db.Model):
     invited_university = db.Column(db.String(64), default='')
     title = db.Column(db.String(64), default='')
     number =db.Column(db.Integer, default=0)
-    exchange_time = db.Column(db.TIMESTAMP, default=datetime.now)
+    start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
 
@@ -620,7 +627,7 @@ class Exchange(db.Model):
                 'invited_university': exchange.invited_university,
                 'title': exchange.title,
                 'number': exchange.number,
-                'exchange_time': convert_datetime_to_string(exchange.exchange_time),
+                'start_time': convert_datetime_to_string(exchange.start_time),
                 'term': exchange.term
             }
         except Exception as e:
@@ -744,7 +751,7 @@ class Research(db.Model):
     author = db.Column(db.String(64), default='')
     title = db.Column(db.String(64), default='')
     journal = db.Column(db.String(64), default='')
-    publication_time = db.Column(db.TIMESTAMP, default=datetime.now)
+    start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
     using = db.Column(db.Boolean, default=True)
 
@@ -766,7 +773,7 @@ class Research(db.Model):
                 'author': research.author,
                 'title': research.title,
                 'journal': research.journal,
-                'publication_time': convert_datetime_to_string(research.publication_time),
+                'start_time': convert_datetime_to_string(research.start_time),
                 'term': research.term
             }
         except Exception as e:
@@ -1026,6 +1033,291 @@ class Project(db.Model):
                 if hasattr(project, key):
                     setattr(project, key, value)
             db.session.add(project)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+class FileRecord(db.Model):
+    __tablename__ = 'FileRecord'
+    id = db.Column(db.Integer, primary_key=True,
+                   autoincrement=True, index=True)
+    title = db.Column(db.String(64), default='')
+    path= db.Column(db.String(64), default='')
+    # type = db.Column(db.String(64), default='')
+    using = db.Column(db.Boolean, default=True)
+
+    @classmethod
+    def reformatter_insert(cls, data: dict):
+        return data
+
+    @classmethod
+    def reformatter_update(cls, data: dict):
+        return data
+
+    @classmethod
+    def formatter(cls, filerecord):
+        if filerecord is None:
+            return None
+        try:
+            file_dict = {
+                'id': filerecord.id,
+                'title': filerecord.title,
+                'path': filerecord.path
+                # 'type': filerecord.type
+            }
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return file_dict
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        query = FileRecord.query
+        if not unscoped:
+            query = query.filter(FileRecord.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict,
+                                url_condition.sort_limit_dict, FileRecord)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
+    def insert_filerecord(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        data = cls.reformatter_insert(data)
+        filerecord = FileRecord()
+        for key, value in data.items():
+            if hasattr(filerecord, key):
+                setattr(filerecord, key, value)
+        db.session.add(filerecord)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def get_filerecord(cls, query_dict: dict, unscoped: bool = False):
+        filerecord = FileRecord.query
+        if not unscoped:
+            filerecord = filerecord.filter(FileRecord.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            filerecord = process_query(filerecord, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                    FileRecord).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return cls.formatter(filerecord)
+
+    @classmethod
+    def query_filerecords(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        query = FileRecord.query
+        if not unscoped:
+            query = query.filter(FileRecord.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, FileRecord)
+            (filerecords, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [cls.formatter(filerecord) for filerecord in filerecords], total
+
+    @classmethod
+    def delete_filerecord(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
+        query = FileRecord.query.filter(FileRecord.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, FileRecord)
+            (filerecords, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for filerecord in filerecords:
+            filerecord.using = False
+            db.session.add(filerecord)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def update_filerecord(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
+        data = cls.reformatter_update(data)
+        query = FileRecord.query.filter(FileRecord.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, FileRecord)
+            (filerecords, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for filerecord in filerecords:
+            for key, value in data.items():
+                if hasattr(filerecord, key):
+                    setattr(filerecord, key, value)
+            db.session.add(filerecord)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+
+class ActivityUserScore(db.Model):
+    __tablename__ = 'activityscore'
+    id = db.Column(db.Integer, primary_key=True,
+                   autoincrement=True, index=True)
+    username = db.Column(db.String(64), default='')
+    worktime = db.Column(db.Integer, default=0)
+    score = db.Column(db.Integer, default=0)
+    using = db.Column(db.Boolean, default=True)
+
+    @classmethod
+    def reformatter_insert(cls, data: dict):
+        return data
+
+    @classmethod
+    def reformatter_update(cls, data: dict):
+        return data
+
+    @classmethod
+    def formatter(cls, activityscore):
+        if activityscore is None:
+            return None
+        try:
+            score_dict = {
+                'id': activityscore.id,
+                'username': activityscore.username,
+                'worktime': activityscore.worktime,
+                'score':activityscore.score
+            }
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return score_dict
+
+    @classmethod
+    def count(cls, query_dict: dict, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        query = ActivityUserScore.query
+        if not unscoped:
+            query = query.filter(ActivityUserScore.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            total = count_query(query, url_condition.filter_dict,
+                                url_condition.sort_limit_dict, ActivityUserScore)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return total
+
+    @classmethod
+    def insert_activityuser_score(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        data = cls.reformatter_insert(data)
+        activity_user_score = ActivityUserScore()
+        for key, value in data.items():
+            if hasattr(activity_user_score, key):
+                setattr(activity_user_score, key, value)
+        db.session.add(activity_user_score)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def get_activityuser_score(cls, query_dict: dict, unscoped: bool = False):
+        activity_user_score = ActivityUserScore.query
+        if not unscoped:
+            activity_user_score = activity_user_score.filter(ActivityUserScore.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            activity_user_score = process_query(activity_user_score, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                     ActivityUserScore).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return cls.formatter(activity_user_score)
+
+    @classmethod
+    def query_activity_user_scores(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        query = ActivityUserScore.query
+        if not unscoped:
+            query = query.filter(ActivityUserScore.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUserScore)
+            (activity_user_scores, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [cls.formatter(activity_user_score) for activity_user_score in activity_user_scores], total
+
+    @classmethod
+    def delete_activity_user_score(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = {}
+        query = ActivityUserScore.query.filter(ActivityUserScore.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUserScore)
+            (activity_user_scores, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for activity_user_score in activity_user_scores:
+            activity_user_score.using = False
+            db.session.add(activity_user_score)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def update_activity_user_score(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = {}
+        if query_dict is None:
+            query_dict = {}
+        data = cls.reformatter_update(data)
+        query = ActivityUserScore.query.filter(ActivityUserScore.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(
+                query, url_condition.filter_dict, url_condition.sort_limit_dict, ActivityUserScore)
+            (activity_user_scores, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for activity_user_score in activity_user_scores:
+            for key, value in data.items():
+                if hasattr(activity_user_score, key):
+                    setattr(activity_user_score, key, value)
+            db.session.add(activity_user_score)
         if ctx:
             try:
                 db.session.commit()
