@@ -651,3 +651,140 @@ def update_project(id, **kwargs):
         'code': 200,
         'msg': '',
     }), 200
+
+@activity_blueprint.route('/activities_plan/<int:id>', methods=['PUT'])
+@login_required
+def update_activity_plan(id, **kwargs):
+    try:
+        controller.ActivityPlanController.update_activity_plan(id=id, data=request.json)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+    }), 200
+
+@activity_blueprint.route('/activities/activity_plans')
+@login_required
+def get_activity_plans(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    try:
+        (activity_plans, total) = controller.ActivityPlanController.query_activity_plans(query_dict=query_dict)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'total': total,
+        'activity_plans': activity_plans,
+        'msg': ''
+    }), 200
+
+@activity_blueprint.route('/activities/user_plan/<string:username>')
+@login_required
+def get_user_plan(username, **kwargs):
+    try:
+        user_plan_data = controller.ActivityPlanController.get_user_plan(username=username)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'user_plan_data': user_plan_data
+    }), 200
+
+
+@activity_blueprint.route('/activities/plan_file/upload', methods=['POST'])
+@login_required
+def upload_planfile():
+    try:
+        path = controller.FileRecordController.uploadplanfile(data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': ''
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': ''
+        }), 200
+
+@activity_blueprint.route('/activities/planfile/export/<string:filename>', methods=['POST'])
+@login_required
+def export_planfile_excel(filename, **kwargs):
+    try:
+        controller.FileRecordController.download_file(filename=filename)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': ''
+        # 'filename': filename
+    }), 200
+
+@activity_blueprint.route('/activities/query_files')
+@login_required
+def query_files(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    try:
+        (files, total) = controller.FileRecordController.query_files(query_dict=query_dict)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'total': total,
+        'files': files,
+        'msg': ''
+    }), 200
+
+@activity_blueprint.route('/activities/users_score')
+@login_required
+def query_users_score(*args, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    try:
+        (users_score, total) = controller.ActivityUserScoreController.query_users_score(query_dict=query_dict)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'total': total,
+        'users_score': users_score,
+        'msg': ''
+    }), 200
+
