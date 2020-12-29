@@ -964,11 +964,11 @@ class ActivityPlanController(object):
             if activity_plan['min_worktime'] <= work_time < activity_plan['max_worktime']:
                 data['require_score']=activity_plan['period']
                 continue
-        user_score=dict()
         user_score = dao.ActivityUserScore.get_activityuser_score(query_dict={'username':user['username'],'work_time':work_time}, unscoped=unscoped)
         if user_score is None:
-            user_score['score']=0
-        data['user_score']=user_score['score']
+            data['user_score']=0
+        else:
+            data['user_score']=user_score['score']
         return data
 
 
