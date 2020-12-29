@@ -689,13 +689,12 @@ def get_activity_plans(*args, **kwargs):
         'msg': ''
     }), 200
 
-@activity_blueprint.route('/activities/user_plan/<string:username>')
+@activity_blueprint.route('/activities/user_plan')
 @login_required
-def get_user_plan(username, **kwargs):
+def get_user_plan(*args, **kwargs):
     query_dict = {}
     query_dict.update(args_to_dict(request.args))
     query_dict.update(kwargs)
-    query_dict.update({'username': username})
     try:
         user_plan_data = controller.ActivityPlanController.get_user_plan(query_dict=query_dict)
     except CustomError as e:
