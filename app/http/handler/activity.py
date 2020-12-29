@@ -692,8 +692,12 @@ def get_activity_plans(*args, **kwargs):
 @activity_blueprint.route('/activities/user_plan/<string:username>')
 @login_required
 def get_user_plan(username, **kwargs):
+    query_dict = {}
+    query_dict.update(args_to_dict(request.args))
+    query_dict.update(kwargs)
+    query_dict.update({'username': username})
     try:
-        user_plan_data = controller.ActivityPlanController.get_user_plan(username=username)
+        user_plan_data = controller.ActivityPlanController.get_user_plan(query_dict=query_dict)
     except CustomError as e:
         db.session.rollback()
         return jsonify({

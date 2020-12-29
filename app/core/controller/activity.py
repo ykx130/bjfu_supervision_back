@@ -949,8 +949,8 @@ class ActivityPlanController(object):
         return [cls.formatter(activity_plan) for activity_plan in activity_plans], num
 
     @classmethod
-    def get_user_plan(cls,username:str,unscoped: bool = False):
-        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+    def get_user_plan(cls,query_dict,unscoped: bool = False):
+        user = dao.User.get_user(query_dict=query_dict, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
         now = datetime.now()
@@ -964,7 +964,7 @@ class ActivityPlanController(object):
             if activity_plan['min_workingtime'] <= work_time < activity_plan['max_workingtime']:
                 data['require_score']=activity_plan['period']
                 continue
-        user_score = dao.ActivityUserScore.get_activityuser_score(query_dict={'username':username,'work_time':work_time}, unscoped=unscoped)
+        user_score = dao.ActivityUserScore.get_activityuser_score(query_dict={'username':user['username'],'work_time':work_time}, unscoped=unscoped)
         if user_score is None:
             user_score['score']=0
         data['user_score']=user_score['score']
