@@ -961,7 +961,7 @@ class ActivityPlanController(object):
         work_time = ActivityUserScoreController.months(str(now), start_working) // 12
         (activity_plans, num) = dao.ActivityPlan.query_activity_plan(query_dict={}, unscoped=unscoped)
         for activity_plan in activity_plans:
-            if activity_plan['min_workingtime'] <= work_time < activity_plan['max_workingtime']:
+            if activity_plan['min_worktime'] <= work_time < activity_plan['max_worktime']:
                 data['require_score']=activity_plan['period']
                 continue
         user_score = dao.ActivityUserScore.get_activityuser_score(query_dict={'username':user['username'],'work_time':work_time}, unscoped=unscoped)
