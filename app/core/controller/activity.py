@@ -393,7 +393,7 @@ class ActivityUserController(object):
                 if activity is None:
                     fail_activity_users.append({**activity_user_dict, 'reason': '活动不存在'})
                     continue
-                activity_user_dict['activity_id'] = activity['activity_id']
+                activity_user_dict['activity_id'] = activity['id']
                 user = dao.User.get_user(query_dict={'username':  activity_user_dict['username']}, unscoped=False)
                 if user is None:
                     fail_activity_users.append({**activity_user_dict, 'reason': '用户不存在'})
