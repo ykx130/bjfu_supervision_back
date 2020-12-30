@@ -130,8 +130,18 @@ class ActivityController(object):
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
         data = cls.reformatter(data)
+        user_dict = dict()
+        if 'period' in data:
+            user_dict['score']=data['period']
+        if 'start_time' in data:
+            user_dict['activity_time'] = data['start_time']
+        (activity_users,num) = dao.ActivityUser.query_activity_users(
+            query_dict={'activity_id': id, 'activity_type': '培训'}, unscoped=False)
+
         try:
             dao.Activity.update_activity(ctx=False, query_dict={'id': [id]}, data=data)
+            if user_dict is not None and num!=0:
+                ActivityUserController.update_activity_users(activity_id=id,data=user_dict)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -305,7 +315,7 @@ class ActivityUserController(object):
 
         else:
             data = cls.reformatter(data)
-            cls.judge_insert_activity(ctx=False,data=data,activity_dict=data)
+            dao.ActivityUser.insert_activity_user(ctx=False, data=data)
         return True
 
     @classmethod
@@ -429,6 +439,32 @@ class ActivityUserController(object):
             frame.to_excel(fullname, sheet_name='123',
                            index=False, header=True)
         return file_path
+
+    @classmethod
+    def update_activity_users(cls,ctx: bool = True, activity_id: int = 0,data: dict = None):
+        (activity_users,_)= dao.ActivityUser.query_activity_users(
+            query_dict={'activity_id': activity_id,'activity_type':'培训'}, unscoped=False)
+        try:
+            for activity_user in activity_users:
+                user = dao.User.get_user(query_dict={'username': activity_user['username']}, unscoped=False)
+                if 'start_time' in data:
+                    data['intervals'] = ActivityUserScoreController.months(data['start_time'],
+                                                                           user['start_working']) // 12
+                dao.ActivityUser.update_activity_user(ctx=False,
+                                                  query_dict={'activity_id': [activity_id], 'username': [activity_user['username']],
+                                                              'activity_type': ['培训']},
+                                                  data=data)
+                ActivityUserScoreController.refresh_user_score(username=activity_user['username'])
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+
 
     @classmethod
     def update_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None, data: dict = None):
@@ -1078,7 +1114,7 @@ class ActivityUserScoreController(object):
         work_time = cls.months(str(now), start_working) // 12
         i=0
         if i <=work_time:
-            (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict={'username': [username], 'intervals':[i],'fin_state':['已完成']},
+            (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict={'username': [username], 'intervals':[i],'fin_state':['已完成'],'activity_type':['培训']},
                                                      unscoped=False)
             (activity_user_scores, num1) = dao.ActivityUserScore.query_activity_user_scores(query_dict={'username': [username], 'worktime': [i]},unscoped=False)
             user_score = 0
