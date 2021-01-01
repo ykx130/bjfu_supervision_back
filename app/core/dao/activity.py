@@ -22,6 +22,7 @@ class Activity(db.Model):
     term = db.Column(db.String(32), default='')
     period = db.Column(db.Integer, default=0)
     is_obligatory=db.Column(db.Boolean, default=False)
+    path=db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -51,7 +52,8 @@ class Activity(db.Model):
                 'remainder_num': activity.remainder_num,
                 'term': activity.term,
                 'period':activity.period,
-                'is_obligatory': activity.is_obligatory
+                'is_obligatory': activity.is_obligatory,
+                'path':activity.path
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -461,6 +463,7 @@ class Competition(db.Model):
     level = db.Column(db.String(64), default='')
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
+    path=db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -482,7 +485,8 @@ class Competition(db.Model):
                 'organizer': competition.organizer,
                 'level': competition.level,
                 'start_time': convert_datetime_to_string(competition.start_time),
-                'term': competition.term
+                'term': competition.term,
+                'path':competition.path
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -607,6 +611,7 @@ class Exchange(db.Model):
     number =db.Column(db.Integer, default=0)
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
+    path=db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -628,7 +633,8 @@ class Exchange(db.Model):
                 'title': exchange.title,
                 'number': exchange.number,
                 'start_time': convert_datetime_to_string(exchange.start_time),
-                'term': exchange.term
+                'path':exchange.path,
+                'term':exchange.term
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -753,6 +759,7 @@ class Research(db.Model):
     journal = db.Column(db.String(64), default='')
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
+    path=db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -774,6 +781,7 @@ class Research(db.Model):
                 'title': research.title,
                 'journal': research.journal,
                 'start_time': convert_datetime_to_string(research.start_time),
+                'path':research.path,
                 'term': research.term
             }
         except Exception as e:
@@ -901,6 +909,7 @@ class Project(db.Model):
     end_time = db.Column(db.TIMESTAMP, default=datetime.now)
     leader = db.Column(db.String(128), default='')
     term = db.Column(db.String(32), default='')
+    path=db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -924,7 +933,8 @@ class Project(db.Model):
                 'start_time': convert_datetime_to_string(project.start_time),
                 'end_time': convert_datetime_to_string(project.end_time),
                 'leader': project.leader,
-                'term': project.term
+                'term': project.term,
+                'path':project.path
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
@@ -1045,8 +1055,7 @@ class FileRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True,
                    autoincrement=True, index=True)
     title = db.Column(db.String(64), default='')
-    path= db.Column(db.String(64), default='')
-    # type = db.Column(db.String(64), default='')
+    path= db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -1066,7 +1075,6 @@ class FileRecord(db.Model):
                 'id': filerecord.id,
                 'title': filerecord.title,
                 'path': filerecord.path
-                # 'type': filerecord.type
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))

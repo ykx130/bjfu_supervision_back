@@ -135,7 +135,7 @@ class ActivityController(object):
             user_dict['score']=data['period']
         if 'start_time' in data:
             user_dict['activity_time'] = data['start_time']
-        (activity_users,num) = dao.ActivityUser.query_activity_users(
+        (_,num) = dao.ActivityUser.query_activity_users(
             query_dict={'activity_id': id, 'activity_type': '培训'}, unscoped=False)
 
         try:
@@ -241,6 +241,26 @@ class ActivityUserController(object):
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
+    @classmethod
+    def judge_delete_activity(cls, ctx: bool = True,activity_id: int = 0,activity_user:dict=None):
+         try:
+            if activity_user['activity_type'] == '项目':
+                dao.Project.delete_project(query_dict={'id': activity_id}, unscoped=False)
+            elif activity_user['activity_type'] == '比赛':
+                dao.Competition.delete_competition(query_dict={'id': activity_id}, unscoped=False)
+            elif activity_user['activity_type'] == '交流':
+                dao.Exchange.delete_exchange(query_dict={'id': activity_id}, unscoped=False)
+            elif activity_user['activity_type'] == '研究':
+                dao.Research.delete_research(query_dict={'id': activity_id}, unscoped=False)
+            if ctx:
+                db.session.commit()
+         except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
 
 
 
@@ -290,8 +310,6 @@ class ActivityUserController(object):
         data['user_unit'] = user['unit']
         data['activity_id'] = activity_id
         if data['activity_type']=='培训':
-            if activity['apply_state'] =='活动已结束':
-                raise CustomError(500, 200, activity['apply_state'])
             if activity['remainder_num'] <= 0:
                 raise CustomError(500, 200, 'remain number is zero')
             data['score']=activity['period']
@@ -393,6 +411,8 @@ class ActivityUserController(object):
                 if activity is None:
                     fail_activity_users.append({**activity_user_dict, 'reason': '活动不存在'})
                     continue
+                remainder_num = activity['remainder_num'] - 1
+                attend_num = activity['attend_num'] + 1
                 activity_user_dict['activity_id'] = activity['id']
                 user = dao.User.get_user(query_dict={'username':  activity_user_dict['username']}, unscoped=False)
                 if user is None:
@@ -407,13 +427,88 @@ class ActivityUserController(object):
                     'username': activity_user_dict['username'],
                     'activity_id': activity_user_dict['activity_id'],'activity_type': activity_user_dict['activity_type']
                 }, unscoped=False)
+                dao.Activity.update_activity(ctx=False, query_dict={'id': [activity['id']]},
+                                             data={'remainder_num': remainder_num, 'attend_num': attend_num})
                 if num != 0:
                     dao.ActivityUser.update_activity_user(ctx=False,
-                                                  query_dict={'activity_id': [activity['activity_id']], 'username': [ activity_user_dict['username']],'activity_type': [activity_user_dict['activity_type']]},
+                                                  query_dict={'activity_id': [activity['id']], 'username': [ activity_user_dict['username']],'activity_type': [activity_user_dict['activity_type']]},
                                                   data=activity_user_dict)
                     continue
-                dao.Activity.insert_activity(ctx=True, data=activity_user_dict)
+                dao.ActivityUser.insert_activity_user(ctx=True, data=activity_user_dict)
                 ActivityUserScoreController.refresh_user_score(username=activity_user_dict['username'])
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            raise e
+        file_path = None
+        if len(fail_activity_users) != 0:
+            frame_dict = {}
+            for fail_activity_user in fail_activity_users:
+                for key, value in column_dict.items():
+                    if value in fail_activity_user:
+                        excel_value = fail_activity_user.get(value)
+                        if key not in frame_dict:
+                            frame_dict[key] = [excel_value]
+                        else:
+                            frame_dict[key].append(excel_value)
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + "fail" + \
+                       datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123',
+                           index=False, header=True)
+        return file_path
+
+    @classmethod
+    def import_competition_user_excel(cls, ctx: bool = True, data=None):
+    
+        if 'filename' in data.files:
+            from app import basedir
+            filename = basedir + '/static/' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            file = data.files['filename']
+            file.save(filename)
+            df = pandas.read_excel(filename)
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        fail_activity_users = list()
+        column_dict = {'教师工号': 'username', '名次': 'fin_state'}
+        row_num = df.shape[0]
+        try:
+            for i in range(0, row_num):
+                activity_user_dict = dict()
+                for col_name_c, col_name_e in column_dict.items():
+                    activity_user_dict[col_name_e] = str(df.iloc[i].get(col_name_c, ''))
+                activity_user_dict['state']='已报名'
+                activity_user_dict['activity_type'] ='比赛'
+                competition = dao.Competition.get_competition(query_dict={'award_name': str(df.iloc[i].get('比赛名称', ''))},
+                                                     unscoped=False)
+                if competition is None:
+                    fail_activity_users.append({**activity_user_dict, 'reason': '比赛不存在'})
+                    continue
+               
+                activity_user_dict['activity_id'] = competition['id']
+                user = dao.User.get_user(query_dict={'username':  activity_user_dict['username']}, unscoped=False)
+                if user is None:
+                    fail_activity_users.append({**activity_user_dict, 'reason': '用户不存在'})
+                    continue
+                activity_user_dict['user_unit']=user['unit']
+                activity_user_dict['activity_time']=competition['start_time']
+                activity_user_dict['score']=0
+                activity_user_dict['intervals'] = ActivityUserScoreController.months(competition['start_time'],
+                                                                       user['start_working']) // 12  # 活动开始时间与入职时间间隔
+                (_, num) = dao.ActivityUser.query_activity_users(query_dict={
+                    'username': activity_user_dict['username'],
+                    'activity_id': activity_user_dict['activity_id'],'activity_type': activity_user_dict['activity_type']
+                }, unscoped=False)
+                if num != 0:
+                    dao.ActivityUser.update_activity_user(ctx=False,
+                                                  query_dict={'activity_id': [competition['id']], 'username': [ activity_user_dict['username']],'activity_type': [activity_user_dict['activity_type']]},
+                                                  data=activity_user_dict)
+                    continue
+                dao.ActivityUser.insert_activity_user(ctx=True, data=activity_user_dict)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -473,7 +568,7 @@ class ActivityUserController(object):
         user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
-        activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
+        activity =ActivityUserController.judge_get_activity(activity_id=activity_id,activity_user=data)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
         activity_user = dao.ActivityUser.get_activity_user(
@@ -502,24 +597,32 @@ class ActivityUserController(object):
         return True
 
     @classmethod
-    def delete_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None):
+    def delete_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None,data: dict = None):
+        if data is None:
+            data={}
         user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
-        activity = dao.Activity.get_activity(query_dict={'id': activity_id}, unscoped=False)
+        activity =cls.judge_get_activity(activity_id=activity_id,activity_user=data)
         if activity is None:
             raise CustomError(404, 404, 'activity not found')
+        if 'activity_type' not in data:
+            raise CustomError(404, 404, 'activity_type must be given')
         activity_user = dao.ActivityUser.get_activity_user(
-            query_dict={'activity_id': activity_id, 'username': username}, unscoped=False)
+            query_dict={'activity_id': activity_id, 'username': username,'activity_type':data['activity_type']}, unscoped=False)
         if activity_user is None:
             raise CustomError(404, 404, 'activity_user not found')
-        attend_num = activity['attend_num'] - 1
-        remainder_num = activity_id['remainder_num'] + 1
         try:
-            dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']]})
-            dao.Activity.update_activity(ctx=False, query_dict={'id': [activity_id]},
-                                         data={'attend_num': attend_num, 'remainder_num': remainder_num})
-            ActivityUserScoreController.refresh_user_score(username=username)
+            if data['activity_type']=='培训':
+                attend_num = activity['attend_num'] - 1
+                remainder_num = activity_id['remainder_num'] + 1
+                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':username})
+                dao.Activity.update_activity(ctx=False, query_dict={'id': [activity_id]},
+                                            data={'attend_num': attend_num, 'remainder_num': remainder_num})
+                ActivityUserScoreController.refresh_user_score(username=username)
+            else:
+                cls.judge_delete_activity(ctx=False,activity_id=activity_user['id'],activity_user=data)
+                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':username})
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -543,7 +646,7 @@ class ActivityUserController(object):
 
         if state == 'hasAttended':
             (activity_users, _) = dao.ActivityUser.query_activity_users(
-                query_dict={'username': [username], 'state_ne': ['未报名']}, unscoped=False)
+                query_dict={'username': [username], 'activity_type': ['培训'],'state_ne': ['未报名']}, unscoped=False)
             for activity_user in activity_users:
                 activity = dao.Activity.get_activity(query_dict={'id':activity_user['activity_id']}, unscoped=False)
                 if activity is None:
@@ -560,20 +663,22 @@ class ActivityUserController(object):
 
         elif state == 'canAttend':
             (has_attend_activity_users, _) = dao.ActivityUser.query_activity_users(
-                query_dict={'username': [username], 'state_ne': ['未报名']}, unscoped=False)
+                query_dict={'username': [username], 'state_ne': ['未报名'],'activity_type':['培训']}, unscoped=False)
             has_attend_activity_ids = [has_attend_activity_user['activity_id'] for has_attend_activity_user in
                                        has_attend_activity_users]
             (all_can_attend_activities, _) = dao.Activity.query_activities(
-                query_dict={'apply_state': ['报名进行中'], 'remainder_num_gte': [0], 'id_ne': has_attend_activity_ids})
+                query_dict={'apply_state': ['报名进行中'], 'remainder_num_gte': [0]})
+            
             for activity in all_can_attend_activities:
-                current_user_activity = {
-                    'activity': activity,
-                    'activity_user': {
-                        'state': '未报名',
-                        'fin_state': '未参加'
+                if activity['id'] not in has_attend_activity_ids:
+                    current_user_activity = {
+                        'activity': activity,
+                        'activity_user': {
+                            'state': '未报名',
+                            'fin_state': '未参加'
+                        }
                     }
-                }
-                current_user_activities.append(current_user_activity)
+                    current_user_activities.append(current_user_activity)
             return current_user_activities, len(current_user_activities)
         else:
             raise CustomError(500, 200, 'state is wrong')
@@ -985,8 +1090,8 @@ class ActivityPlanController(object):
         return [cls.formatter(activity_plan) for activity_plan in activity_plans], num
 
     @classmethod
-    def get_user_plan(cls,query_dict,unscoped: bool = False):
-        user = dao.User.get_user(query_dict=query_dict, unscoped=False)
+    def get_user_plan(cls,username:str,unscoped: bool = False):
+        user = dao.User.get_user(query_dict={'username':username}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
         now = datetime.now()
@@ -1035,8 +1140,9 @@ class FileRecordController(object):
         if 'filename' in data.files:
             from app import basedir
             file = data.files['filename']
-            ext = file.rsplit('.', 1)[1]#获取文件后缀
-            path=datetime.now().strftime('%Y%m%d%H%M%S') + ext
+            fname=file.filename
+            ext = fname.rsplit('.', 1)[1]#获取文件后缀
+            path=datetime.now().strftime('%Y%m%d%H%M%S') + '.'+ext
             if ext in ALLOWED_EXTENSIONS:
                 filename = basedir + '/static/' +path#生成文件名
                 file.save(filename)
@@ -1045,7 +1151,7 @@ class FileRecordController(object):
         else:
             raise CustomError(500, 200, 'file must be given')
         # new_data['type'] = 'planfile'
-        new_data['path'] = path
+        new_data['path'] = '/static/' +path
         new_data['title'] = '研修计划' + datetime.now().strftime('%Y%m%d%H%M%S')
         new_data=cls.reformatter(new_data)
         try:
@@ -1059,20 +1165,36 @@ class FileRecordController(object):
                 raise e
             else:
                 raise CustomError(500, 500, str(e))
-        return True
+        return filename
+
+    @classmethod
+    def uploadpic(cls,ctx:bool=True,data=None):
+        ALLOWED_EXTENSIONS = {'jpg', 'png', 'JPG','PNG','jepg','JEPG'}
+        if 'filename' in data.files:
+            from app import basedir
+            file = data.files['filename']
+            fname=file.filename
+            ext = fname.rsplit('.', 1)[1]#获取文件后缀
+            path=datetime.now().strftime('%Y%m%d%H%M%S') + '.'+ext
+            if ext in ALLOWED_EXTENSIONS:
+                filename = basedir + '/static/' +path#生成文件名
+                file.save(filename)
+            else:
+                raise CustomError(500, 200, 'Invalid file suffix')
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        picpath = '/static/' +path
+        return picpath
+
 
     @classmethod
     def download_file(cls, filename, unscoped: bool = False):
         from app import basedir
-        dirpath=basedir+'/static/'
         file = dao.FileRecord.get_filerecord(query_dict={'title':filename}, unscoped=unscoped)
         if file is None:
             raise CustomError(404, 404, 'file not found')
         filename=file['path']
-        try:
-            return send_from_directory(dirpath, filename, as_attachment=True)
-        except Exception as e:
-            raise CustomError(500, 200, 'download failed!！')
+        return filename
 
 
     @classmethod
@@ -1113,10 +1235,10 @@ class ActivityUserScoreController(object):
         start_working = user['start_working']
         work_time = cls.months(str(now), start_working) // 12
         i=0
-        if i <=work_time:
+        for i in range(work_time+2):
             (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict={'username': [username], 'intervals':[i],'fin_state':['已完成'],'activity_type':['培训']},
                                                      unscoped=False)
-            (activity_user_scores, num1) = dao.ActivityUserScore.query_activity_user_scores(query_dict={'username': [username], 'worktime': [i]},unscoped=False)
+            (_, num1) = dao.ActivityUserScore.query_activity_user_scores(query_dict={'username': [username], 'worktime': [i]},unscoped=False)
             user_score = 0
             if num != 0 and num1!=0:
                 for activity_user in activity_users:
@@ -1133,7 +1255,10 @@ class ActivityUserScoreController(object):
                          raise e
                     else:
                         raise CustomError(500, 500, str(e))
+                continue
             if num != 0 and num1==0:
+                for activity_user in activity_users:
+                    user_score+=activity_user['score']
                 try:
                     dao.ActivityUserScore.insert_activityuser_score(ctx=False,
                                                                     data={'username': username, 'worktime': i,
@@ -1147,6 +1272,7 @@ class ActivityUserScoreController(object):
                         raise e
                     else:
                         raise CustomError(500, 500, str(e))
+                continue
             if num==0 and num1!=0:
                 try:
                     dao.ActivityUserScore.update_activity_user_score(ctx=False,query_dict={'username': [username],'worktime':[i]},
@@ -1160,10 +1286,11 @@ class ActivityUserScoreController(object):
                          raise e
                     else:
                         raise CustomError(500, 500, str(e))
+                continue
+        
 
-            i+=1
-        else:
-            print(username+'activity score refreshed ')
+
+       
 
 
 

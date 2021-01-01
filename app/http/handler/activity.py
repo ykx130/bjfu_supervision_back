@@ -207,6 +207,29 @@ def import_activitys_user_excel(**kwargs):
             'fail_excel_path': path
         }), 200
 
+@activity_blueprint.route('/activities/competition_users_excel/import', methods=['POST'])
+@login_required
+def import_competition_users_excel(**kwargs):
+    try:
+        path = controller.ActivityUserController.import_competition_user_excel(data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': '',
+            'fail_excel_path': path
+        }), 200
 
 @activity_blueprint.route('/activities/<int:id>/activity_users/<string:username>')
 @login_required
@@ -235,7 +258,10 @@ def find_activity_user(id, username, **kwargs):
 @login_required
 def delete_activity_user(id, username, **kwargs):
     try:
-        controller.ActivityUserController.delete_activity_user(activity_id=id, username=username)
+        query_dict = {}
+        query_dict.update(args_to_dict(request.args))
+        query_dict.update(kwargs)
+        controller.ActivityUserController.delete_activity_user(activity_id=id, username=username,data=query_dict)
     except CustomError as e:
         db.session.rollback()
         return jsonify({
@@ -689,14 +715,11 @@ def get_activity_plans(*args, **kwargs):
         'msg': ''
     }), 200
 
-@activity_blueprint.route('/activities/user_plan')
+@activity_blueprint.route('/activities/user_plan/<string:username>')
 @login_required
-def get_user_plan(*args, **kwargs):
-    query_dict = {}
-    query_dict.update(args_to_dict(request.args))
-    query_dict.update(kwargs)
+def get_user_plan(username, **kwargs):
     try:
-        user_plan_data = controller.ActivityPlanController.get_user_plan(query_dict=query_dict)
+        user_plan_data = controller.ActivityPlanController.get_user_plan(username=username)
     except CustomError as e:
         db.session.rollback()
         return jsonify({
@@ -729,14 +752,38 @@ def upload_planfile():
     else:
         return jsonify({
             'code': 500,
+            'msg': 'success'
+        }), 200
+
+
+@activity_blueprint.route('/activities/pic_file/upload', methods=['POST'])
+@login_required
+def upload_pic_file():
+    try:
+        path = controller.FileRecordController.uploadpic(data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
             'msg': ''
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': 'success',
+            'path':path
         }), 200
 
 @activity_blueprint.route('/activities/planfile/export/<string:filename>', methods=['POST'])
 @login_required
-def export_planfile_excel(filename, **kwargs):
+def export_planfile(filename, **kwargs):
     try:
-        controller.FileRecordController.download_file(filename=filename)
+        filename=controller.FileRecordController.download_file(filename=filename)
     except CustomError as e:
         db.session.rollback()
         return jsonify({
@@ -745,8 +792,8 @@ def export_planfile_excel(filename, **kwargs):
         }), e.status_code
     return jsonify({
         'code': 200,
-        'msg': ''
-        # 'filename': filename
+        'msg': '',
+        'filename':filename
     }), 200
 
 @activity_blueprint.route('/activities/query_files')
