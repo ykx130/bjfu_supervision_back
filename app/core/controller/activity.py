@@ -246,11 +246,7 @@ class ActivityUserController(object):
          try:
             if activity_user['activity_type'] == '项目':
                 dao.Project.delete_project(query_dict={'id': activity_id}, unscoped=False)
-            elif activity_user['activity_type'] == '比赛':
-                dao.Competition.delete_competition(query_dict={'id': activity_id}, unscoped=False)
-            elif activity_user['activity_type'] == '交流':
-                dao.Exchange.delete_exchange(query_dict={'id': activity_id}, unscoped=False)
-            elif activity_user['activity_type'] == '研究':
+            else:
                 dao.Research.delete_research(query_dict={'id': activity_id}, unscoped=False)
             if ctx:
                 db.session.commit()
@@ -597,32 +593,37 @@ class ActivityUserController(object):
         return True
 
     @classmethod
-    def delete_activity_user(cls, ctx: bool = True, activity_id: int = 0, username: str = None,data: dict = None):
+    def delete_activity_user(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data={}
-        user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+        user = dao.User.get_user(query_dict={'username': data['username']}, unscoped=False)
         if user is None:
             raise CustomError(404, 404, 'user not found')
-        activity =cls.judge_get_activity(activity_id=activity_id,activity_user=data)
-        if activity is None:
-            raise CustomError(404, 404, 'activity not found')
         if 'activity_type' not in data:
             raise CustomError(404, 404, 'activity_type must be given')
+        data['activity_id']=data['activity_id'][0]
+        data['activity_type']=data['activity_type'][0]
+        data['username']=data['username'][0]
+        activity =cls.judge_get_activity(activity_id=data['activity_id'],activity_user=data)
+        if activity is None:
+            raise CustomError(404, 404, 'activity not found')
         activity_user = dao.ActivityUser.get_activity_user(
-            query_dict={'activity_id': activity_id, 'username': username,'activity_type':data['activity_type']}, unscoped=False)
+            query_dict={'activity_id': data['activity_id'], 'username': data['username'],'activity_type':data['activity_type']}, unscoped=False)
         if activity_user is None:
             raise CustomError(404, 404, 'activity_user not found')
         try:
             if data['activity_type']=='培训':
                 attend_num = activity['attend_num'] - 1
-                remainder_num = activity_id['remainder_num'] + 1
-                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':username})
-                dao.Activity.update_activity(ctx=False, query_dict={'id': [activity_id]},
+                remainder_num = activity['remainder_num'] + 1
+                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':data['username']})
+                dao.Activity.update_activity(ctx=False, query_dict={'id': [data['activity_id']]},
                                             data={'attend_num': attend_num, 'remainder_num': remainder_num})
-                ActivityUserScoreController.refresh_user_score(username=username)
+                ActivityUserScoreController.refresh_user_score(username=data['username'])
+            elif data['activity_type']=='比赛' or  data['activity_type']=='交流':
+                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':data['username']})
             else:
                 cls.judge_delete_activity(ctx=False,activity_id=activity_user['id'],activity_user=data)
-                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':username})
+                dao.ActivityUser.delete_activity_user(ctx=False, query_dict={'id': [activity_user['id']],'activity_type':[data['activity_type']],'username':data['username']})
             if ctx:
                 db.session.commit()
         except Exception as e:

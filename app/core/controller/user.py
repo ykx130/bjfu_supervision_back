@@ -52,7 +52,7 @@ class AuthController():
 
 class UserController():
     role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '学院领导',
-                          'is_guider': '督导','is_reader':'校级管理员'}
+                          'is_guider': '督导','is_reader':'校级管理员','is_develop':'教发管理员'}
     @classmethod
     def role_list(cls, user: dict, term: str):
        
@@ -114,7 +114,7 @@ class UserController():
                 data['password'] = default_password
 
             role_names = data.get('role_names', [])
-            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader'}
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader','教发管理员':'is_develop'}
             for role_name in role_names:
                 role_name_filed = role_name_dict[role_name]
                 data[role_name_filed] = True
@@ -205,7 +205,7 @@ class UserController():
                 raise CustomError(404, 404, 'user is not found')
             
             role_names = data.get('role_names', [])
-            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader'}
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader','教发管理员':'is_develop'}
             for role_name in role_name_dict.keys():
                 role_name_filed = role_name_dict[role_name]
                 data[role_name_filed] = True if role_name in role_names else False

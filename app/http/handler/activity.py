@@ -254,14 +254,13 @@ def find_activity_user(id, username, **kwargs):
     }), 200
 
 
-@activity_blueprint.route('/activities/<int:id>/activity_users/<string:username>', methods=['DELETE'])
+@activity_blueprint.route('/activities/activity_users', methods=['DELETE'])
 @login_required
-def delete_activity_user(id, username, **kwargs):
+def delete_activity_user():
     try:
         query_dict = {}
         query_dict.update(args_to_dict(request.args))
-        query_dict.update(kwargs)
-        controller.ActivityUserController.delete_activity_user(activity_id=id, username=username,data=query_dict)
+        controller.ActivityUserController.delete_activity_user(data=query_dict)
     except CustomError as e:
         db.session.rollback()
         return jsonify({
