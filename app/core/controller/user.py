@@ -7,7 +7,8 @@ import app.core.services as service
 from functools import wraps
 from flask import request
 from flask import jsonify
-
+import pandas
+import datetime
 
 class SchoolTerm():
     def __init__(self, term_name: str = None):
@@ -51,7 +52,7 @@ class AuthController():
 
 class UserController():
     role_list_dict = {'is_grouper': '小组长', 'is_main_grouper': '大组长', 'is_admin': '管理员', 'is_leader': '学院领导',
-                          'is_guider': '督导','is_reader':'校级管理员'}
+                          'is_guider': '督导','is_reader':'校级管理员','is_develop':'教发管理员'}
     @classmethod
     def role_list(cls, user: dict, term: str):
        
@@ -113,7 +114,7 @@ class UserController():
                 data['password'] = default_password
 
             role_names = data.get('role_names', [])
-            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader'}
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader','教发管理员':'is_develop'}
             for role_name in role_names:
                 role_name_filed = role_name_dict[role_name]
                 data[role_name_filed] = True
@@ -136,6 +137,60 @@ class UserController():
         return True
 
     @classmethod
+    def import_users_excel(cls,ctx: bool = True,data=None,default_password='bjfu123456'):
+        if 'filename' in data.files:
+            from app import basedir
+            filename = basedir + '/static/' + datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            file = data.files['filename']
+            file.save(filename)
+            df = pandas.read_excel(filename)
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        column_dict = {'教师姓名': 'name', '教师工号': 'username', '性别': 'sex',
+                       '教师所属学院': 'unit', '入职时间': 'start_working'}
+        row_num=df.shape[0]
+        fail_users=list()
+        try:
+            for i in range(0, row_num):
+                user_date=dict()
+                for col_name_c, col_name_e in column_dict.items():
+                    user_date[col_name_e]=str(df.iloc[i].get(col_name_c,''))
+                (_, num) = dao.User.query_users(query_dict={
+                    'username': user_date['username']
+                }, unscoped=False)
+                if num!=0:
+                    fail_users.append({**user_date,'reason':'用户已存在'})
+                    continue
+                user_date['password'] = default_password
+                dao.User.insert_user(ctx=True,data=user_date)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            raise e
+        file_path = None
+        if len(fail_users) != 0:
+            frame_dict = {}
+            for fail_user in fail_users:
+                for key, value in column_dict.items():
+                    if value in fail_user:
+                        excel_value = fail_user.get(value)
+                        if key not in frame_dict:
+                            frame_dict[key] = [excel_value]
+                        else:
+                            frame_dict[key].append(excel_value)
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + "fail" + \
+                       datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123',
+                           index=False, header=True)
+        return file_path
+
+
+    @classmethod
     def update_user(cls, ctx: bool = True, username: str = '', data: dict = None):
         if data is None:
             data = dict()
@@ -150,7 +205,7 @@ class UserController():
                 raise CustomError(404, 404, 'user is not found')
             
             role_names = data.get('role_names', [])
-            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader'}
+            role_name_dict = {'管理员': 'is_admin', '学院领导': 'is_leader','校级管理员':'is_reader','教发管理员':'is_develop'}
             for role_name in role_name_dict.keys():
                 role_name_filed = role_name_dict[role_name]
                 data[role_name_filed] = True if role_name in role_names else False

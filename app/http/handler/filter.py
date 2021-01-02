@@ -11,7 +11,8 @@ UserRoleMap = {
     "leader": "学院领导",
     "guider": "督导",
     "teacher": "教师",
-    'reader':"校级管理员"
+    'reader':"校级管理员",
+    'develop_admin':'教发管理员'
 }
 
 
@@ -88,7 +89,7 @@ class Filter(object):
                             'msg': 'forbidden'
                         }), 403
 
-                    if current_role == '管理员' or current_role == '校级管理员':
+                    if current_role == '管理员' or current_role == '校级管理员' or current_role=='教发管理员':
                         query_dict = query_dict
                     elif current_role == '学院领导':
                         query_dict.update({'unit': [user['unit']]})
@@ -144,7 +145,7 @@ class Filter(object):
                             'msg': 'forbidden'
                         }), 403
 
-                    if current_role == '管理员' or  current_role == '校级管理员':                       
+                    if current_role == '管理员' or  current_role == '校级管理员' or current_role=='教发管理员':                       
                         query_dict = query_dict
                     elif current_role == '学院领导':
                         query_dict.update({'meta.lesson.lesson_teacher_unit': user.get('unit')})
