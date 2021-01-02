@@ -30,7 +30,7 @@ class User(db.Model, UserMixin):
     is_leader = db.Column(db.Boolean, default=False)
     is_guider = db.Column(db.Boolean, default=False)
     is_reader = db.Column(db.Boolean, default=False)
-    start_working=db.Column(db.Date, default='0000-01-01')
+    start_working=db.Column(db.Date, default='1000-01-01')
 
 
     @classmethod

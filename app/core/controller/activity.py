@@ -300,6 +300,13 @@ class ActivityUserController(object):
             unscoped=False)
         if num > 0:
             raise CustomError(500, 200, 'activity_user has existed')
+        if  data['activity_type']=='培训':
+            data['score']=activity['period']
+        else:
+            if 'period' not in data :
+                data['score']=0
+            else:
+                data['score']=data['period']
         data['username'] = username
         data['intervals'] = ActivityUserScoreController.months(activity['start_time'], user['start_working']) // 12#活动开始时间与入职时间间隔
         data['activity_time'] = activity['start_time']
@@ -308,7 +315,6 @@ class ActivityUserController(object):
         if data['activity_type']=='培训':
             if activity['remainder_num'] <= 0:
                 raise CustomError(500, 200, 'remain number is zero')
-            data['score']=activity['period']
             data = cls.reformatter(data)
             remainder_num = activity['remainder_num'] - 1
             attend_num = activity['attend_num'] + 1
@@ -1237,7 +1243,7 @@ class ActivityUserScoreController(object):
         work_time = cls.months(str(now), start_working) // 12
         i=0
         for i in range(work_time+2):
-            (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict={'username': [username], 'intervals':[i],'fin_state':['已完成'],'activity_type':['培训']},
+            (activity_users, num) = dao.ActivityUser.query_activity_users(query_dict={'username': [username], 'intervals':[i],'fin_state':['已完成'],'activity_type':['培训','交流']},
                                                      unscoped=False)
             (_, num1) = dao.ActivityUserScore.query_activity_user_scores(query_dict={'username': [username], 'worktime': [i]},unscoped=False)
             user_score = 0
