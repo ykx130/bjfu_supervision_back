@@ -29,11 +29,16 @@ class ModelLessonService:
             }
         )
         print("num_vote ", num_vote)
+        if num_vote>=2:
+            status='推荐为好评课'
+        else:
+            status='待商榷'
         dao.ModelLesson.update_model_lesson(
             query_dict={
             'lesson_id': lesson_id
             }, 
             data={
-                "votes": num_vote
+                "votes": num_vote,
+                "status":status
             }
         )

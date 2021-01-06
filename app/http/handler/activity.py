@@ -207,6 +207,24 @@ def import_activitys_user_excel(**kwargs):
             'fail_excel_path': path
         }), 200
 
+@activity_blueprint.route('/activities/activity_users_excel/export', methods=['POST'])
+@login_required
+def export_activity_users_excel():
+    try:
+        filename = controller.ActivityUserController.export_activity_user(data=request.json)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'filename': filename
+    }), 200
+
+
 @activity_blueprint.route('/activities/competition_users_excel/import', methods=['POST'])
 @login_required
 def import_competition_users_excel(**kwargs):
