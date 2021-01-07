@@ -464,6 +464,33 @@ class ActivityUserController(object):
                            index=False, header=True)
         return file_path
 
+   
+    @classmethod
+    def export_activity_user(cls, data: dict = None):
+        if data is None:
+            data = dict()
+        activity_users,num=dao.ActivityUser.query_activity_users(query_dict=data)
+        column_dict={'用户工号':'username','用户姓名':'name','用户学院':'user_unit','参与状态':'fin_state'}
+        frame_dict = dict()
+        for activity_user in activity_users:
+            user=dao.User.get_user(query_dict={'username':activity_user['username']})
+            activity_user['name']=user['name']
+            for key, value in column_dict.items():
+                excel_value = activity_user[value] if value in activity_user else activity_user.get(value, "")
+                if key not in frame_dict:
+                    frame_dict[key] = [excel_value]
+                else:
+                    frame_dict[key].append(excel_value)
+        try:
+            frame = pandas.DataFrame(frame_dict)
+            from app import basedir
+            filename = '/static/' + datetime.now().strftime('%Y%m%d%H%M%S') + '.xlsx'
+            fullname = basedir + filename
+            frame.to_excel(fullname, sheet_name='123', index=False, header=True)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return filename
+
     @classmethod
     def import_competition_user_excel(cls, ctx: bool = True, data=None):
     

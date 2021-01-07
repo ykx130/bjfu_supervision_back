@@ -30,6 +30,7 @@ class User(db.Model, UserMixin):
     is_leader = db.Column(db.Boolean, default=False)
     is_guider = db.Column(db.Boolean, default=False)
     is_reader = db.Column(db.Boolean, default=False)
+    is_develop = db.Column(db.Boolean, default=False)
     start_working=db.Column(db.Date, default='1000-01-01')
 
 
@@ -56,6 +57,7 @@ class User(db.Model, UserMixin):
             'is_leader': user.is_leader,
             'is_admin': user.is_admin,
             'is_reader': user.is_reader,
+            'is_develop':user.is_develop,
             'start_working':str(user.start_working.strftime('%Y-%m-%d'))
         }
         return user_dict
@@ -63,7 +65,7 @@ class User(db.Model, UserMixin):
     @classmethod
     def reformatter_update(cls, data: dict):
         allow_change_list = ['name', 'sex', 'password', 'email', 'phone', 'state', 'unit', 'status', 'prorank',
-                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider','is_reader','start_working']
+                             'skill', 'group_name', 'work_state', 'term', 'is_admin', 'is_leader', 'is_guider','is_reader','is_develop','start_working']
         update_data = dict()
         for key, value in data.items():
             if key in allow_change_list:
