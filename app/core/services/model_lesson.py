@@ -33,6 +33,12 @@ class ModelLessonService:
             status='推荐为好评课'
         else:
             status='待商榷'
+        dao.Lesson.update_lesson( query_dict={
+            'lesson_id': lesson_id
+            },
+            data={
+                "lesson_model":status
+            })
         dao.ModelLesson.update_model_lesson(
             query_dict={
             'lesson_id': lesson_id
