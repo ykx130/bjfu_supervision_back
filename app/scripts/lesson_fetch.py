@@ -362,7 +362,7 @@ def run():
     # 创建解析器
     parser = argparse.ArgumentParser()
     #添加参数
-    parser.add_argument('--term', '-t', help='请输入学期', default='2020-2021-1')
+    parser.add_argument('--term', '-t', help='请输入学期', default='2020-2021-2')
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
     parser.add_argument('--user', '-u', help='请输入用户名', default='root')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')
