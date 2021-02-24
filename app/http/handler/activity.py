@@ -796,6 +796,30 @@ def upload_pic_file():
             'path':path
         }), 200
 
+# 返回上传的活动文件的路径
+@activity_blueprint.route('/activities/file/upload', methods=['POST'])
+@login_required
+def upload_activity_file():
+    try:
+        path = controller.FileRecordController.upload_activityfile(data=request)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    if path is None:
+        return jsonify({
+            'code': 200,
+            'msg': ''
+        }), 200
+    else:
+        return jsonify({
+            'code': 500,
+            'msg': 'success',
+            'path':path
+        }), 200
+
 @activity_blueprint.route('/activities/planfile/export/<string:filename>', methods=['POST'])
 @login_required
 def export_planfile(filename, **kwargs):
