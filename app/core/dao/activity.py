@@ -183,6 +183,7 @@ class ActivityUser(db.Model):
     activity_time= db.Column(db.TIMESTAMP, default=datetime.now)
     user_unit=db.Column(db.String(64), default='')
     score= db.Column(db.Integer, default=0)
+    picpaths= db.Column(db.String(1000), default='')
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -208,7 +209,8 @@ class ActivityUser(db.Model):
                 'intervals':activity_user_user.intervals,
                 'activity_time':convert_datetime_to_string(activity_user_user.activity_time),
                 'user_unit':activity_user_user.user_unit,
-                'score':activity_user_user.score
+                'score':activity_user_user.score,
+                'picpaths':activity_user_user.picpaths
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))

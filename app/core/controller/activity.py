@@ -200,7 +200,8 @@ class ActivityUserController(object):
             'activity_id':activity_user['activity_id'],
             'fin_state': activity_user['fin_state'],
             'user_unit':activity_user['user_unit'],
-            'activity_time':activity_user['activity_time']
+            'activity_time':activity_user['activity_time'],
+            'picpaths':activity_user['picpaths']
         }
         return activity_user_dict
 
@@ -689,7 +690,8 @@ class ActivityUserController(object):
                     'activity': activity,
                     'activity_user': {
                         'state': activity_user['state'],
-                        'fin_state': activity_user['fin_state']
+                        'fin_state': activity_user['fin_state'],
+                        'picpaths': activity_user['picpaths']
                     }
                 }
                 current_user_activities.append(current_user_activity)
@@ -1209,6 +1211,26 @@ class FileRecordController(object):
             file = data.files['filename']
             fname=file.filename
             ext = fname.rsplit('.', 1)[1]#获取文件后缀
+            path= datetime.now().strftime('%Y%m%d%H%M%S') + '.'+ext
+            if ext in ALLOWED_EXTENSIONS:
+                filename = basedir + '/static/images/' +path#生成文件名
+                file.save(filename)
+            else:
+                raise CustomError(500, 200, 'Invalid file suffix')
+        else:
+            raise CustomError(500, 200, 'file must be given')
+        picpath = '/static/images/' +path
+        return picpath
+
+# 返回文件路径，在前端将文件路径与表单其他内容一起存储至数据库中。
+    @classmethod
+    def upload_activityfile(cls,ctx:bool=True,data=None):
+        ALLOWED_EXTENSIONS={'doc', 'docx', 'pdf','DOC','DOCX','PDF'}
+        if 'filename' in data.files:
+            from app import basedir
+            file = data.files['filename']
+            fname=file.filename
+            ext = fname.rsplit('.', 1)[1]#获取文件后缀
             path=datetime.now().strftime('%Y%m%d%H%M%S') + '.'+ext
             if ext in ALLOWED_EXTENSIONS:
                 filename = basedir + '/static/' +path#生成文件名
@@ -1217,10 +1239,9 @@ class FileRecordController(object):
                 raise CustomError(500, 200, 'Invalid file suffix')
         else:
             raise CustomError(500, 200, 'file must be given')
-        picpath = '/static/' +path
-        return picpath
-
-
+        filepath = '/static/' +path
+        return filepath
+#研修计划下载
     @classmethod
     def download_file(cls, filename, unscoped: bool = False):
         from app import basedir
@@ -1229,6 +1250,15 @@ class FileRecordController(object):
             raise CustomError(404, 404, 'file not found')
         filename=file['path']
         return filename
+ #活动附件下载 ----自己加的 不知道可不可以用 
+    @classmethod
+    def download_activity_file(cls, path, unscoped: bool = False):
+        from app import basedir
+       
+        # if path is None:
+        #     raise CustomError(404, 404, 'file not found')
+        
+        return path
 
 
     @classmethod
@@ -1242,10 +1272,22 @@ class FileRecordController(object):
 
 
 class ActivityUserScoreController(object):
+    # @classmethod
+    # def formatter(cls, data):
+    #     return data
+
     @classmethod
     def formatter(cls, data):
-
-        return data
+        user = dao.User.get_user(query_dict={'username': data['username']}, unscoped=False)
+        if user is None:
+            raise CustomError(404, 404, 'user not found')
+        users_score_dict = {
+            'user':user,
+            'score':data['score'],
+            'username':data['username'],
+            'worktime':data['worktime']
+        }
+        return users_score_dict
 
     @classmethod
     def reformatter(cls, data):
