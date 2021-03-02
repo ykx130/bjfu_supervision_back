@@ -82,7 +82,7 @@ def update_database(info=None):
 def run():
     parser = argparse.ArgumentParser()
     parser.add_argument('--year', '-t', help='请输入学期', default='2020-2021')
-    parser.add_argument('--semester', '-s', help='请输入学期', default='1')
+    parser.add_argument('--semester', '-s', help='请输入学期', default='2')
     parser.add_argument('--host', '-H', help='请输入主机名', default='202.204.121.76')
     parser.add_argument('--user', '-u', help='请输入用户名', default='bjlydx_pj')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='bjlydx_pj')
