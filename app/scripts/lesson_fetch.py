@@ -325,9 +325,12 @@ def update_database(info: dict = None):
             old_lesson = if_has_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]})
             if old_lesson:
                 lesson_class = old_lesson['lesson_class'] 
-                if old_lesson['lesson_class'] not in lesson_data['lesson_class'] and len(
+                print(11,lesson_data['lesson_class'])
+                print(44,old_lesson['lesson_class'])
+                if lesson_data['lesson_class'] not in old_lesson['lesson_class'] and len(
                         old_lesson['lesson_class']) < 100:
-                        lesson_class = lesson_class + lesson_data['lesson_class'],
+                        lesson_class = lesson_class +','+ lesson_data['lesson_class']
+                        print(55,lesson_class)    
                 update_lesson(query_dict={'lesson_id': [lesson_data['lesson_id']]}, data={
                     'lesson_class' : lesson_class,
                 })
@@ -362,7 +365,7 @@ def run():
     # 创建解析器
     parser = argparse.ArgumentParser()
     #添加参数
-    parser.add_argument('--term', '-t', help='请输入学期', default='2020-2021-2')
+    parser.add_argument('--term', '-t', help='请输入学期', default='2020-2021-1')
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
     parser.add_argument('--user', '-u', help='请输入用户名', default='root')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')

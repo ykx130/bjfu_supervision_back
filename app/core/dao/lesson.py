@@ -348,6 +348,7 @@ class Lesson(db.Model):
     def insert_lesson(cls, ctx: bool = True, data: dict = None):
         if data is None:
             data = dict()
+        print(33,data['lesson_class'])
         data = cls.reformatter_insert(data)
         lesson = Lesson()
         for key, value in data.items():

@@ -13,14 +13,15 @@ import time
 def job_refresh_lesson():
     print("RUN TASK")
     origin_info = {'host':'202.204.121.76', 'user': 'bjlydx_pj', 'passwd': 'bjlydx_pj', 'db': 'orcl',
-     'year': '2020-2021', 'semester': '2'}
+     'year': '2020-2021', 'semester': '1'}
     fetch_origin_lesson.update_database(info=origin_info)
 
-    lesson_info = {'term': '2020-2021-2', 'host': 'localhost', 'user': 'root', 'passwd': 'Root!!2018', 'db': 'supervision',
+    lesson_info = {'term': '2020-2021-1', 'host': 'localhost', 'user': 'root', 'passwd': 'Root!!2018', 'db': 'supervision',
             'charset': 'utf8'}
     lesson_fetch.update_database(info=lesson_info)
 
-schedule.every().day.at("23:35").do(job_refresh_lesson)
+# schedule.every().day.at("23:35").do(job_refresh_lesson)
+schedule.every().day.at("14:25").do(job_refresh_lesson)
 schedule.every(5).hours.do(mongodb_back.run_back)
 schedule.every().day.at("09:00").do(refresh_lesson_record.inser_lesson_record)
 schedule.every().day.at("12:00").do(refresh_lesson_record.inser_lesson_record)
