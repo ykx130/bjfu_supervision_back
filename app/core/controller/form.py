@@ -232,6 +232,31 @@ class FormController(object):
                 }) 
             excel_dict['是否为好评课入围'].append( ( "是" if model_lesson is not None else "否") )
 
+            model_lesson_form = form["model_lesson"]
+            if not excel_dict.get('是否推荐'):
+                excel_dict['是否推荐'] = list()
+            
+            if not excel_dict.get('推荐理由'):
+                excel_dict['推荐理由'] = list()
+                
+            if not excel_dict.get('不推荐理由'):
+                excel_dict['不推荐理由'] = list()
+
+            if "recommend" in model_lesson_form:
+                if model_lesson_form["recommend"] == 1:
+                    excel_dict['是否推荐'].append("是")
+                    excel_dict['推荐理由'].append( model_lesson_form.get('recommend_reason','') )
+                    excel_dict['不推荐理由'].append("")
+                else:
+                    excel_dict['是否推荐'].append("否")
+                    excel_dict['不推荐理由'].append( model_lesson_form.get('recommend_reason','') )
+                    excel_dict['推荐理由'].append("")
+            else:
+                excel_dict['是否推荐'].append("")
+                excel_dict['不推荐理由'].append("")  
+                excel_dict['推荐理由'].append("") 
+            
+
             for key in form: # 遍历form找到values
                 if key=='values':
                     options=form['values']
