@@ -14,7 +14,7 @@ ctx = app.app_context()
 ctx.push()
 
 
-term = "2020-2021-1"
+term = "2020-2021-2"
 
 def get_all_guider():
 
