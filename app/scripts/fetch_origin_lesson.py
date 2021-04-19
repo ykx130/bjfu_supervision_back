@@ -76,6 +76,7 @@ def update_database(info=None):
                            'lesson_week': data['COURSE_WEEK'], 'lesson_weekday': lesson_weekday,
                            'lesson_time': lesson_time, 'lesson_room': data['COURSE_ROOM'],
                            'lesson_class': data['COURSE_CLASS'], 'assign_group': ''}
+            print("lesson_time",insert_data)
             dao.OriginLessons.insert(insert_data)
         page = page + 1
 
