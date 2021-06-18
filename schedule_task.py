@@ -21,7 +21,7 @@ def job_refresh_lesson():
     lesson_fetch.update_database(info=lesson_info)
 
 # schedule.every().day.at("23:35").do(job_refresh_lesson)
-schedule.every().day.at("23:30").do(job_refresh_lesson)
+schedule.every().day.at("23:50").do(job_refresh_lesson)
 schedule.every(5).hours.do(mongodb_back.run_back)
 schedule.every().day.at("09:00").do(refresh_lesson_record.inser_lesson_record)
 schedule.every().day.at("12:00").do(refresh_lesson_record.inser_lesson_record)
