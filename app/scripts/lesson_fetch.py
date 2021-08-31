@@ -371,7 +371,7 @@ def run():
     parser.add_argument('--host', '-H', help='请输入主机名', default='localhost')
     parser.add_argument('--user', '-u', help='请输入用户名', default='root')
     parser.add_argument('--passwd', '-p', help='请输入密码', default='Root!!2018')
-    parser.add_argument('--db', '-d', help='请输入数据库名', default='supervision')
+    parser.add_argument('--db', '-d', help='请输入数据库名', default='supervision2')
     parser.add_argument('--charset', '-c', help='请输入编码格式', default='utf8')
     #解析参数
     args = parser.parse_args()
