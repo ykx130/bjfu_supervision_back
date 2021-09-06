@@ -82,6 +82,7 @@ def update_database(info=None):
             lesson_teacher_id = insert_data['lesson_teacher_id'].split(',')
             if len(lesson_teacher_name) == 2:
                 new_lesson_teacher_name = []
+                print('lesson_teacher_name:', lesson_teacher_name)
                 new_lesson_teacher_name[0] = lesson_teacher_name[1]
                 new_lesson_teacher_name[1] = lesson_teacher_name[0]
                 new_lesson_teacher_id = []
