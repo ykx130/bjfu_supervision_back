@@ -1034,6 +1034,32 @@ class OriginLessons(db.Model):
     assign_group = db.Column(db.String(32), default='')
 
     @classmethod
+    def formatter(cls, origin_lesson):
+        if origin_lesson is None:
+            return None
+        origin_lesson_dict = {
+            'id': origin_lesson.id,
+            'lesson_id': origin_lesson.lesson_id,
+            'lesson_attribute': origin_lesson.lesson_attribute,
+            'lesson_state': origin_lesson.lesson_state,
+            'lesson_level': origin_lesson.lesson_level,
+            'lesson_name': origin_lesson.lesson_name,
+            'lesson_teacher_id': origin_lesson.lesson_teacher_id,
+            'lesson_teacher_name': origin_lesson.lesson_teacher_name,
+            'lesson_teacher_unit': origin_lesson.lesson_teacher_unit,
+            'lesson_unit': origin_lesson.lesson_unit,
+            'lesson_year': origin_lesson.lesson_year,
+            'lesson_semester': origin_lesson.lesson_semester,
+            'lesson_week': origin_lesson.lesson_week,
+            'lesson_weekday': origin_lesson.lesson_weekday,
+            'lesson_time': origin_lesson.lesson_time,
+            'lesson_room': origin_lesson.lesson_room,
+            'lesson_class': origin_lesson.lesson_class,
+
+        }
+        return origin_lesson_dict
+
+    @classmethod
     def delete_all(cls):
         OriginLessons.query.delete()
 
@@ -1049,6 +1075,19 @@ class OriginLessons(db.Model):
         except Exception as e:
             print(str(e))
             db.session.rollback()
+
+    @classmethod
+    def get_orgin_lesson(cls, query_dict: dict, unscoped: bool = False):
+        origin_lesson = OriginLessons.query
+        if not unscoped:
+            origin_lesson = origin_lesson.filter(OriginLessons.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            origin_lesson = process_query(origin_lesson, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                         OriginLessons).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return cls.formatter(origin_lesson)
 
 
 def create_all_lesson_case():
