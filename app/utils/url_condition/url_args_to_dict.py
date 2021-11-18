@@ -16,5 +16,5 @@ def args_to_dict(condition):
     if '_page' not in condition_fin:
         condition_fin['_page'] = [1]
     if '_per_page' not in condition_fin:
-        condition_fin['_per_page'] = [20]
+        condition_fin['_per_page'] = [100]
     return condition_fin

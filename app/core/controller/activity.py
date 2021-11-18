@@ -1385,7 +1385,91 @@ class ActivityUserScoreController(object):
             raise CustomError(404, 404, 'user_score not found')
         return cls.formatter(user_score)
 
+class ActivityModuleController(object):
+    @classmethod
+    def formatter(cls, activity_module: dict):
+        return activity_module
 
+    @classmethod
+    def reformatter(cls, data: dict):
+        return data
+
+    @classmethod
+    def get_activity_module(cls, query_dict: dict, unscoped: bool = False):
+        activity_module = dao.ActivityModule.get_activity_module(query_dict=query_dict, unscoped=unscoped)
+        if activity_module is None:
+            raise CustomError(404, 404, 'this activity module is not found')
+        return cls.formatter(activity_module)
+
+    @classmethod
+    def query_activity_modules(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = {}
+        (activity_modules, num) = dao.ActivityModule.query_activity_module(query_dict=query_dict, unscoped=unscoped)
+        return [cls.formatter(activity_module) for activity_module in activity_modules], num
+
+    @classmethod
+    def update_activity_modules(cls, ctx: bool = True, id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
+        activity_modules = dao.ActivityModule.get_activity_module(query_dict={'id': id}, unscoped=False)
+        if activity_modules is None:
+            raise CustomError(404, 404, 'this activity_modules not found')
+        data = cls.formatter(data)
+        try:
+            dao.ActivityModule.update_activity_module(ctx=False, query_dict={'id': [id]}, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def insert_activity_modules(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = {}
+        if 'module' not in data:
+            raise CustomError(404, 404, 'module must be given')
+
+        (_, num) = dao.ActivityModule.query_activity_module(query_dict={'module': [data.get('module', '')]}, unscoped=False)
+        if num != 0:
+            raise CustomError(500, 200, 'this activity_module has been existed')
+        data = cls.reformatter(data)
+        try:
+            dao.ActivityModule.insert_activity_module(ctx=False, data=data)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def delete_activity_modules(cls, ctx: bool = True, id: int = 0):
+        activity_module = dao.ActivityModule.get_activity_module(query_dict={'id': id}, unscoped=False)
+        if activity_module is None:
+            raise CustomError(404, 404, 'activity_module not found')
+        try:
+            dao.ActivityModule.delete_activity_module(ctx=False, query_dict={'id': [id]})
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
 
 
 

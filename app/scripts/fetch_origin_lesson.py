@@ -77,6 +77,27 @@ def update_database(info=None):
                            'lesson_time': lesson_time, 'lesson_room': data['COURSE_ROOM'],
                            'lesson_class': data['COURSE_CLASS'], 'assign_group': ''}
             print("lesson_time",insert_data)
+            # # 对插入的数据进行处理
+            # lesson_teacher_name = insert_data['lesson_teacher_name'].split(',')
+            # lesson_teacher_id = insert_data['lesson_teacher_id'].split(',')
+            # if len(lesson_teacher_name) == 2:
+            #     new_lesson_teacher_name = []
+            #     print('lesson_teacher_name:', lesson_teacher_name)
+            #     new_lesson_teacher_name[0] = lesson_teacher_name[1]
+            #     new_lesson_teacher_name[1] = lesson_teacher_name[0]
+            #     new_lesson_teacher_id = []
+            #     new_lesson_teacher_id[0] = lesson_teacher_id[1]
+            #     new_lesson_teacher_id[1] = lesson_teacher_id[0]
+            #     origin_lesson_a = dao.OriginLessons.get_orgin_lesson(query_dict={'lesson_id': insert_data['lesson_id'],
+            #                                                                        'lesson_teacher_name': insert_data['lesson_teacher_name']})
+            #     new_lesson_teacher_name_turn = ','.join(new_lesson_teacher_name)
+            #
+            #     origin_lesson_b = dao.OriginLessons.get_orgin_lesson(query_dict={'lesson_id': insert_data['lesson_id'],
+            #                                                                      'lesson_teacher_name': new_lesson_teacher_name_turn })
+            #     if origin_lesson_a is None and origin_lesson_b is not None:
+            #         insert_data['lesson_teacher_name'] = new_lesson_teacher_name_turn
+            #         insert_data['lesson_teacher_id'] = ','.join(new_lesson_teacher_id)
+
             dao.OriginLessons.insert(insert_data)
         page = page + 1
 
