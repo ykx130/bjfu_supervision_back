@@ -78,7 +78,7 @@ def find_activity(id, *args, **kwargs):
         query_dict.update(kwargs)
         query_dict.update({'id': id})
         activity = controller.ActivityController.get_activity(query_dict={'id': id})
-        (activity_users, num) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
+        # (activity_users, num) = controller.ActivityUserController.query_activity_users(query_dict=query_dict)
     except CustomError as e:
         db.session.rollback()
         return jsonify({
@@ -89,7 +89,7 @@ def find_activity(id, *args, **kwargs):
         'code': 200,
         'msg': '',
         'activity': activity,
-        'activity_users': activity_users
+        # 'activity_users': activity_users
     }), 200
 
 
@@ -879,3 +879,92 @@ def query_users_score(*args, **kwargs):
         'msg': ''
     }), 200
 
+@activity_blueprint.route('/insert_activity_module', methods=['POST'])
+@login_required
+def insert_activity_module():
+    try:
+        controller.ActivityModuleController.insert_activity_modules(data=request.json)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+    }), 200
+
+
+@activity_blueprint.route('/activity_modules')
+@login_required
+def query_activity_modules(*args, **kwargs):
+    try:
+        query_dict = {}
+        query_dict.update(args_to_dict(request.args))
+        query_dict.update(kwargs)
+        (activity_modules, total) = controller.ActivityModuleController.query_activity_modules(query_dict=query_dict)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'activity_modules': activity_modules,
+        'total': total
+    }), 200
+
+
+@activity_blueprint.route('/activity_module/<int:id>')
+@login_required
+def get_activity_module_by_id(id):
+    try:
+        activity_module = controller.ActivityModuleController.get_activity_module(query_dict={'id': id}, unscoped=False)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+        'activity_module': activity_module
+    }), 200
+
+
+@activity_blueprint.route('/update_activity_module/<int:id>', methods=['PUT'])
+@login_required
+def update_activity_module(id, **kwargs):
+    try:
+        controller.ActivityModuleController.update_activity_modules(id=id, data=request.json)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+    }), 200
+
+
+@activity_blueprint.route('/delete_activity_module/<int:id>', methods=['DELETE'])
+@login_required
+def delete_activity_module(id, **kwargs):
+    try:
+        controller.ActivityModuleController.delete_activity_modules(id=id)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': '',
+    }), 200

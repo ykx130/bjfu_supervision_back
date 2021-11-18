@@ -1334,3 +1334,126 @@ class ActivityUserScore(db.Model):
             except Exception as e:
                 raise CustomError(500, 500, str(e))
         return True
+
+class ActivityModule(db.Model):
+    __tablename__ = 'activity_module'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
+    module = db.Column(db.String(100), default='')
+    using = db.Column(db.Boolean, default=True)
+
+    @classmethod
+    def formatter(cls, activity_module):
+        if activity_module is None:
+            return None
+        try:
+            activity_module_dict = {
+                'id': activity_module.id,
+                'module': activity_module.module
+            }
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return activity_module_dict
+
+    @classmethod
+    def reformatter_insert(cls, data: dict):
+        return data
+
+    @classmethod
+    def reformatter_update(cls, data: dict):
+        return data
+
+    @classmethod
+    def insert_activity_module(cls, ctx: bool = True, data: dict = None):
+        if data is None:
+            data = dict()
+        data = cls.reformatter_insert(data)
+        activity_module = ActivityModule()
+        for key, value in data.items():
+            if hasattr(activity_module, key):
+                setattr(activity_module, key, value)
+        db.session.add(activity_module)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def query_activity_module(cls, query_dict: dict = None, unscoped: bool = False):
+        if query_dict is None:
+            query_dict = dict()
+        query = ActivityModule.query
+        if not unscoped:
+            query = query.filter(ActivityModule.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                                      ActivityModule)
+            (res, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return [cls.formatter(data) for data in res], total
+
+    @classmethod
+    def get_activity_module(cls, query_dict: dict, unscoped: bool = False):
+        activity_module = ActivityModule.query
+        if not unscoped:
+            activity_module = activity_module.filter(ActivityModule.using == True)
+        url_condition =UrlCondition(query_dict)
+        try:
+            activity_module = process_query(activity_module, url_condition.filter_dict,
+                                                          url_condition.sort_limit_dict,
+                                                          ActivityModule).first()
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        return cls.formatter(activity_module)
+
+    @classmethod
+    def delete_activity_module(cls, ctx: bool = True, query_dict: dict = None):
+        if query_dict is None:
+            query_dict = dict()
+        query = ActivityModule.query.filter(ActivityModule.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(query, url_condition.filter_dict,
+                                                      url_condition.sort_limit_dict, ActivityModule)
+            (activity_modules, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for activity_module in activity_modules:
+            activity_module.using = False
+            db.session.add(activity_module)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
+
+    @classmethod
+    def update_activity_module(cls, ctx: bool = True, query_dict: dict = None, data: dict = None):
+        if data is None:
+            data = dict()
+        if query_dict is None:
+            query_dict = dict()
+        data = cls.reformatter_update(data)
+        query = ActivityModule.query.filter(ActivityModule.using == True)
+        url_condition = UrlCondition(query_dict)
+        try:
+            query = process_query(query, url_condition.filter_dict, url_condition.sort_limit_dict,
+                                                      ActivityModule)
+            (activity_modules, total) = page_query(query, url_condition.page_dict)
+        except Exception as e:
+            raise CustomError(500, 500, str(e))
+        for activity_module in activity_modules:
+            for key, value in data.items():
+                if hasattr(activity_module, key):
+                    setattr(activity_module, key, value)
+            db.session.add(activity_module)
+        if ctx:
+            try:
+                db.session.commit()
+            except Exception as e:
+                raise CustomError(500, 500, str(e))
+        return True
