@@ -307,6 +307,21 @@ def update_activity_user(id, username, **kwargs):
         'msg': ''
     }), 200
 
+@activity_blueprint.route('/activities/<int:id>/batch_update_activity_users_state', methods=['PUT'])
+@login_required
+def batch_update_activity_users_state(id, **kwargs):
+    try:
+        controller.ActivityUserController.batch_update_activity_user_state(activity_id=id, data=request.json)
+    except CustomError as e:
+        db.session.rollback()
+        return jsonify({
+            'code': e.code,
+            'msg': e.err_info,
+        }), e.status_code
+    return jsonify({
+        'code': 200,
+        'msg': ''
+    }), 200   
 
 @activity_blueprint.route('/current_user/activities')
 @login_required
