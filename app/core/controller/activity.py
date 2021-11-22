@@ -195,6 +195,7 @@ class ActivityUserController(object):
             raise CustomError(404, 404, 'user not found')
         activity_user_dict = {
             'user': user,
+            'username': activity_user['username'],
             'activity':ActivityUserController.judge_get_activity(activity_id=activity_user['activity_id'],activity_user=activity_user),
             'state': activity_user['state'],
             'activity_id':activity_user['activity_id'],
@@ -614,7 +615,47 @@ class ActivityUserController(object):
             dao.ActivityUser.update_activity_user(ctx=False,
                                                   query_dict={'activity_id': [activity_id], 'username': [username],'activity_type':[data['activity_type']]},
                                                   data=new_data)
-            ActivityUserScoreController.refresh_user_score(username=username)
+            if data['activity_type'] == '培训':
+                ActivityUserScoreController.refresh_user_score(username=username)
+            if ctx:
+                db.session.commit()
+        except Exception as e:
+            if ctx:
+                db.session.rollback()
+            if isinstance(e, CustomError):
+                raise e
+            else:
+                raise CustomError(500, 500, str(e))
+        return True
+
+# 批量修改报名用户的培训参与状态
+    @classmethod
+    def batch_update_activity_user_state(cls, ctx: bool = True, activity_id: int = 0, data: dict = None):
+        if data is None:
+            data = {}
+        usernames = data.get('usernames', None)
+        if usernames is None:
+            raise CustomError(500, 500, 'usernames should be given')
+        activity =ActivityUserController.judge_get_activity(activity_id=activity_id,activity_user=data)
+        if activity is None:
+            raise CustomError(404, 404, 'activity not found')
+        try:
+            for username in usernames:
+               user = dao.User.get_user(query_dict={'username': username}, unscoped=False)
+               if user is None:
+                   raise CustomError(404, 404, 'user not found')
+               activity_user = dao.ActivityUser.get_activity_user(
+                   query_dict={'activity_id': activity_id, 'username': username,'activity_type':data['activity_type']}, unscoped=False)
+               if activity_user is None:
+                   raise CustomError(404, 404, 'activity_user not found')
+               new_data = dict()
+               new_data['fin_state'] = data.get('fin_state', '')
+               new_data['state'] = data.get('state', '')
+               new_data['intervals'] = ActivityUserScoreController.months(activity['start_time'], user['start_working']) // 12
+               dao.ActivityUser.update_activity_user(ctx=False,
+                                                  query_dict={'activity_id': [activity_id], 'username': [username],'activity_type':[data['activity_type']]},
+                                                  data=new_data)
+               ActivityUserScoreController.refresh_user_score(username=username)   
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -764,8 +805,16 @@ class CompetitionController(object):
         if competition is None:
             raise CustomError(404, 404, 'competition not found')
         data = cls.reformatter(data)
+        user_dict = dict()
+        if 'start_time' in data:
+            user_dict['activity_time'] = data['start_time']
+        (_,num) = dao.ActivityUser.query_activity_users(
+            query_dict={'activity_id':id, 'activity_type':'比赛'}, unscoped=False)
         try:
             dao.Competition.update_competition(ctx=False, query_dict={'id': [id]}, data=data)
+            if user_dict is not None and num!=0:
+                dao.ActivityUser.update_activity_user(
+                    query_dict={'activity_id':id,'activity_type':'比赛'},data=user_dict)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -1205,7 +1254,7 @@ class FileRecordController(object):
 
     @classmethod
     def uploadpic(cls,ctx:bool=True,data=None):
-        ALLOWED_EXTENSIONS = {'jpg', 'png', 'JPG','PNG','jepg','JEPG'}
+        ALLOWED_EXTENSIONS = {'jpg', 'png', 'JPG','PNG','jpeg','JPEG'}
         if 'filename' in data.files:
             from app import basedir
             file = data.files['filename']
@@ -1219,7 +1268,7 @@ class FileRecordController(object):
                 raise CustomError(500, 200, 'Invalid file suffix')
         else:
             raise CustomError(500, 200, 'file must be given')
-        picpath = '/static/images/' +path
+        picpath = path
         return picpath
 
 # 返回文件路径，在前端将文件路径与表单其他内容一起存储至数据库中。
@@ -1239,7 +1288,7 @@ class FileRecordController(object):
                 raise CustomError(500, 200, 'Invalid file suffix')
         else:
             raise CustomError(500, 200, 'file must be given')
-        filepath = '/static/' +path
+        filepath = path
         return filepath
 #研修计划下载
     @classmethod

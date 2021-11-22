@@ -188,10 +188,14 @@ class ActivityUser(db.Model):
 
     @classmethod
     def reformatter_insert(cls, data: dict):
+        if "picpaths" in data:
+            data["picpaths"] = ','.join(data["picpaths"])
         return data
 
     @classmethod
     def reformatter_update(cls, data: dict):
+        if "picpaths" in data:
+            data["picpaths"] = ','.join(data["picpaths"])
         return data
 
     @classmethod
@@ -210,8 +214,10 @@ class ActivityUser(db.Model):
                 'activity_time':convert_datetime_to_string(activity_user_user.activity_time),
                 'user_unit':activity_user_user.user_unit,
                 'score':activity_user_user.score,
-                'picpaths':activity_user_user.picpaths
+                'picpaths':activity_user_user.picpaths.split(',')
             }
+            if len(activity_user_user_dict['picpaths']) == 0:
+                activity_user_user_dict['picpaths'] = []
         except Exception as e:
             raise CustomError(500, 500, str(e))
         return activity_user_user_dict
@@ -466,6 +472,7 @@ class Competition(db.Model):
     start_time = db.Column(db.TIMESTAMP, default=datetime.now)
     term = db.Column(db.String(32), default='')
     path=db.Column(db.String(1000), default='')
+    create_by=db.Column(db.Boolean, default=True)
     using = db.Column(db.Boolean, default=True)
 
     @classmethod
@@ -488,7 +495,8 @@ class Competition(db.Model):
                 'level': competition.level,
                 'start_time': convert_datetime_to_string(competition.start_time),
                 'term': competition.term,
-                'path':competition.path
+                'path':competition.path,
+                'create_by': competition.create_by,
             }
         except Exception as e:
             raise CustomError(500, 500, str(e))
