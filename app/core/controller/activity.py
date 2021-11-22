@@ -732,7 +732,10 @@ class ActivityUserController(object):
                     'activity_user': {
                         'state': activity_user['state'],
                         'fin_state': activity_user['fin_state'],
-                        'picpaths': activity_user['picpaths']
+                        'picpaths': activity_user['picpaths'],
+                        'username': activity_user['username'],
+                        'activity_type': activity_user['activity_type'],
+                        'activity_id': activity_user['activity_id'],
                     }
                 }
                 current_user_activities.append(current_user_activity)
