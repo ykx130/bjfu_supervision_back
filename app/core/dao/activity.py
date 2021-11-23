@@ -176,6 +176,7 @@ class ActivityUser(db.Model):
                    autoincrement=True, index=True)
     username = db.Column(db.String(64), default='')
     activity_id = db.Column(db.Integer, default=-1)
+    activity_title = db.Column(db.String(200), default='')
     state = db.Column(db.String(16), default='')
     fin_state = db.Column(db.String(16), default='')
     activity_type = db.Column(db.String(64), default='')
@@ -207,6 +208,7 @@ class ActivityUser(db.Model):
                 'id': activity_user_user.id,
                 'username': activity_user_user.username,
                 'activity_id': activity_user_user.activity_id,
+                'activity_title': activity_user_user.activity_title,
                 'state': activity_user_user.state,
                 'fin_state': activity_user_user.fin_state,
                 'activity_type':activity_user_user.activity_type,
