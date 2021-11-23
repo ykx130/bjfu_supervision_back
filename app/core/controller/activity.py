@@ -135,6 +135,8 @@ class ActivityController(object):
             user_dict['score']=data['period']
         if 'start_time' in data:
             user_dict['activity_time'] = data['start_time']
+        if 'title' in data:
+            user_dict['activity_title'] = data['title']
         (_,num) = dao.ActivityUser.query_activity_users(
             query_dict={'activity_id': id, 'activity_type': '培训'}, unscoped=False)
 
@@ -199,6 +201,7 @@ class ActivityUserController(object):
             'activity':ActivityUserController.judge_get_activity(activity_id=activity_user['activity_id'],activity_user=activity_user),
             'state': activity_user['state'],
             'activity_id':activity_user['activity_id'],
+            'activity_title': activity_user['activity_title'],
             'fin_state': activity_user['fin_state'],
             'user_unit':activity_user['user_unit'],
             'activity_time':activity_user['activity_time'],
@@ -314,6 +317,11 @@ class ActivityUserController(object):
         data['activity_time'] = activity['start_time']
         data['user_unit'] = user['unit']
         data['activity_id'] = activity_id
+        if data['activity_type']=='比赛':
+            data['activity_title']=activity['award_name']
+        else:
+            data['activity_title']=activity['title']
+        
         if data['activity_type']=='培训':
             if activity['remainder_num'] <= 0:
                 raise CustomError(500, 200, 'remain number is zero')
@@ -373,6 +381,7 @@ class ActivityUserController(object):
         activity_user_dict['activity_type'] = '培训'
         activity_user_dict['state']='已报名'
         activity_user_dict['fin_state']=data['fin_state']
+        activity_user_dict['activity_title']=data['title']
         (_, num) = dao.ActivityUser.query_activity_users(
             query_dict={'activity_id': [activity['activity_id']], 'username': [username]}, unscoped=False)
         if num > 0:
@@ -418,6 +427,7 @@ class ActivityUserController(object):
                 remainder_num = activity['remainder_num'] - 1
                 attend_num = activity['attend_num'] + 1
                 activity_user_dict['activity_id'] = activity['id']
+                activity_user_dict['activity_title'] = activity['title']
                 user = dao.User.get_user(query_dict={'username':  activity_user_dict['username']}, unscoped=False)
                 if user is None:
                     fail_activity_users.append({**activity_user_dict, 'reason': '用户不存在'})
@@ -521,6 +531,7 @@ class ActivityUserController(object):
                     continue
                
                 activity_user_dict['activity_id'] = competition['id']
+                activity_user_dict['activity_title'] = competition['award_name']
                 user = dao.User.get_user(query_dict={'username':  activity_user_dict['username']}, unscoped=False)
                 if user is None:
                     fail_activity_users.append({**activity_user_dict, 'reason': '用户不存在'})
@@ -811,6 +822,8 @@ class CompetitionController(object):
         user_dict = dict()
         if 'start_time' in data:
             user_dict['activity_time'] = data['start_time']
+        if 'award_name' in data:
+            user_dict['activity_title'] = data['award_name']
         (_,num) = dao.ActivityUser.query_activity_users(
             query_dict={'activity_id':id, 'activity_type':'比赛'}, unscoped=False)
         try:
@@ -907,8 +920,17 @@ class ExchangeController(object):
         if exchange is None:
             raise CustomError(404, 404, 'exchange not found')
         data = cls.reformatter(data)
+        user_dict=dict()
+        if 'start_time' in data:
+            user_dict['activity_time'] = data['start_time']
+        if 'title' in data:
+            user_dict['activity_title'] = data['title']
+        (_,num)=dao.ActivityUser.query_activity_users(query_dict={'activity_id':id, 'activity_type':'交流'}, unscoped=False)
         try:
             dao.Exchange.update_exchange(ctx=False, query_dict={'id': [id]}, data=data)
+            if user_dict is not None and num!=0:
+                dao.ActivityUser.update_activity_user(
+                    query_dict={'activity_id':id,'activity_type':'交流'},data=user_dict)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -998,8 +1020,17 @@ class ResearchController(object):
         if research is None:
             raise CustomError(404, 404, 'research not found')
         data = cls.reformatter(data)
+        user_dict=dict()
+        if 'start_time' in data:
+            user_dict['activity_time'] = data['start_time']
+        if 'title' in data:
+            user_dict['activity_title'] = data['title']
+        (_,num)=dao.ActivityUser.query_activity_users(query_dict={'activity_id':id, 'activity_type':'研究'}, unscoped=False)
         try:
             dao.Research.update_research(ctx=False, query_dict={'id': [id]}, data=data)
+            if user_dict is not None and num!=0:
+                dao.ActivityUser.update_activity_user(
+                    query_dict={'activity_id':id,'activity_type':'研究'},data=user_dict)
             if ctx:
                 db.session.commit()
         except Exception as e:
@@ -1089,8 +1120,17 @@ class ProjectController(object):
         if project is None:
             raise CustomError(404, 404, 'project not found')
         data = cls.reformatter(data)
+        user_dict=dict()
+        if 'start_time' in data:
+            user_dict['activity_time'] = data['start_time']
+        if 'title' in data:
+            user_dict['activity_title'] = data['title']
+        (_,num)=dao.ActivityUser.query_activity_users(query_dict={'activity_id':id, 'activity_type':'项目'}, unscoped=False)
         try:
             dao.Project.update_project(ctx=False, query_dict={'id': [id]}, data=data)
+            if user_dict is not None and num!=0:
+                dao.ActivityUser.update_activity_user(
+                    query_dict={'activity_id':id,'activity_type':'项目'},data=user_dict)
             if ctx:
                 db.session.commit()
         except Exception as e:
