@@ -21,6 +21,15 @@ class InterfaceService:
         _, wait_submitted_form_num = dao.Form.query_forms(query_dict={
             "status": ["待提交", "草稿"]
         })
+
+        # 当前学期已提交的问卷数量
+        from . import term
+        term = term.TermService.get_now_term_no_cache()['name']
+        _, current_term_has_submitted_num = dao.Form.query_forms(query_dict={
+            "status": ["已完成"],
+            "meta.term": [term]
+        })
+
         print("has_submitted_num", has_submitted_num, "wait", wait_submitted_form_num)
         for unit in UNIT_LIST:
             _, submit_unit_num = dao.Form.query_forms(query_dict={
@@ -30,6 +39,7 @@ class InterfaceService:
             redis_cli.set('sys:form_num:{unit}'.format(unit=unit), str(submit_unit_num))
         redis_cli.set("sys:submitted_form", json.dumps(has_submitted_num))
         redis_cli.set("sys:wait_submitted_form", json.dumps(wait_submitted_form_num))
+        redis_cli.set("sys:current_term_submitted_form", json.dumps(current_term_has_submitted_num))
         
     
         # 评价情况数据刷新
