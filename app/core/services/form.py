@@ -68,9 +68,10 @@ class FormService:
                     else:
                         value = item['value']
                         if value:
-                            print('value',value,type(value))
-                            res = jieba.cut(value)
-                            print('res',res,type(res))
+                            if isinstance(value, str):
+                                res = jieba.cut(value)
+                            else:
+                                res = jieba.cut(str(value))
                             word_cloud[item['item_name']] = word_cloud[item['item_name']] + list(res)
 
         # word_cloud 转成数组新式
