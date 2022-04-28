@@ -18,6 +18,7 @@ class PageDataController():
             "sys:form_just_num": 0,
             "sys:form_statisfy_num": 0,
             "sys:current_term_submitted_form": 0,
+            "sys:current_term_wait_submitted_form": 0,
         }
         
         # 计算已提交的问卷
@@ -27,12 +28,19 @@ class PageDataController():
         else:
             submitted_form = json.loads(submitted_form)
 
-        #计算当前学期已提交的问卷数量
+        # 计算当前学期已提交的问卷数量
         current_term_submitted_form = redis_cli.get("sys:current_term_submitted_form")
         if current_term_submitted_form is None:
             current_term_submitted_form = 0
         else:
             current_term_submitted_form = json.loads(current_term_submitted_form)
+
+        # 计算当前学期【待提交、草稿】的问卷总数
+        current_term_wait_submitted_form =redis_cli.get("sys:current_term_wait_submitted_form")
+        if current_term_wait_submitted_form is None:
+            current_term_wait_submitted_form = 0
+        else:
+            current_term_wait_submitted_form = json.loads(current_term_wait_submitted_form)
 
         # 计算带提交
         wait_submitted_form = redis_cli.get("sys:wait_submitted_form")
@@ -52,6 +60,7 @@ class PageDataController():
         data_dict["sys:wait_submitted_form"] = wait_submitted_form
         data_dict["sys:submitted_form"] = submitted_form
         data_dict["sys:current_term_submitted_form"] = current_term_submitted_form
+        data_dict["sys:current_term_wait_submitted_form"] = current_term_wait_submitted_form
         now_term = TermService.get_now_term()
         data_dict["sys:guider_num"] = dao.Supervisor.count(query_dict={'term': [now_term['name']]})
         data_dict["sys:notice_lesson_num"] = dao.NoticeLesson.count(query_dict={'term': [now_term['name']]})
