@@ -44,6 +44,19 @@ class InterfaceService:
                 "meta.lesson.lesson_teacher_unit": [unit]
             })
             redis_cli.set('sys:form_num:{unit}'.format(unit=unit), str(submit_unit_num))
+
+        # 当前学期 各学院评教情况统计
+        for unit in UNIT_LIST:
+            _, current_term_submit_unit_num = dao.Form.query_forms(query_dict={
+                "status": ["已完成"],
+                "meta.lesson.lesson_teacher_unit": [unit],
+                "meta.term": [term],
+            })
+            redis_cli.set('sys:current_term_form_num:{unit}'.format(unit=unit), str(current_term_submit_unit_num))
+
+
+
+
         redis_cli.set("sys:submitted_form", json.dumps(has_submitted_num))
         redis_cli.set("sys:wait_submitted_form", json.dumps(wait_submitted_form_num))
         redis_cli.set("sys:current_term_submitted_form", json.dumps(current_term_has_submitted_num))

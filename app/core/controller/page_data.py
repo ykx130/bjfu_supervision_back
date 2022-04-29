@@ -10,6 +10,7 @@ class PageDataController():
     def get_page_data(cls):
         data_dict = {
             "sys:form_num": {},
+            "sys:current_term_form_num": {},
             "sys:guider_num": 0,
             "sys:notice_lesson_num": 0,
             "sys:submitted_form": 0,
@@ -71,4 +72,12 @@ class PageDataController():
                 num = 0
             form_num[unit] = int(num)
         data_dict["sys:form_num"] = form_num
+
+        current_term_form_num = {}
+        for unit in UNIT_LIST:
+            current_term_num = redis_cli.get('sys:current_term_form_num:{unit}'.format(unit=unit))
+            if not current_term_num:
+                current_term_num = 0
+            current_term_form_num[unit] = int(current_term_num)
+        data_dict['sys:current_term_form_num'] = current_term_form_num
         return data_dict
