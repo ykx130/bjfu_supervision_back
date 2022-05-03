@@ -155,6 +155,15 @@ class FormController(object):
                                    form_id=form.get('_id', ''),
                                    lesson_id=lesson_id)
 
+            if data.get('status') == '草稿':
+                send_kafka_message(topic='form_service',
+                                   method='repulse_form',
+                                   term=form.get('meta', {}).get('term', None),
+                                   bind_meta_name=form.get('bind_meta_name', None),
+                                   username=form.get('meta', {}).get('guider', None),
+                                   form_id=form.get('_id', ''),
+                                   lesson_id=lesson_id)
+
         return True
 
     @classmethod
