@@ -146,7 +146,7 @@ class FormController(object):
                                    form_id=form.get('_id', ''),
                                    lesson_id=lesson_id)
                 cls.push_put_back_form_message(form)
-            if data.get('status') == '已提交':
+            if data.get('status') == '已完成':
                 send_kafka_message(topic='form_service',
                                    method='add_form',
                                    term=form.get('meta', {}).get('term', None),
