@@ -70,7 +70,7 @@ class UrlCondition(object):
         if len(order_list) == len(sort_list):
             self.sort_limit_dict['_sort_dict'] = [(order_list[i], sort_list[i]) for i in range(len(sort_list))]
         elif len(order_list) == 0:
-            self.sort_limit_dict['_sort_dict'] = [(sort_list[i], 1) for i in range(len(sort_list))]
+            self.sort_limit_dict['_sort_dict'] = [(sort_list[i], -1) for i in range(len(sort_list))]
 
 
 # 将请求的url_args分解成三个字典
