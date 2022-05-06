@@ -18,6 +18,7 @@ class FormService:
             return
         item_map = {}
         word_cloud = {}
+        # 此处可能需要添加一个学期查询参数
         forms, _ = dao.Form.query_forms(query_dict={"bind_meta_name": [meta_name], 'status': ['已完成']})
 
         for form in forms:
