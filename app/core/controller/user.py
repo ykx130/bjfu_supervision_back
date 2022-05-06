@@ -56,7 +56,8 @@ class UserController():
     @classmethod
     def role_list(cls, user: dict, term: str):
        
-        role_names = ['教师']
+        # role_names = ['教师']
+        role_names = []
         for role_name_e, role_name_c in cls.role_list_dict.items():
             if user.get(role_name_e, False):
                 role_names.append(role_name_c)
