@@ -56,7 +56,8 @@ class UserController():
     @classmethod
     def role_list(cls, user: dict, term: str):
        
-        role_names = ['教师']
+        # role_names = ['教师']
+        role_names = []
         for role_name_e, role_name_c in cls.role_list_dict.items():
             if user.get(role_name_e, False):
                 role_names.append(role_name_c)
@@ -308,15 +309,18 @@ class SupervisorController():
                                        role_name='grouper', add=False)
                 cls.update_grouper(ctx=False, username=username, term=term, group_name=group, role_name='grouper',
                                    add=True)
+            # 原来是大组长，现在不是
             if main_grouper and not is_main_grouper:
                 cls.update_grouper(ctx=False, username=username, term=term, role_name='main_grouper', add=False)
+            # 原来不是大组长，现在是
             if not main_grouper and is_main_grouper:
-                (groupers, num) = dao.Supervisor.query_supervisors(
-                    query_dict={'term_gte': [term], 'main_grouper': [True]})
-                if num > 0:
-                    grouper = groupers[0]
-                    cls.update_grouper(ctx=False, username=grouper['username'], term=term, role_name='main_grouper',
-                                       add=False)
+                # 查找supervisor中原有的大组长，将其 main_grouper变为 false,  使大组长唯一
+                # (groupers, num) = dao.Supervisor.query_supervisors(
+                #     query_dict={'term_gte': [term], 'main_grouper': [True]})
+                # if num > 0:
+                #     grouper = groupers[0]
+                #     cls.update_grouper(ctx=False, username=grouper['username'], term=term, role_name='main_grouper',
+                #                        add=False)
                 cls.update_grouper(ctx=False, username=username, term=term, role_name='main_grouper',
                                    add=True)
             dao.Supervisor.update_supervisor(query_dict={'id': [id]}, data=data)
@@ -411,10 +415,11 @@ class SupervisorController():
                 dao.Supervisor.update_supervisor(
                     query_dict={'group_name': [data.get('group_name')], 'term_gte': [term], 'grouper': [True]},
                     data={'grouper': False})
-            if main_grouper:
-                dao.Supervisor.update_supervisor(
-                    query_dict={'term_gte': [term], 'main_grouper': [True]},
-                    data={'main_grouper': False})
+            # 如果加入的督导是大组长，那么找到原有的大组长，将main_grouper设为false,即原有大组长身份消失
+            # if main_grouper:
+            #     dao.Supervisor.update_supervisor(
+            #         query_dict={'term_gte': [term], 'main_grouper': [True]},
+            #         data={'main_grouper': False})
             dao.User.update_user(ctx=False, username=username, data={'is_guider': True})
             school_term = SchoolTerm(term)
             data['grouper'] = grouper

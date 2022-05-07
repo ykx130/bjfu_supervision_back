@@ -121,7 +121,16 @@ class FormController(object):
         form = dao.Form.get_form(query_dict={'_id': _id})
         if form is None:
             raise CustomError(404, 404, 'form not found')
-        dao.Form.delete_form(where_dict={'_id': _id})
+        else:
+            lesson_id = form.get('meta', {}).get('lesson', {}).get('lesson_id', None)
+            send_kafka_message(topic='form_service',
+                               method='repulse_form',
+                               term=form.get('meta', {}).get('term', None),
+                               bind_meta_name=form.get('bind_meta_name', None),
+                               username=form.get('meta', {}).get('guider', None),
+                               form_id=form.get('_id', ''),
+                               lesson_id=lesson_id)
+            dao.Form.delete_form(where_dict={'_id': _id})
         return True
 
     @classmethod
